@@ -76,19 +76,19 @@ export default function CardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="page-title">Análise de Cartão</h2>
-          <p className="page-subtitle">Consolidação da fatura do cartão de crédito</p>
+          <h2 className="text-headline-lg font-bold text-on-surface">Análise de Cartão</h2>
+          <p className="text-body-md text-outline mt-1">Consolidação da fatura do cartão de crédito</p>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+      <div className="glass-card p-4 flex flex-wrap gap-4 items-center">
         <MonthSelector month={month} onChange={setMonth} />
         
         {cards.length > 0 && (
           <select
             value={selectedCardId}
             onChange={e => setSelectedCardId(e.target.value ? Number(e.target.value) : '')}
-            className="px-4 py-2 rounded-full border border-gray-200 text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface cursor-pointer"
+            className="px-4 py-2 rounded-lg border border-outline-variant text-body-md focus:outline-none focus:ring-2 focus:ring-primary bg-surface-container-high cursor-pointer text-on-surface"
           >
             <option value="">Todos os cartões</option>
             {cards.map(c => (
@@ -103,8 +103,8 @@ export default function CardPage() {
       {loading ? (
         <div className="animate-pulse text-outline">Carregando...</div>
       ) : cards.length === 0 ? (
-        <div className="card text-center py-16 bg-surface-sidebar border border-dashed border-gray-300">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
+        <div className="glass-card text-center py-16 border border-outline-variant">
+          <div className="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
             <span className="material-symbols-outlined text-3xl">credit_card</span>
           </div>
           <p className="text-body-lg font-medium text-on-surface">Nenhum cartão cadastrado.</p>
@@ -112,16 +112,16 @@ export default function CardPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="card bg-gradient-to-br from-error to-red-500 text-white transition-transform hover:-translate-y-1">
+          <div className="glass-card bg-gradient-to-br from-error/40 to-error/20 text-white transition-transform hover:-translate-y-1 p-6 border-error/50">
             <p className="text-label-md opacity-80">Total da Fatura (Ciclo)</p>
             <p className="text-headline-xl mt-1">{formatCurrency(totalCard)}</p>
           </div>
 
-          <div className="border-b border-gray-200 flex gap-6">
+          <div className="border-b border-outline-variant flex gap-6">
             <button
               onClick={() => setActiveTab('resumo')}
               className={`pb-3 px-2 text-label-md font-medium transition-colors border-b-2 ${
-                activeTab === 'resumo' ? 'border-primary-container text-primary-container' : 'border-transparent text-outline hover:text-on-surface'
+                activeTab === 'resumo' ? 'border-primary text-primary' : 'border-transparent text-outline hover:text-on-surface'
               }`}
             >
               Resumo
@@ -129,7 +129,7 @@ export default function CardPage() {
             <button
               onClick={() => setActiveTab('transacoes')}
               className={`pb-3 px-2 text-label-md font-medium transition-colors border-b-2 ${
-                activeTab === 'transacoes' ? 'border-primary-container text-primary-container' : 'border-transparent text-outline hover:text-on-surface'
+                activeTab === 'transacoes' ? 'border-primary text-primary' : 'border-transparent text-outline hover:text-on-surface'
               }`}
             >
               Transações
@@ -138,8 +138,8 @@ export default function CardPage() {
 
           {activeTab === 'resumo' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="card flex flex-col">
-                <h3 className="text-body-lg font-semibold mb-4">Gasto por Pessoa no Cartão</h3>
+              <div className="glass-card flex flex-col">
+                <h3 className="text-body-lg font-semibold mb-4 text-on-surface">Gasto por Pessoa no Cartão</h3>
                 {personChartData.length > 0 ? (
                   <div className="space-y-4">
                     {personChartData.map(item => {
@@ -168,14 +168,14 @@ export default function CardPage() {
                       );
                     })}
                     {unassignedTransactions > 0 && (
-                      <p className="text-label-sm text-outline pt-2 border-t border-gray-100">
+                      <p className="text-label-sm text-outline pt-2 border-t border-outline-variant">
                         {unassignedTransactions} transações sem pessoa vinculada neste filtro.
                       </p>
                     )}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <span className="material-symbols-outlined text-3xl text-gray-300 mb-2 block">group_off</span>
+                    <span className="material-symbols-outlined text-3xl text-outline-variant mb-2 block">group_off</span>
                     <p className="text-label-md text-outline">Sem dados por pessoa neste filtro.</p>
                     {filteredTransactions.length > 0 && (
                       <p className="text-label-sm text-outline mt-1">
@@ -184,7 +184,7 @@ export default function CardPage() {
                     )}
                     <button
                       onClick={() => navigate('/importar')}
-                      className="mt-3 text-label-sm text-primary-container hover:underline flex items-center gap-1 mx-auto"
+                      className="mt-3 text-label-sm text-primary hover:underline flex items-center gap-1 mx-auto"
                     >
                       <span className="material-symbols-outlined text-sm">upload_file</span>
                       Reimportar fatura Excel
@@ -194,17 +194,19 @@ export default function CardPage() {
               </div>
             </div>
           ) : (
-            <div className="card p-0 shadow-sm">
+            <div className="glass-card p-0 border border-outline-variant">
               {filteredTransactions.length === 0 ? (
                 <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-4xl text-gray-300 mb-2 block">receipt_long</span>
+                  <span className="material-symbols-outlined text-4xl text-outline-variant mb-2 block">receipt_long</span>
+                  <p className="text-body-md text-outline">Nenhuma transação neste período.</p>
+                </div>
                   <p className="text-body-md text-outline">Nenhuma transação neste período.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[600px]">
                     <thead>
-                      <tr className="border-b border-gray-100 text-label-md text-outline text-left bg-gray-50/50">
+                      <tr className="border-b border-outline-variant text-label-md text-outline text-left bg-surface-container-high">
                         <th className="px-6 py-4">Data</th>
                         <th className="px-6 py-4">Descrição</th>
                         <th className="px-6 py-4">Categoria</th>
@@ -214,16 +216,16 @@ export default function CardPage() {
                     </thead>
                     <tbody>
                       {filteredTransactions.map(t => (
-                        <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        <tr key={t.id} className="border-b border-outline-variant hover:bg-surface-container-high transition-colors">
                           <td className="px-6 py-3 text-label-sm text-outline font-medium">{formatDate(t.date)}</td>
                           <td className="px-6 py-3 text-body-md font-medium text-on-surface">{t.description}</td>
                           <td className="px-6 py-3">
                             {t.category_name ? (
-                              <span className="chip bg-primary-50 text-primary-container border border-primary-100 text-xs">
+                              <span className="chip bg-primary/10 text-primary border border-primary/20 text-xs rounded px-2 py-1">
                                 {t.category_name}
                               </span>
                             ) : (
-                              <span className="chip bg-warning/10 text-warning border border-warning/20 text-xs">Sem categoria</span>
+                              <span className="chip bg-warning/10 text-warning border border-warning/20 text-xs rounded px-2 py-1">Sem categoria</span>
                             )}
                           </td>
                           <td className="px-6 py-3 text-label-sm text-outline">
