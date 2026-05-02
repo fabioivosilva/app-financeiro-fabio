@@ -118,7 +118,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Adaptar RulesPage.tsx para Etheris Finance
   - Tabela com glass rows, busca, filtros — mesma lógica atual
 
-- [/] `[P]` 🔒 [THIAGO] **B8 — Cartão v2**
+- [x] `[P]` **B8 — Cartão v2**
   - Adaptar CardPage.tsx para Etheris Finance
   - Mesma lógica, visual novo
 
