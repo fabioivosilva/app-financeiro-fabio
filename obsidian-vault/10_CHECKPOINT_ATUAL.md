@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — A4 em andamento
+> Última atualização: 2026-05-02 — A4 concluída
 
 ---
 
@@ -31,15 +31,15 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**A4 — Reset Arquitetural mantendo Motor de Parsers** — limpar backend antigo sem perder parsers
+**B1 — Dashboard v2** — conectar o Dashboard novo na API limpa
 
 **O que fazer:**
-1. Remover carcaça antiga do backend de produto
-2. Manter `ofx_parser.py`, `itau_pdf_parser.py` e `itau_excel_parser.py`
-3. Criar API mínima nova: `/api/health`, `/api/imports`, `/api/transactions`, `/api/dashboard`
-4. Validar frontend novo + backend novo + build desktop
+1. Trocar mocks do dashboard em `frontend/src/App.tsx` por dados de `/api/dashboard/`
+2. Preservar o visual do protótipo Etheris
+3. Manter gráfico de fluxo futuro em barras agrupadas
+4. Usar a API limpa criada na A4, sem ressuscitar páginas antigas
 
-Referência: item A4 em `obsidian-vault/05_PENDENCIAS.md`
+Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 
 ## 📋 Ordem de Execução
 
@@ -47,10 +47,10 @@ Referência: item A4 em `obsidian-vault/05_PENDENCIAS.md`
 1. `[M]` A1 — Setup Design System Etheris Finance ✅
 2. `[P]` A2 — Layout Base + Sidebar novo ✅
 3. `[P]` A3 — Fix build_desktop.bat (remover pause) ✅
-4. `[G]` A4 — Reset Arquitetural mantendo Motor de Parsers ← **AGORA**
+4. `[G]` A4 — Reset Arquitetural mantendo Motor de Parsers ✅
 
 ### Trilha B — Migração das Telas (após A1+A2)
-5. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout)
+5. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout) ← **AGORA**
 6. `[M]` B2 — Importar v2
 7. `[M]` B3 — Transações v2
 8. `[M]` B4 — Provisões v2
@@ -76,11 +76,12 @@ Referência: item A4 em `obsidian-vault/05_PENDENCIAS.md`
 | A2 — Layout Base + Sidebar novo | ✅ Sidebar Etheris + layout base com área principal alinhada |
 | A3 — Fix build_desktop.bat | ✅ build validado sem pausa/travamento |
 | Reset do frontend antigo | ✅ React Router, páginas antigas e client antigo removidos; base visual do zip assumiu o app |
+| A4 — Reset Arquitetural mantendo Motor de Parsers | ✅ Backend antigo removido; parsers OFX/PDF/Excel preservados; API mínima criada |
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
 
 ## 💬 Nota da Sessão Anterior
-Feito: o frontend antigo foi removido do build. O usuário decidiu também limpar a carcaça antiga do backend, mantendo apenas o motor de parsers para não gastar retrabalho.
-Pendente: concluir A4 criando uma API mínima nova em volta dos parsers preservados.
+Feito: A4 concluiu o reset arquitetural. Backend de produto antigo apagado; permanecem `ofx_parser.py`, `itau_pdf_parser.py`, `itau_excel_parser.py` e testes dos parsers. API nova expõe `/api/health`, `/api/imports`, `/api/transactions` e `/api/dashboard`.
+Pendente: iniciar B1 conectando o Dashboard novo à API limpa.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`

@@ -1,17 +1,52 @@
-"""Router: Dashboard aggregations."""
-from typing import Optional
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
-from .. import schemas
-from ..database import get_db
-from ..services.dashboard_service import get_dashboard_data
+from __future__ import annotations
+
+from collections import defaultdict
+
+from fastapi import APIRouter
+
+from ..database import get_connection
+
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
-@router.get("/", response_model=schemas.DashboardOut)
-def get_dashboard(
-    month: Optional[str] = Query(None, description="YYYY-MM format"),
-    db: Session = Depends(get_db),
-):
-    return get_dashboard_data(db, month)
+@router.get("/")
+def get_dashboard():
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT date, description, amount, transaction_type, source, card_last_digits, cardholder_first_name
+            FROM transactions
+            ORDER BY date DESC, id DESC
+            """
+        ).fetchall()
+
+    income = sum(float(row["amount"]) for row in rows if float(row["amount"]) > 0)
+    expenses = -sum(float(row["amount"]) for row in rows if float(row["amount"]) < 0)
+    by_source: dict[str, float] = defaultdict(float)
+    by_person: dict[str, float] = defaultdict(float)
+
+    for row in rows:
+        amount = float(row["amount"])
+        if amount < 0:
+            by_source[row["source"]] += -amount
+            person = row["cardholder_first_name"] or "Nao identificado"
+            by_person[person] += -amount
+
+    return {
+        "summary": {
+            "income": income,
+            "expenses": expenses,
+            "balance": income - expenses,
+            "transactions": len(rows),
+        },
+        "spending_by_source": [
+            {"source": source, "amount": amount}
+            for source, amount in sorted(by_source.items(), key=lambda item: item[1], reverse=True)
+        ],
+        "spending_by_person": [
+            {"person": person, "amount": amount}
+            for person, amount in sorted(by_person.items(), key=lambda item: item[1], reverse=True)
+        ],
+        "recent_transactions": [dict(row) for row in rows[:10]],
+    }

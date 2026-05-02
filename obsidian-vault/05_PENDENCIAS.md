@@ -66,7 +66,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Testar que o build roda sem travar via PowerShell
   - Commitar — habilita o agente a buildar automaticamente ao fechar itens
 
-- [/] `[G]` 🔒 [FABIO] **A4 — Reset Arquitetural mantendo Motor de Parsers**
+- [x] `[G]` **A4 — Reset Arquitetural mantendo Motor de Parsers**
   - Apagar a carcaça antiga de produto do backend: routers, CRUD, schemas e models antigos
   - Manter o motor de parsers: OFX, PDF Itaú e Excel Itaú
   - Criar API mínima nova: health, imports, transactions e dashboard
@@ -81,8 +81,8 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
 > Referência: converter os HTML do Stitch para React + conectar na API.
 
 - [ ] `[G]` **B1 — Dashboard v2**
-  - Converter `dashboard_consolidado/code.html` para `DashboardPage.tsx`
-  - Manter todos os dados da API atual (`/api/dashboard/`)
+  - Evoluir `frontend/src/App.tsx` a partir da base visual do zip, sem recriar as paginas antigas
+  - Conectar o Dashboard novo na API limpa (`/api/dashboard/`)
   - **Corrigir o gráfico** de Fluxo de Caixa Futuro:
     - Trocar mixed chart (barras+linha confuso) por barras agrupadas simples
     - Verde = Receita prevista, Vermelho = Despesa prevista, Roxo = Saldo projetado

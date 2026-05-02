@@ -46,6 +46,7 @@ Thumbs.db
 desktop.ini
 
 # PyInstaller
+*.spec
 *.spec.bak
 
 # Build artifacts — executável gerado pelo build_desktop.bat

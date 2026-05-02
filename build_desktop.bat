@@ -22,7 +22,6 @@ call .venv\Scripts\pyinstaller.exe ^
     --hidden-import uvicorn ^
     --hidden-import fastapi ^
     --hidden-import pydantic ^
-    --hidden-import sqlalchemy ^
     --hidden-import sqlite3 ^
     --collect-all pdfminer ^
     --collect-all pdfplumber ^

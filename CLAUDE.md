@@ -12,8 +12,8 @@ Antes de qualquer código ou sugestão, ler nesta ordem:
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend | React 19 + Vite + TypeScript + TailwindCSS + Recharts |
-| Backend | Python 3.12 + FastAPI + SQLAlchemy + SQLite |
+| Frontend | React 19 + Vite + TypeScript + CSS do protótipo Etheris |
+| Backend | Python 3.12 + FastAPI + SQLite mínimo |
 | Desktop | PyWebView + PyInstaller (onedir) |
 | Design | Etheris Finance (Stitch) — ver `docs/UX_REFERENCE.md` |
 | Build | `build_desktop.bat` → gera `ControleFinanceiro\ControleFinanceiro.exe` na raiz |
@@ -64,15 +64,14 @@ Ao concluir qualquer tarefa:
 
 ```
 backend/app/
-  main.py, database.py, models.py, schemas.py, crud.py
-  routers/     → dashboard, imports, transactions, categories, rules, goals, cards, persons, settings, provisions
-  services/    → parsers (OFX, PDF, Excel), dashboard_service, categorizer
+  main.py, database.py, models.py
+  routers/     → dashboard, imports, transactions
+  services/    → parsers preservados (OFX, PDF Itaú, Excel Itaú)
 
 frontend/src/
-  pages/       → DashboardPage, TransactionsPage, CardPage, GoalsPage, ImportPage, RulesPage, SettingsPage, ProvisionsPage
-  components/  → Modal, MonthSelector, Sidebar
-  types/       → contratos TypeScript
-  api/         → client.ts (axios)
+  App.tsx      → shell e telas do novo protótipo
+  main.tsx
+  styles/      → prototype.css copiado do design oficial
 
 obsidian-vault/  → cérebro do projeto (backlog, checkpoint, decisões)
 docs/            → UX reference e design system

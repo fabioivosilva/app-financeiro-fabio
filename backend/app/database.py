@@ -1,60 +1,79 @@
-"""
-Database configuration — SQLAlchemy + SQLite local.
-"""
+from __future__ import annotations
+
 import os
+import sqlite3
 import sys
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy import text
+from contextlib import contextmanager
+from datetime import date, datetime
+from typing import Iterator
 
-if getattr(sys, 'frozen', False):
-    # If the application is run as a bundle, the PyInstaller bootloader
-    # extends the sys module by a flag frozen=True and sets the app 
-    # path into variable _MEIPASS.
-    # The actual executable is in sys.executable.
-    _BASE_DIR = os.path.dirname(sys.executable)
+
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
 else:
-    # Running locally
-    _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-_DATA_DIR = os.path.join(_BASE_DIR, "data")
-os.makedirs(_DATA_DIR, exist_ok=True)
-
-DATABASE_URL = f"sqlite:///{os.path.join(_DATA_DIR, 'finance.db')}"
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False},  # needed for SQLite
-    echo=False,
-)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DB_PATH = os.path.join(DATA_DIR, "finance.db")
 
 
-def ensure_database_schema() -> None:
-    """Apply lightweight SQLite migrations for existing local databases."""
-    with engine.begin() as conn:
-        category_columns = {
-            row[1] for row in conn.execute(text("PRAGMA table_info(categories)")).fetchall()
-        }
-        if "exclude_from_totals" not in category_columns:
-            conn.execute(text(
-                "ALTER TABLE categories "
-                "ADD COLUMN exclude_from_totals BOOLEAN NOT NULL DEFAULT 0"
-            ))
-        if "goal_id" not in category_columns:
-            conn.execute(text(
-                "ALTER TABLE categories "
-                "ADD COLUMN goal_id INTEGER REFERENCES goals(id)"
-            ))
+def _adapt_date(value: date) -> str:
+    return value.isoformat()
 
 
-def get_db():
-    """FastAPI dependency — yields a DB session."""
-    db = SessionLocal()
+def _adapt_datetime(value: datetime) -> str:
+    return value.isoformat(timespec="seconds")
+
+
+sqlite3.register_adapter(date, _adapt_date)
+sqlite3.register_adapter(datetime, _adapt_datetime)
+
+
+@contextmanager
+def get_connection() -> Iterator[sqlite3.Connection]:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     try:
-        yield db
+        yield conn
+        conn.commit()
     finally:
-        db.close()
+        conn.close()
+
+
+def init_db() -> None:
+    with get_connection() as conn:
+        conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS imports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT NOT NULL,
+                parser TEXT NOT NULL,
+                imported_at TEXT NOT NULL,
+                total_transactions INTEGER NOT NULL DEFAULT 0,
+                duplicates INTEGER NOT NULL DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                description TEXT NOT NULL,
+                amount REAL NOT NULL,
+                transaction_type TEXT NOT NULL,
+                source TEXT NOT NULL,
+                parser TEXT NOT NULL,
+                external_id TEXT,
+                card_last_digits TEXT,
+                cardholder_first_name TEXT,
+                installment_current INTEGER,
+                installment_total INTEGER,
+                import_id INTEGER,
+                hash TEXT NOT NULL UNIQUE,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(import_id) REFERENCES imports(id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+            CREATE INDEX IF NOT EXISTS idx_transactions_source ON transactions(source);
+            """
+        )

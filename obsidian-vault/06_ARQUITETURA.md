@@ -4,8 +4,8 @@ Resumo atual do app desktop.
 
 ## Stack
 
-- Frontend: React + Vite + TypeScript + TailwindCSS + Recharts.
-- Backend: FastAPI + SQLAlchemy + SQLite.
+- Frontend: React + Vite + TypeScript + CSS do prototipo Etheris.
+- Backend: FastAPI + SQLite minimo.
 - Desktop: `backend/main_desktop.py` com PyWebView + Uvicorn em porta local livre.
 - Build: `build_desktop.bat` gera `backend/dist/ControleFinanceiro.exe` e copia para `ControleFinanceiro.exe` na raiz.
 
@@ -14,16 +14,14 @@ Resumo atual do app desktop.
 ```text
 backend/app/
   main.py                 FastAPI app e rotas
-  database.py             SQLite, schema leve e migrations simples
-  models.py               ORM
-  schemas.py              contratos API
-  crud.py                 consultas e persistencia
-  routers/                dashboard, imports, transactions, categories, rules, goals, cards, persons
-  services/               parsers, dashboard, categorizacao, aprendizado
+  database.py             SQLite limpo, schema minimo
+  models.py               helpers de hash/deduplicacao
+  routers/                dashboard, imports, transactions
+  services/               motor de parsers preservado: OFX, PDF Itau, Excel Itau
 frontend/src/
-  pages/                  telas principais
-  components/             componentes compartilhados
-  types/                  tipos TS dos contratos
+  App.tsx                 shell e telas do novo prototipo
+  main.tsx                entrada React
+  styles/prototype.css    CSS oficial do zip de design
 ```
 
 ## Dados Locais
@@ -36,12 +34,11 @@ frontend/src/
 1. Usuario importa OFX/PDF/Excel.
 2. Parser extrai lancamentos normalizados.
 3. Importador deduplica por hash/FITID.
-4. Categorizador aplica regras.
-5. Transacoes pendentes ficam para revisao manual.
-6. Dashboard e telas leem agregacoes do SQLite.
+4. Importador grava transacoes cruas no SQLite novo.
+5. Dashboard e telas leem agregacoes basicas do SQLite.
 
 ## Observacoes Atuais
 
-- Ciclo financeiro usado no dashboard/cartao: dia 27 ao dia 26.
+- Reset arquitetural A4: carcaça antiga removida; parsers foram preservados.
 - Excel Itau e o caminho principal para fatura de cartao.
 - Handoff operacional vive somente no Obsidian (`10_CHECKPOINT_ATUAL.md`), nao em arquivo solto na raiz.
