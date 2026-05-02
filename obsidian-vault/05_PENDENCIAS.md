@@ -81,3 +81,40 @@
 
 ---
 *Última atualização: 2026-05-02 — Claude (claude.ai)*
+
+---
+
+## 📥 Notas do Thiago — Incorporadas ao Backlog (2026-05-02)
+
+### Importação Multi-Instituição
+
+- [ ] `[G]` **Arquitetura de Parsers Plugável:** Hoje os parsers são hardcoded (Itaú Excel, Itaú PDF, OFX). Criar uma interface base `BaseParser` com método `parse(file_bytes) -> List[Transaction]` e um registro de parsers por instituição/formato. Na tela de importação, o usuário seleciona a instituição (dropdown) + formato (OFX / Excel / PDF) e o sistema despacha para o parser correto.
+  - **Dica prática (uso interno):** Não vale a pena auto-detectar instituição por heurística. O mais simples é um `PARSER_REGISTRY = { ("itau", "excel"): ItauExcelParser, ("itau", "pdf"): ItauPdfParser, ("generic", "ofx"): OfxParser }`. Para adicionar Bradesco ou Nubank, basta criar o parser e registrar.
+  - Impacto: `backend/app/services/` (nova classe base), `backend/app/routers/imports.py` (unificar endpoints), `frontend/src/pages/ImportPage.tsx` (dropdown de instituição).
+
+- [ ] `[M]` **Cofrinho por Reconhecimento de Texto ou Regra Manual:** Hoje a meta só é alimentada via `category.goal_id`. Thiago quer que uma transação também alimente uma meta se a descrição contiver uma palavra-chave (ex: "COFRINHO VIAGEM") ou se existir uma regra explícita "transações da conta X com texto Y → meta Z".
+  - Abordagem: Estender o modelo `Rule` com campo opcional `goal_id`. Quando a regra for aplicada na categorização, se tiver `goal_id`, vincular a transação à meta além de categorizar.
+  - Alternativa mais simples: campo `keyword` na própria `Goal` — ao categorizar, varrer metas com keyword e vincular se bater.
+
+---
+
+### Provisões e Fluxo de Caixa (Feature Estrutural — quebrar em 3 sessões)
+
+- [ ] `[G]` **Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
+  - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única / mensal / trimestral / anual), `start_date`, `end_date` (opcional), `notes`.
+  - Ao criar uma provisão recorrente, o sistema gera automaticamente as ocorrências futuras (`ProvisionOccurrence`) com `expected_date`, `expected_amount` e `status` (pendente / realizada / ajustada).
+  - CRUD completo + tela "Provisões" no frontend.
+  - Casos de uso: assinaturas mensais, parcelas de fatura, prestações de empréstimo/financiamento.
+
+- [ ] `[G]` **Vinculação Provisão ↔ Transação Real:** Ao importar um extrato, oferecer ao usuário a opção de atrelar uma transação a uma `ProvisionOccurrence` pendente.
+  - Se o valor importado diferir do provisionado: perguntar a causa (variação normal vs. juros/encargos).
+  - Se juros/encargos: registrar a diferença como transação separada na categoria "Juros e Encargos" (categoria especial a criar) para não distorcer a categoria original.
+  - Atualizar o `status` da ocorrência para "realizada" e guardar `linked_transaction_id`.
+
+- [ ] `[G]` **Relatório de Fluxo de Caixa Futuro:** Nova aba ou seção no Dashboard mostrando a projeção dos próximos meses.
+  - Colunas por mês: Receitas previstas, Despesas previstas, Saldo projetado.
+  - Distinguir: já realizado (transações importadas) vs. provisionado (ocorrências futuras pendentes).
+  - Drill-down: clicar no mês para ver quais provisões compõem o total.
+  - Dependência: requer o Modelo Base de Provisões estar implementado.
+
+---
