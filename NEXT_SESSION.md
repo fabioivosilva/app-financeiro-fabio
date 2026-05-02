@@ -23,13 +23,19 @@ planeja os meses futuros com Provisões.
 - Parsers: OFX, PDF Itaú, Excel Itaú
 - Build: `build_desktop.bat` → gera `ControleFinanceiro\ControleFinanceiro.exe`
 
-### Referências de design prontas (Stitch)
-Estão em `C:\Users\fabio\Downloads\stitch_preview\stitch_instant_finance_tracker\`:
-- `etheris_finance/DESIGN.md` ← **tokens de cor, tipografia, glassmorphism**
-- `dashboard_consolidado/code.html` ← protótipo HTML do Dashboard
-- `importar_arquivos/code.html` ← protótipo HTML do Importar
-- `transa_es_do_ciclo/code.html` ← protótipo HTML de Transações
-- `provis_es_e_futuro/code.html` ← protótipo HTML de Provisões
+### Design oficial (Claude) — está no repo
+`design/App-financeiro-claude-design.zip` — extrair e abrir `App Financeiro.html` no browser.
+
+Contém componentes JSX prontos por tela:
+- `components/dashboard.jsx` → Dashboard
+- `components/importar.jsx` → Importar
+- `components/provisoes.jsx` → Provisões
+- `components/transacoes.jsx` → Transações
+- `components/config.jsx` → Configurações
+- `components/shell.jsx` → Layout + Sidebar
+
+> Usar como referência visual — reescrever em TypeScript e conectar na API real.
+> Ver `design/README.md` para instruções.
 
 ### Backup da versão anterior
 `C:\Users\fabio\Downloads\App-financeiro-v0.1.0.zip`
