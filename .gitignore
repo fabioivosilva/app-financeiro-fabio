@@ -1,0 +1,52 @@
+# Dados sensíveis
+imports/*
+!imports/.gitkeep
+!imports/faturas/.gitkeep
+!imports/extratos/.gitkeep
+data/*.db
+samples/private/*
+!samples/private/.gitkeep
+*.ofx
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node
+node_modules/
+frontend/dist/
+frontend/build/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PyInstaller
+*.spec.bak
+
+# Obsidian (memória local, não versionar)
+# C:\Users\fabio\OneDrive\Documentos\Projetos\app-financeiro-fabio\
