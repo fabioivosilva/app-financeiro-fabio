@@ -1,0 +1,10 @@
+# Normaliza line endings: LF no repo, conversão automática no checkout Windows
+* text=auto eol=lf
+
+# Binários — sem conversão
+*.png binary
+*.jpg binary
+*.ico binary
+*.db  binary
+*.exe binary
+*.bat text eol=crlf
