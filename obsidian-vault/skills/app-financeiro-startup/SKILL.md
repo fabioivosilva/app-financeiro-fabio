@@ -12,61 +12,64 @@ description: >
 
 ## Por que esta skill existe
 Este projeto é desenvolvido em duo (Fabio + Thiago) com múltiplos agentes de IA alternando sessões.
-Para não perder contexto nem repetir trabalho, cada IA deve sempre partir do estado mais recente do repositório
-e do Obsidian Vault antes de sugerir qualquer código ou mudança.
+Cada IA deve partir do estado mais recente do repositório e do Vault antes de qualquer código.
 
-## Passo 1 — Clonar / Atualizar o Repositório
+---
 
-Se o repositório ainda não foi clonado:
+## Passo 1 — Atualizar o Repositório
+
 ```bash
-git clone https://<TOKEN>@github.com/fabioivosilva/app-financeiro-fabio.git
-cd app-financeiro-fabio
-git checkout develop
-```
-
-Se já foi clonado:
-```bash
-cd app-financeiro-fabio
 git checkout develop
 git pull origin develop
 ```
 
-**Importante:** Sempre trabalhar na branch `develop`. Nunca commitar direto em `main`.
-
-## Passo 2 — Ler o Vault (nesta ordem exata, mínimo de tokens)
-
-Ler sequencialmente:
-1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — estado atual + próxima tarefa + protocolo de fechamento
-2. `obsidian-vault/05_PENDENCIAS.md` — backlog vivo com status de cada item
-3. (somente se necessário) `obsidian-vault/00_INDEX.md` — mapa do vault para saber onde buscar outra info
-
-Não ler outros arquivos do vault a menos que a tarefa exija (ver `00_INDEX.md` para guia).
-
-## Passo 3 — Reportar Estado ao Usuário
-
-Após ler o vault, apresentar um resumo estruturado:
-
-```
-## 🧠 Estado Atual do Projeto
-**Último trabalho:** [extraído do checkpoint]
-**Próxima tarefa:** [extraído da seção 🔴 do checkpoint]
-**Backlog pendente:** [N itens abertos no 05_PENDENCIAS.md]
-
-## 🎯 Sugestão para Esta Sessão
-[tarefa mais prioritária com escopo claro]
+Se ainda não clonado:
+```bash
+git clone https://<TOKEN>@github.com/fabioivosilva/app-financeiro-fabio.git
+cd app-financeiro-fabio && git checkout develop
 ```
 
-Só então perguntar ao usuário se quer atacar a tarefa sugerida ou outra coisa.
+---
 
-## Passo 4 — Antes de Qualquer Código
+## Passo 2 — Ler o Vault (nesta ordem, mínimo de tokens)
 
-Confirmar:
-- [ ] Branch é `develop` (`git branch`)
-- [ ] Repo está atualizado (`git status` / `git log --oneline -3`)
-- [ ] Entendeu o contexto da próxima tarefa
+1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — último estado + próxima tarefa
+2. `obsidian-vault/05_PENDENCIAS.md` — backlog com sizing P/M/G
+
+Não ler outros arquivos a menos que a tarefa exija (ver `obsidian-vault/00_INDEX.md`).
+
+---
+
+## Passo 3 — Gerar Orçamento de Sessão
+
+Após ler o backlog, apresentar ao usuário:
+
+```
+## 🧠 Estado Atual
+Último trabalho: [extraído do checkpoint]
+Commit: [git log --oneline -1]
+
+## 💰 Orçamento da Sessão
+Capacidade: 1G  ·  ou  ·  2-3M  ·  ou  ·  4-6P
+
+Itens disponíveis (por prioridade):
+  [/] [M] Fluxo de Aporte em Meta ............ ← recomendado agora
+  [ ] [P] Preenchimento Automático Categoria . ← dá pra encaixar junto
+  [ ] [G] Previsão de Gastos Futuros ......... ← sessão própria
+  ...
+
+Sugestão para hoje: [listar o que cabe — ex: "1M + 1P = ~80% da sessão"]
+
+## 🎯 Próxima Tarefa Recomendada
+[descrever o item mais prioritário com escopo claro]
+```
+
+Só então perguntar ao usuário se confirma o plano ou quer ajustar.
+
+---
 
 ## Referências Rápidas
-- Design System: `obsidian-vault/07_UX_REFERENCE.md` (dark mode, glassmorphism, cor `#820AD1`)
-- Regras de categorização: `backend/app/seed.py` (56 regras de ouro)
+- Design System: `obsidian-vault/07_UX_REFERENCE.md` (dark mode, glassmorphism, `#820AD1`)
+- Regras de categorização: `backend/app/seed.py`
 - Arquitetura: `obsidian-vault/06_ARQUITETURA.md`
 - Comandos: `obsidian-vault/09_COMANDOS.md`
