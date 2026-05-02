@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import type { Dashboard } from '../types';
 import { 
@@ -9,6 +10,7 @@ import {
 const COLORS = ['#820AD1', '#f97316', '#0e8345', '#eab308', '#ba1a1a', '#0ea5e9', '#d946ef', '#64748b'];
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const now = new Date();
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   
@@ -146,13 +148,27 @@ export default function DashboardPage() {
           <p className="text-label-md opacity-80">Saldo do Mês</p>
           <p className="text-headline-md mt-1">{formatCurrency(data.monthly_balance)}</p>
         </div>
-        <div className="card transition-transform hover:-translate-y-1">
+        <div
+          className="card transition-transform hover:-translate-y-1 cursor-pointer hover:ring-2 hover:ring-success/30"
+          onClick={() => navigate(`/transacoes?month=${selectedMonth}&source=bank_statement`)}
+          title="Ver entradas do mês"
+        >
           <p className="text-label-md text-outline">Total Entradas</p>
           <p className="text-headline-md text-success mt-1">{formatCurrency(data.total_income)}</p>
+          <p className="text-label-sm text-outline mt-1 flex items-center gap-1">
+            <span className="material-symbols-outlined text-xs">open_in_new</span> Ver transações
+          </p>
         </div>
-        <div className="card transition-transform hover:-translate-y-1">
+        <div
+          className="card transition-transform hover:-translate-y-1 cursor-pointer hover:ring-2 hover:ring-error/30"
+          onClick={() => navigate(`/transacoes?month=${selectedMonth}`)}
+          title="Ver saídas do mês"
+        >
           <p className="text-label-md text-outline">Total Saídas</p>
           <p className="text-headline-md text-error mt-1">{formatCurrency(data.total_expenses)}</p>
+          <p className="text-label-sm text-outline mt-1 flex items-center gap-1">
+            <span className="material-symbols-outlined text-xs">open_in_new</span> Ver transações
+          </p>
         </div>
       </div>
 
@@ -178,7 +194,11 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-label-md text-outline flex-1 flex items-center justify-center">Nenhum gasto registrado.</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 py-6">
+              <span className="material-symbols-outlined text-3xl text-gray-300">group</span>
+              <p className="text-label-md text-outline">Nenhum gasto por pessoa neste mês.</p>
+              <p className="text-label-sm text-outline">Importe uma fatura Excel para vincular titulares aos cartões.</p>
+            </div>
           )}
         </div>
 
@@ -210,7 +230,17 @@ export default function DashboardPage() {
               </div>
             ))}
             {data.category_limits.length === 0 && (
-              <p className="text-label-md text-outline flex h-full items-center justify-center">Nenhum limite configurado.</p>
+              <div className="flex flex-col items-center justify-center gap-2 py-6 h-full">
+                <span className="material-symbols-outlined text-3xl text-gray-300">speed</span>
+                <p className="text-label-md text-outline">Nenhum limite configurado.</p>
+                <button
+                  onClick={() => navigate('/configuracoes')}
+                  className="text-label-sm text-primary-container hover:underline flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-sm">settings</span>
+                  Configurar limites
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -262,7 +292,17 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <p className="text-label-md text-outline flex-1 flex items-center justify-center">Nenhum gasto registrado.</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 py-6">
+              <span className="material-symbols-outlined text-3xl text-gray-300">pie_chart</span>
+              <p className="text-label-md text-outline">Nenhum gasto categorizado neste mês.</p>
+              <button
+                onClick={() => navigate(`/transacoes?month=${selectedMonth}&pending=true`)}
+                className="text-label-sm text-primary-container hover:underline flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">label</span>
+                Categorizar pendentes
+              </button>
+            </div>
           )}
         </div>
 
@@ -282,7 +322,11 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="card transition-transform hover:-translate-y-1">
+          <div
+            className={`card transition-transform hover:-translate-y-1 ${data.pending_review_count > 0 ? 'cursor-pointer hover:ring-2 hover:ring-warning/30' : ''}`}
+            onClick={() => data.pending_review_count > 0 && navigate(`/transacoes?month=${selectedMonth}&pending=true`)}
+            title={data.pending_review_count > 0 ? 'Clique para revisar' : ''}
+          >
             <p className="text-label-md text-outline">Pendentes de Revisão</p>
             <div className="flex items-center gap-3 mt-1">
               <p className={`text-headline-md ${data.pending_review_count > 0 ? 'text-warning' : 'text-success'}`}>
@@ -292,7 +336,32 @@ export default function DashboardPage() {
                 <span className="material-symbols-outlined text-warning animate-pulse">warning</span>
               )}
             </div>
+            {data.pending_review_count > 0 && (
+              <p className="text-label-sm text-warning mt-1 flex items-center gap-1">
+                <span className="material-symbols-outlined text-xs">open_in_new</span> Revisar agora
+              </p>
+            )}
           </div>
+
+          {/* Top 3 Gastos */}
+          {sortedCategorySpending.length > 0 && (
+            <div className="card">
+              <h3 className="text-body-lg font-semibold mb-3">🔥 Top Gastos</h3>
+              <div className="space-y-3">
+                {sortedCategorySpending.slice(0, 3).map((c, i) => (
+                  <div key={c.category_id} className="flex items-center gap-3">
+                    <span className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold ${
+                      i === 0 ? 'bg-error' : i === 1 ? 'bg-warning' : 'bg-orange-400'
+                    }`}>{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-label-md font-medium truncate">{c.category_name}</p>
+                      <p className="text-label-sm text-outline">{formatCurrency(c.total)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

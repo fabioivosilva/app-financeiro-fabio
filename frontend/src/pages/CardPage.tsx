@@ -1,8 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import type { Card, Transaction } from '../types';
 
 export default function CardPage() {
+  const navigate = useNavigate();
   const [cards, setCards] = useState<Card[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,12 +182,20 @@ export default function CardPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
+                    <span className="material-symbols-outlined text-3xl text-gray-300 mb-2 block">group_off</span>
                     <p className="text-label-md text-outline">Sem dados por pessoa neste filtro.</p>
                     {filteredTransactions.length > 0 && (
                       <p className="text-label-sm text-outline mt-1">
-                        Existem transações no período, mas nenhuma possui pessoa vinculada.
+                        Existem {filteredTransactions.length} transações, mas nenhuma possui pessoa vinculada.
                       </p>
                     )}
+                    <button
+                      onClick={() => navigate('/importar')}
+                      className="mt-3 text-label-sm text-primary-container hover:underline flex items-center gap-1 mx-auto"
+                    >
+                      <span className="material-symbols-outlined text-sm">upload_file</span>
+                      Reimportar fatura Excel
+                    </button>
                   </div>
                 )}
               </div>

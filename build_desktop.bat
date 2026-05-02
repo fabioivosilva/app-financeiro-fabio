@@ -17,7 +17,7 @@ cd backend
 call .venv\Scripts\pyinstaller.exe ^
     --name ControleFinanceiro ^
     --noconsole ^
-    --onefile ^
+    --onedir ^
     --add-data "../frontend/dist;frontend/dist" ^
     --hidden-import uvicorn ^
     --hidden-import fastapi ^
@@ -36,17 +36,18 @@ if %errorlevel% neq 0 (
 
 echo.
 cd ..
-echo [3/4] Copiando executavel para a pasta do banco local...
-copy /Y "backend\dist\ControleFinanceiro.exe" "ControleFinanceiro.exe" >nul
+echo [3/4] Copiando pasta do executavel para a raiz...
+if exist "ControleFinanceiro" rmdir /s /q "ControleFinanceiro"
+xcopy /E /I /Y "backend\dist\ControleFinanceiro" "ControleFinanceiro" >nul
 if %errorlevel% neq 0 (
-    echo Erro ao copiar o executavel para a raiz do projeto!
+    echo Erro ao copiar a pasta para a raiz do projeto!
     echo Feche o ControleFinanceiro.exe se ele estiver aberto e rode o build novamente.
     exit /b %errorlevel%
 )
 
 echo.
 echo [4/4] Sucesso!
-echo Executavel para uso/teste: %cd%\ControleFinanceiro.exe
+echo Executavel para uso/teste: %cd%\ControleFinanceiro\ControleFinanceiro.exe
 echo Banco usado por este executavel: %cd%\data\finance.db
-echo Artefato original tambem permanece em: backend\dist\ControleFinanceiro.exe
+echo Artefato original tambem permanece em: backend\dist\ControleFinanceiro\
 pause

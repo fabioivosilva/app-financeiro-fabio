@@ -1,20 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
 import type { Transaction, Category, Person } from '../types';
 
 export default function TransactionsPage() {
+  const [searchParams] = useSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Filters
+  // Filters — initialize from URL params if present
   const now = new Date();
-  const [month, setMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
-  const [pendingOnly, setPendingOnly] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
-  const [selectedPerson, setSelectedPerson] = useState<number | ''>('');
-  const [selectedSource, setSelectedSource] = useState<string>('');
+  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [month, setMonth] = useState(searchParams.get('month') || defaultMonth);
+  const [pendingOnly, setPendingOnly] = useState(searchParams.get('pending') === 'true');
+  const [selectedCategory, setSelectedCategory] = useState<number | ''>(searchParams.get('category_id') ? Number(searchParams.get('category_id')) : '');
+  const [selectedPerson, setSelectedPerson] = useState<number | ''>(searchParams.get('person_id') ? Number(searchParams.get('person_id')) : '');
+  const [selectedSource, setSelectedSource] = useState<string>(searchParams.get('source') || '');
   const [sortMode, setSortMode] = useState<'date' | 'amount_desc'>('date');
 
   const loadData = () => {
