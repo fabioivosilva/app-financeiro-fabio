@@ -1,46 +1,69 @@
 # 05_PENDENCIAS — Backlog Vivo
 
 ## Legenda de Tamanho
-| Tag | Significado | Tokens estimados | O que cabe numa sessão |
-|---|---|---|---|
-| `[P]` | Pequeno — 1 arquivo, mudança isolada | ~3–8k tokens | 4–6 itens P |
-| `[M]` | Médio — 1 endpoint + 1 componente UI | ~8–20k tokens | 2–3 itens M |
-| `[G]` | Grande — novo modelo + backend + UI | ~20k+ tokens | 1 item G |
+| Tag | Tokens estimados | O que cabe numa sessão |
+|---|---|---|
+| `[P]` Pequeno — 1 arquivo, mudança isolada | ~3–8k | 4–6 itens P |
+| `[M]` Médio — 1 endpoint + 1 componente UI | ~8–20k | 2–3 itens M |
+| `[G]` Grande — novo modelo + backend + UI | ~20k+ | 1 item G |
 
-> **Capacidade de uma sessão:** 1G · ou · 2-3M · ou · 4-6P (combinações possíveis)
-
----
-
-## 🔴 Alta Prioridade
-
-- [/] `[M]` **Fluxo de Aporte em Meta (Cofrinho):** Endpoint `POST /goals/{id}/deposit` + modal "Registrar Aporte" no card de meta. Transação gerada aparece no extrato com origem `Aporte Manual`. ← **PRÓXIMA TAREFA**
-- [ ] `[P]` **Preenchimento Automático pela Categoria:** Ao selecionar categoria vinculada a uma meta em uma transação, preencher automaticamente o vínculo de meta.
+> **Capacidade de uma sessão:** 1G · ou · 2-3M · ou · 4-6P
 
 ---
 
-## 🟡 Média Prioridade
+## 🔴 Trilha 1 — Metas & Cofrinho (completar o sistema)
+> Estes 3 itens formam um sistema único. Atacar em sequência.
 
-### Dashboard
-- [ ] `[G]` **Previsão de Gastos Futuros (Provisão):** Mostrar no Dashboard quanto já está comprometido nos próximos meses baseado em parcelas existentes.
+- [/] `[M]` **Aporte Manual em Meta:** Endpoint `POST /goals/{id}/deposit` + modal "Registrar Aporte" no card da meta. Transação gerada aparece no extrato com origem `Aporte Manual` e alimenta o progresso automaticamente. ← **PRÓXIMA TAREFA**
 
-### Sistema e Importação
-- [ ] `[M]` **Importação Assistida pela Pasta Padrão:** Usar pasta configurada para listar arquivos não importados e permitir importar com menos cliques.
+- [ ] `[P]` **Preenchimento Automático pela Categoria:** Ao selecionar uma categoria vinculada a uma meta em uma transação, preencher o vínculo de meta automaticamente. (Fazer junto com o item acima — é rápido.)
 
-### Desktop
-- [ ] `[P]` **Evitar Confusão entre Executáveis:** Doc/script de build deixando claro que só o `ControleFinanceiro.exe` da raiz deve ser usado.
+- [ ] `[M]` **Cofrinho por Keyword ou Regra Manual:** Uma meta pode ser alimentada por reconhecimento de texto na transação (ex: "COFRINHO VIAGEM") ou por uma regra explícita. Abordagem: adicionar `goal_id` opcional ao modelo `Rule` — quando a regra for aplicada, vincula a meta além de categorizar.
+
+---
+
+## 🟡 Trilha 2 — Importação Multi-Banco
+> ⚠️ Respeitar a dependência: item A ANTES do item B.
+
+- [ ] `[G]` **A — Arquitetura de Parsers Plugável:** Refatorar os 3 parsers atuais (Itaú Excel, Itaú PDF, OFX) para implementarem uma interface base `BaseParser`. Criar `PARSER_REGISTRY = { ("itau", "excel"): ItauExcelParser, ... }`. Na tela de importação, o usuário seleciona banco + formato — o sistema despacha para o parser certo. Para adicionar Bradesco ou Nubank futuramente, basta criar o parser e registrar.
+  - Impacto: `services/` (interface base), `routers/imports.py` (unificar 3 endpoints em 1), `ImportPage.tsx` (dropdown banco + formato).
+
+- [ ] `[M]` **B — Importação Assistida pela Pasta Padrão** *(depende do item A):* Usar a pasta configurada em Configurações para listar arquivos `.xls/.xlsx/.pdf/.ofx` ainda não importados. Destacar os novos e permitir importar com menos cliques. Só faz sentido após a refatoração dos parsers.
+
+---
+
+## 🟡 Trilha 3 — Provisões e Fluxo de Caixa
+> Feature estrutural. Atacar em 3 sessões na ordem indicada — cada uma depende da anterior.
+
+- [ ] `[G]` **1 — Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
+  - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única/mensal/trimestral/anual), `start_date`, `end_date`, `notes`.
+  - Ao criar provisão recorrente → sistema gera `ProvisionOccurrence` com `expected_date`, `expected_amount`, `status` (pendente/realizada/ajustada).
+  - CRUD completo + tela "Provisões" no frontend.
+  - Casos de uso: assinaturas, parcelas de fatura, prestações de empréstimo/financiamento.
+
+- [ ] `[G]` **2 — Vinculação Provisão ↔ Transação Real** *(depende do item 1):* Ao importar, oferecer ao usuário a opção de atrelar a transação a uma `ProvisionOccurrence` pendente.
+  - Se valor diferir do provisionado: perguntar causa (variação normal vs. juros/encargos).
+  - Se juros/encargos: registrar diferença como transação separada na categoria "Juros e Encargos" para não distorcer a categoria original.
+  - Atualizar `status` da ocorrência para "realizada" e guardar `linked_transaction_id`.
+
+- [ ] `[G]` **3 — Relatório de Fluxo de Caixa Futuro** *(depende dos itens 1 e 2):* Nova aba mostrando a projeção dos próximos meses.
+  - Por mês: Receitas previstas | Despesas previstas | Saldo projetado.
+  - Distinguir realizado (transações importadas) vs. provisionado (ocorrências futuras pendentes).
+  - Drill-down por mês para ver quais provisões compõem o total.
 
 ---
 
 ## 🔵 Baixa Prioridade
 
-### Inteligência e Insights
-- [ ] `[G]` **Menu de Insights/IA:** Aba com gastos altos, sugestões de corte, simulação de metas. Cruzar categorias + histórico + metas.
+- [ ] `[G]` **Menu de Insights/IA** *(melhor após Trilha 3):* Aba com gastos altos, sugestões de corte, simulação de metas ("se economizar R$ X no iFood, chego na meta Y em Z meses"). Com as Provisões implementadas, os insights ganham dados de fluxo futuro e ficam muito mais ricos.
 
-### Segurança (trilha própria)
-- [ ] `[P]` **Avaliação de Criptografia Local:** Mapear opções para proteger `data\finance.db`.
-- [ ] `[P]` **Plano de Senha/Master Key:** UX de senha mestre, recuperação, troca.
-- [ ] `[M]` **Varredura de Brechas de Segurança:** Auditoria: deps, CORS, localhost, path traversal, logs.
-- [ ] `[M]` **Hardening do Desktop:** PyInstaller/PyWebView, porta aleatória, remoção de debug antes de distribuir.
+- [ ] `[P]` **Evitar Confusão entre Executáveis:** Melhoria no `build_desktop.bat` ou README para deixar claro que o único executável para o usuário é `ControleFinanceiro.exe` na raiz.
+
+### Segurança *(trilha própria — não misturar com features)*
+- [ ] `[P]` **Avaliação de Criptografia Local:** Mapear opções para proteger `data\finance.db` (SQLCipher, chave derivada de senha, impacto no app desktop).
+- [ ] `[P]` **Plano de Senha/Master Key:** Se criptografia adotada — UX de senha mestre, recuperação, troca de senha.
+- [ ] `[M]` **Varredura de Brechas de Segurança:** Auditoria: deps Python/Node, CORS, localhost, path traversal, dados sensíveis em logs.
+- [ ] `[M]` **Hardening do Desktop:** PyInstaller/PyWebView, porta aleatória, remoção de arquivos debug antes de distribuir.
 
 ---
 
@@ -48,7 +71,7 @@
 
 ### Metas e Cofrinho
 - [x] Conectar categorias a metas automaticamente (category.goal_id)
-- [x] Ajustar backend de metas para calcular progresso por transações vinculadas
+- [x] Calcular progresso de meta por transações vinculadas
 - [x] Multi-Metas: CRUD completo com modal e cards
 - [x] Transação categorizada alimenta meta vinculada automaticamente
 
@@ -81,40 +104,3 @@
 
 ---
 *Última atualização: 2026-05-02 — Claude (claude.ai)*
-
----
-
-## 📥 Notas do Thiago — Incorporadas ao Backlog (2026-05-02)
-
-### Importação Multi-Instituição
-
-- [ ] `[G]` **Arquitetura de Parsers Plugável:** Hoje os parsers são hardcoded (Itaú Excel, Itaú PDF, OFX). Criar uma interface base `BaseParser` com método `parse(file_bytes) -> List[Transaction]` e um registro de parsers por instituição/formato. Na tela de importação, o usuário seleciona a instituição (dropdown) + formato (OFX / Excel / PDF) e o sistema despacha para o parser correto.
-  - **Dica prática (uso interno):** Não vale a pena auto-detectar instituição por heurística. O mais simples é um `PARSER_REGISTRY = { ("itau", "excel"): ItauExcelParser, ("itau", "pdf"): ItauPdfParser, ("generic", "ofx"): OfxParser }`. Para adicionar Bradesco ou Nubank, basta criar o parser e registrar.
-  - Impacto: `backend/app/services/` (nova classe base), `backend/app/routers/imports.py` (unificar endpoints), `frontend/src/pages/ImportPage.tsx` (dropdown de instituição).
-
-- [ ] `[M]` **Cofrinho por Reconhecimento de Texto ou Regra Manual:** Hoje a meta só é alimentada via `category.goal_id`. Thiago quer que uma transação também alimente uma meta se a descrição contiver uma palavra-chave (ex: "COFRINHO VIAGEM") ou se existir uma regra explícita "transações da conta X com texto Y → meta Z".
-  - Abordagem: Estender o modelo `Rule` com campo opcional `goal_id`. Quando a regra for aplicada na categorização, se tiver `goal_id`, vincular a transação à meta além de categorizar.
-  - Alternativa mais simples: campo `keyword` na própria `Goal` — ao categorizar, varrer metas com keyword e vincular se bater.
-
----
-
-### Provisões e Fluxo de Caixa (Feature Estrutural — quebrar em 3 sessões)
-
-- [ ] `[G]` **Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
-  - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única / mensal / trimestral / anual), `start_date`, `end_date` (opcional), `notes`.
-  - Ao criar uma provisão recorrente, o sistema gera automaticamente as ocorrências futuras (`ProvisionOccurrence`) com `expected_date`, `expected_amount` e `status` (pendente / realizada / ajustada).
-  - CRUD completo + tela "Provisões" no frontend.
-  - Casos de uso: assinaturas mensais, parcelas de fatura, prestações de empréstimo/financiamento.
-
-- [ ] `[G]` **Vinculação Provisão ↔ Transação Real:** Ao importar um extrato, oferecer ao usuário a opção de atrelar uma transação a uma `ProvisionOccurrence` pendente.
-  - Se o valor importado diferir do provisionado: perguntar a causa (variação normal vs. juros/encargos).
-  - Se juros/encargos: registrar a diferença como transação separada na categoria "Juros e Encargos" (categoria especial a criar) para não distorcer a categoria original.
-  - Atualizar o `status` da ocorrência para "realizada" e guardar `linked_transaction_id`.
-
-- [ ] `[G]` **Relatório de Fluxo de Caixa Futuro:** Nova aba ou seção no Dashboard mostrando a projeção dos próximos meses.
-  - Colunas por mês: Receitas previstas, Despesas previstas, Saldo projetado.
-  - Distinguir: já realizado (transações importadas) vs. provisionado (ocorrências futuras pendentes).
-  - Drill-down: clicar no mês para ver quais provisões compõem o total.
-  - Dependência: requer o Modelo Base de Provisões estar implementado.
-
----
