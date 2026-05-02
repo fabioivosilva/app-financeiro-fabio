@@ -6,7 +6,7 @@ description: >
   do GitHub, ao mencionar "app financeiro", "projeto fabio" ou o prompt padrão.
 ---
 
-# Skill: App Financeiro — Startup de Sessão
+# Skill: App Financeiro - Startup de Sessao
 
 ## Passo 1 — Atualizar o Repositório
 ```bash

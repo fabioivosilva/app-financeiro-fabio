@@ -1,47 +1,33 @@
-﻿# 06_ARQUITETURA
+# 06_ARQUITETURA
 
-Resumo atual do app desktop.
+## Estado Atual
 
-## Stack
+Nao ha arquitetura implementada no repo. O codigo foi removido em 2026-05-02.
 
-- Frontend: React + Vite + TypeScript + TailwindCSS + Recharts.
-- Backend: FastAPI + SQLAlchemy + SQLite.
-- Desktop: `backend/main_desktop.py` com PyWebView + Uvicorn em porta local livre.
-- Build: `build_desktop.bat` gera `backend/dist/ControleFinanceiro.exe` e copia para `ControleFinanceiro.exe` na raiz.
-
-## Estrutura Relevante
+## Arquitetura Alvo
 
 ```text
-backend/app/
-  main.py                 FastAPI app e rotas
-  database.py             SQLite, schema leve e migrations simples
-  models.py               ORM
-  schemas.py              contratos API
-  crud.py                 consultas e persistencia
-  routers/                dashboard, imports, transactions, categories, rules, goals, cards, persons
-  services/               parsers, dashboard, categorizacao, aprendizado
-frontend/src/
-  pages/                  telas principais
-  components/             componentes compartilhados
-  types/                  tipos TS dos contratos
+frontend/
+  React + Vite + TypeScript
+  UI dark/glass, sem reaproveitar paginas antigas
+
+backend/
+  FastAPI
+  SQLite local
+  Parser engine plugavel
+
+desktop/
+  PyWebView + PyInstaller onedir
 ```
 
-## Dados Locais
+## Principio Principal
 
-- Banco: `data/finance.db` ao lado do executavel da raiz.
-- Imports privados e bancos locais nao devem ir para git.
+Parsers sao plugins. O core nao deve conhecer detalhes de Itau, Nubank ou qualquer banco especifico.
 
-## Fluxo de Importacao
+Fluxo alvo:
 
-1. Usuario importa OFX/PDF/Excel.
-2. Parser extrai lancamentos normalizados.
-3. Importador deduplica por hash/FITID.
-4. Categorizador aplica regras.
-5. Transacoes pendentes ficam para revisao manual.
-6. Dashboard e telas leem agregacoes do SQLite.
-
-## Observacoes Atuais
-
-- Ciclo financeiro usado no dashboard/cartao: dia 27 ao dia 26.
-- Excel Itau e o caminho principal para fatura de cartao.
-- Session state vive somente no Obsidian (`01_SESSION_STATE.md`), nao no repo.
+1. Usuario escolhe banco/formato ou o sistema detecta.
+2. Registry escolhe parser.
+3. Parser retorna transacoes normalizadas.
+4. Backend deduplica e persiste.
+5. Frontend exibe dashboard/transacoes do ciclo 27-26.

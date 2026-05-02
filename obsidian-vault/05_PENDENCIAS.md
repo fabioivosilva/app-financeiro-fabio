@@ -1,113 +1,155 @@
-# 05_PENDENCIAS — Backlog Vivo
+# 05_PENDENCIAS - Backlog de Reconstrucao
 
 ## Legenda de Tamanho
-| Tag | Tokens estimados | O que cabe numa sessão |
+
+| Tag | Tamanho | O que significa |
 |---|---|---|
-| `[P]` Pequeno — 1 arquivo, mudança isolada | ~3–8k | 4–6 itens P |
-| `[M]` Médio — 1 endpoint + 1 componente UI | ~8–20k | 2–3 itens M |
-| `[G]` Grande — novo modelo + backend + UI | ~20k+ | 1 item G |
+| `[P]` | Pequeno | Mudanca isolada, baixo risco |
+| `[M]` | Medio | Um modulo/tela/endpoint com validacao |
+| `[G]` | Grande | Fundacao ou feature transversal |
 
-## Convenção de Tarefas em Andamento
-> Antes de começar uma tarefa, marque com `🔒 [SEU_NOME]` no item e faça commit.
-> Isso avisa a outra pessoa (e a IA dela) que aquele item está sendo trabalhado.
->
-> **Como marcar:** `- [/] `[M]` 🔒 [FABIO] Nome da tarefa...`
-> **Como liberar:** remover o 🔒 ao fechar o item (virar `[x]`).
+## Contexto
 
-> **Capacidade de uma sessão:** 1G · ou · 2-3M · ou · 4-6P
+Em 2026-05-02 o repo foi zerado. So o `obsidian-vault/` permaneceu.
 
----
+Objetivo: reconstruir o App Financeiro Fabio do zero, sem reaproveitar a carcaça antiga.
 
-## 🔴 Trilha 1 — Metas & Cofrinho (completar o sistema)
-> Estes 3 itens formam um sistema único. Atacar em sequência.
+## Regras Fixas do Produto
 
-- [/] `[M]` **Aporte Manual em Meta:** Endpoint `POST /goals/{id}/deposit` + modal "Registrar Aporte" no card da meta. Transação gerada aparece no extrato com origem `Aporte Manual` e alimenta o progresso automaticamente. ← **PRÓXIMA TAREFA**
-
-- [ ] `[P]` **Preenchimento Automático pela Categoria:** Ao selecionar uma categoria vinculada a uma meta em uma transação, preencher o vínculo de meta automaticamente. (Fazer junto com o item acima — é rápido.)
-
-- [ ] `[M]` **Cofrinho por Keyword ou Regra Manual:** Uma meta pode ser alimentada por reconhecimento de texto na transação (ex: "COFRINHO VIAGEM") ou por uma regra explícita. Abordagem: adicionar `goal_id` opcional ao modelo `Rule` — quando a regra for aplicada, vincula a meta além de categorizar.
+- App desktop local, sem SaaS e sem login.
+- Banco SQLite local.
+- Ciclo financeiro: dia 27 ao dia 26.
+- UI: dark mode, glassmorphism, primario `#820AD1`, fonte Inter, Material Symbols.
+- Importacao deve suportar multiplos bancos e formatos.
+- Parsers devem nascer plugaveis, nao acoplados ao Itau.
 
 ---
 
-## 🟡 Trilha 2 — Importação Multi-Banco
-> ⚠️ Respeitar a dependência: item A ANTES do item B.
+## Trilha R - Reset e Scaffolding
 
-- [ ] `[G]` **A — Arquitetura de Parsers Plugável:** Refatorar os 3 parsers atuais (Itaú Excel, Itaú PDF, OFX) para implementarem uma interface base `BaseParser`. Criar `PARSER_REGISTRY = { ("itau", "excel"): ItauExcelParser, ... }`. Na tela de importação, o usuário seleciona banco + formato — o sistema despacha para o parser certo. Para adicionar Bradesco ou Nubank futuramente, basta criar o parser e registrar.
-  - Impacto: `services/` (interface base), `routers/imports.py` (unificar 3 endpoints em 1), `ImportPage.tsx` (dropdown banco + formato).
+- [ ] `[M]` **R0 - Scaffolding minimo do repo**
+  - Criar `.gitignore`, `README.md`, `frontend/`, `backend/` e `build_desktop.bat`
+  - Frontend: React + Vite + TypeScript
+  - Backend: FastAPI + SQLite
+  - Validar build basico do frontend e py_compile do backend
 
-- [ ] `[M]` **B — Importação Assistida pela Pasta Padrão** *(depende do item A):* Usar a pasta configurada em Configurações para listar arquivos `.xls/.xlsx/.pdf/.ofx` ainda não importados. Destacar os novos e permitir importar com menos cliques. Só faz sentido após a refatoração dos parsers.
+- [ ] `[M]` **R1 - Contratos de dominio minimo**
+  - Definir modelos conceituais: Transaction, ImportBatch, Account, Institution, ParserRun
+  - Escrever contratos JSON esperados entre backend e frontend
+  - Documentar ciclo 27-26 no README/backend docs
 
----
-
-## 🟡 Trilha 3 — Provisões e Fluxo de Caixa
-> Feature estrutural. Atacar em 3 sessões na ordem indicada — cada uma depende da anterior.
-
-- [ ] `[G]` **1 — Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
-  - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única/mensal/trimestral/anual), `start_date`, `end_date`, `notes`.
-  - Ao criar provisão recorrente → sistema gera `ProvisionOccurrence` com `expected_date`, `expected_amount`, `status` (pendente/realizada/ajustada).
-  - CRUD completo + tela "Provisões" no frontend.
-  - Casos de uso: assinaturas, parcelas de fatura, prestações de empréstimo/financiamento.
-
-- [ ] `[G]` **2 — Vinculação Provisão ↔ Transação Real** *(depende do item 1):* Ao importar, oferecer ao usuário a opção de atrelar a transação a uma `ProvisionOccurrence` pendente.
-  - Se valor diferir do provisionado: perguntar causa (variação normal vs. juros/encargos).
-  - Se juros/encargos: registrar diferença como transação separada na categoria "Juros e Encargos" para não distorcer a categoria original.
-  - Atualizar `status` da ocorrência para "realizada" e guardar `linked_transaction_id`.
-
-- [ ] `[G]` **3 — Relatório de Fluxo de Caixa Futuro** *(depende dos itens 1 e 2):* Nova aba mostrando a projeção dos próximos meses.
-  - Por mês: Receitas previstas | Despesas previstas | Saldo projetado.
-  - Distinguir realizado (transações importadas) vs. provisionado (ocorrências futuras pendentes).
-  - Drill-down por mês para ver quais provisões compõem o total.
+- [ ] `[M]` **R2 - Shell visual novo**
+  - Criar layout escuro/glass do zero
+  - Sidebar com Dashboard, Importar, Transacoes, Provisoes, Metas, Configuracoes
+  - Sem dados reais ainda, apenas navegação e estados vazios
 
 ---
 
-## 🔵 Baixa Prioridade
+## Trilha P - Motor de Parsers Plugavel
 
-- [ ] `[G]` **Menu de Insights/IA** *(melhor após Trilha 3):* Aba com gastos altos, sugestões de corte, simulação de metas ("se economizar R$ X no iFood, chego na meta Y em Z meses"). Com as Provisões implementadas, os insights ganham dados de fluxo futuro e ficam muito mais ricos.
+- [ ] `[G]` **P1 - Interface BaseParser multi-banco**
+  - Criar `BaseParser` com `parse(file_bytes, context) -> ParseResult`
+  - Criar `ParseResult`, `ParsedTransaction`, `ParserError`
+  - Campos obrigatorios: data, descricao, valor, origem, banco, conta/cartao quando houver
 
-- [ ] `[P]` **Evitar Confusão entre Executáveis:** Melhoria no `build_desktop.bat` ou README para deixar claro que o único executável para o usuário é `ControleFinanceiro.exe` na raiz.
+- [ ] `[M]` **P2 - Registry de parsers**
+  - Criar `ParserRegistry`
+  - Chave por banco + formato: exemplo `itau:ofx`, `itau:credit_card_excel`
+  - Endpoint/listagem para frontend saber parsers disponiveis
 
-### Segurança *(trilha própria — não misturar com features)*
-- [ ] `[P]` **Avaliação de Criptografia Local:** Mapear opções para proteger `data\finance.db` (SQLCipher, chave derivada de senha, impacto no app desktop).
-- [ ] `[P]` **Plano de Senha/Master Key:** Se criptografia adotada — UX de senha mestre, recuperação, troca de senha.
-- [ ] `[M]` **Varredura de Brechas de Segurança:** Auditoria: deps Python/Node, CORS, localhost, path traversal, dados sensíveis em logs.
-- [ ] `[M]` **Hardening do Desktop:** PyInstaller/PyWebView, porta aleatória, remoção de arquivos debug antes de distribuir.
+- [ ] `[M]` **P3 - Parser OFX generico**
+  - Implementar parser OFX como primeiro parser multi-banco
+  - Nao assumir Itau no contrato
+  - Testes unitarios com OFX sintético
+
+- [ ] `[M]` **P4 - Parser Itau Excel Cartao**
+  - Recriar/adaptar parser de Excel Itau como plugin
+  - Extrair final do cartao, titular quando existir, parcelas e creditos
+  - Testes unitarios
+
+- [ ] `[M]` **P5 - Parser Itau PDF Cartao**
+  - Recriar/adaptar parser PDF Itau como plugin secundario
+  - Manter como fallback ao Excel
+  - Testes unitarios
+
+- [ ] `[M]` **P6 - Preparar novos bancos**
+  - Criar estrutura para Nubank, Banco do Brasil, Santander, Caixa ou outros
+  - Definir checklist para adicionar banco novo sem alterar core
+
+---
+
+## Trilha B - Backend Novo
+
+- [ ] `[M]` **B1 - SQLite e repositorios minimos**
+  - Criar schema inicial: imports, transactions, institutions, accounts
+  - Deduplicacao por hash normalizado e external_id quando existir
+  - Script de init/migrations simples
+
+- [ ] `[M]` **B2 - Endpoint de importacao unico**
+  - `POST /api/imports`
+  - Recebe arquivo + banco + formato/parser
+  - Retorna capturadas, inseridas, duplicadas e erros
+
+- [ ] `[M]` **B3 - Endpoints de leitura**
+  - `GET /api/transactions`
+  - `GET /api/dashboard`
+  - Filtros por ciclo 27-26, banco, origem e pendentes
+
+- [ ] `[M]` **B4 - Categorias e regras v1**
+  - Categorias iniciais versionadas
+  - Regras simples por palavra-chave
+  - Transacao importada sem match fica pendente
 
 ---
 
-## ✅ Concluídos
+## Trilha F - Frontend Novo
 
-### Metas e Cofrinho
-- [x] Conectar categorias a metas automaticamente (category.goal_id)
-- [x] Calcular progresso de meta por transações vinculadas
-- [x] Multi-Metas: CRUD completo com modal e cards
-- [x] Transação categorizada alimenta meta vinculada automaticamente
+- [ ] `[G]` **F1 - Dashboard conectado**
+  - KPIs do ciclo
+  - Gastos por categoria
+  - Fluxo futuro em barras agrupadas
+  - Estados vazios quando banco estiver limpo
 
-### Melhorias de Usabilidade
-- [x] Titular do Cartão no Excel → Dashboard "Gastos por Pessoa"
-- [x] Soft-delete de categorias
-- [x] Ordenação de transações por maior valor
-- [x] Gráfico pizza com labels e tooltips
-- [x] MonthSelector em todas as abas
+- [ ] `[G]` **F2 - Importar conectado**
+  - Selecionar banco e formato
+  - Upload unico
+  - Resumo da extracao
+  - Lista de importacoes recentes
 
-### Cartões
-- [x] Gráfico "Gasto por Pessoa no Cartão" corrigido
-- [x] Diagnóstico visual quando gráfico por pessoa estiver vazio
+- [ ] `[M]` **F3 - Transacoes conectado**
+  - Lista/tabela do ciclo
+  - Filtros
+  - Pendentes em destaque
 
-### Dashboard UX
-- [x] Alertas de Limite: "Estourou R$ X" / "Faltam R$ Y"
-- [x] Atalhos clicáveis: Pendentes, Saídas, categorias → Transações filtradas
-- [x] Top 3 gastos do ciclo
-- [x] Comparativo por Ciclo com variação %
-- [x] Estados Vazios Guiados com ações diretas
-
-### Desktop e Performance
-- [x] Build onedir (startup mais rápido)
-- [x] Splash screen enquanto backend sobe
-- [x] build_desktop.bat copia exe para a raiz automaticamente
-
-### Sistema
-- [x] Configuração de Pasta de Importação
-- [x] Reset Local com confirmação forte
+- [ ] `[M]` **F4 - Configuracoes base**
+  - Bancos/parsers disponiveis
+  - Categorias
+  - Zona de perigo para reset local
 
 ---
-*Última atualização: 2026-05-02 — Claude (claude.ai)*
+
+## Trilha D - Desktop
+
+- [ ] `[M]` **D1 - PyWebView/PyInstaller limpo**
+  - Recriar entrada desktop
+  - Porta local livre
+  - Splash simples
+  - Build onedir
+
+- [ ] `[P]` **D2 - Build automatizado**
+  - `build_desktop.bat` sem pausa
+  - Copiar executavel para pasta final
+  - Documentar qual `.exe` abrir
+
+---
+
+## Trilha S - Segurança
+
+- [ ] `[P]` **S1 - Plano de criptografia local**
+  - Avaliar SQLCipher ou alternativa
+  - Definir impacto em backup/restauracao
+
+- [ ] `[P]` **S2 - Hardening local**
+  - CORS restrito no desktop
+  - Porta aleatoria
+  - Remover debug/build artifacts do Git

@@ -1,45 +1,53 @@
-# CHECKPOINT ATUAL — App Financeiro Fabio
-> **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — Claude (claude.ai)
+# CHECKPOINT ATUAL - App Financeiro Fabio
 
----
+> Fonte canonica de handoff. Atualizado em 2026-05-02 apos reset total do repo.
 
-## 🟢 Estado do Projeto
-- MVP 100% concluído e funcionando como executável Windows (`ControleFinanceiro.exe`).
-- Branch ativa: `develop`. Último commit: `feat(cofrinho): implement goal sensitization...`
-- Executável em: `ControleFinanceiro.exe` (raiz) — use **sempre este**, não o de `backend/dist/`.
+## Estado Atual
 
-## ✅ Últimas Features Entregues
-| Feature | Commit/Status |
-|---|---|
-| Multi-Metas & Cofrinho (CRUD + vinculo categoria→meta) | ✅ commitado |
-| Dashboard comparativo mensal (badges +/- %) | ✅ commitado |
-| MonthSelector em todas as abas | ✅ commitado |
-| Configuração Pasta de Importação + Reset (Danger Zone) | ✅ commitado |
-| Titular do cartão Excel → Dashboard Gastos por Pessoa | ✅ commitado |
-| Soft-delete categorias + ordenação transações | ✅ commitado |
-| Gráfico pizza com tooltips/labels | ✅ commitado |
-| Atalhos clicáveis Dashboard + Top 3 gastos + Estados vazios | ✅ commitado |
-| Splash screen + build onedir (startup mais rápido) | ✅ commitado |
+O repositorio foi zerado de proposito a pedido do Fabio.
 
-## 🔴 Próxima Tarefa (Iniciar Aqui)
-**Fluxo de Aporte em Meta (Cofrinho)** — item `[/]` no backlog = em aberto.
+Permanece apenas:
 
-**O que falta:**
-- Backend: endpoint `POST /goals/{id}/deposit` (recebe `amount`, `description`, `date` → cria Transaction + atualiza `current_amount`)
-- Frontend: botão "💰 Registrar Aporte" no card de meta → modal → chama endpoint
-- A transação gerada deve aparecer na aba Transações com origem `"Aporte Manual"`
+- `.git/`
+- `obsidian-vault/`
 
-## 📋 Próximos Itens do Backlog (em ordem)
-1. `[/]` Fluxo de Aporte em Meta ← **AGORA**
-2. `[ ]` Preenchimento automático de meta ao selecionar categoria vinculada
-3. `[ ]` Previsão de Gastos Futuros (parcelas futuras no Dashboard)
-4. `[ ]` Importação Assistida pela Pasta Padrão
-5. `[ ]` Aba de Insights/IA
+Tudo fora do vault foi removido: frontend, backend, build desktop, scripts, design zip, bancos locais, configs de agente e artefatos.
 
-## ⚠️ Protocolo Obrigatório ao Fechar Item
-1. Marcar `[x]` em `05_PENDENCIAS.md`
-2. Atualizar este arquivo (seção acima)
-3. `git add -A && git commit -m "feat(...): ..."` na branch `develop`
-4. Rodar `build_desktop.bat` → confirmar novo timestamp do `ControleFinanceiro.exe`
-5. Push: `git push origin develop`
+## Decisao
+
+Recomecar o produto do zero, com backlog estruturado antes de escrever codigo.
+
+O projeto novo deve preservar o conhecimento de produto, mas nao deve reaproveitar carcaça antiga de frontend/backend.
+
+## Proxima Tarefa
+
+**R0 - Scaffolding minimo do repo**
+
+Criar uma base nova, pequena e limpa:
+
+1. `.gitignore`
+2. `README.md`
+3. `frontend/` com React + Vite + TypeScript
+4. `backend/` com FastAPI + SQLite
+5. `build_desktop.bat` simples
+6. Primeiro `npm run build` e primeiro `python -m py_compile`
+
+## Regra de Inicio de Sessao
+
+1. `git checkout develop`
+2. `git pull origin develop`
+3. Ler este arquivo.
+4. Ler `obsidian-vault/05_PENDENCIAS.md`.
+5. Escolher apenas o primeiro item sem claim.
+
+## Regra de Fechamento
+
+Ao concluir item:
+
+1. Marcar `[x]` no backlog.
+2. Atualizar este checkpoint.
+3. Validar com os comandos cabiveis.
+4. Commitar.
+5. Push em `develop`.
+
+Build desktop so volta a ser obrigatorio depois que a trilha de desktop for recriada.

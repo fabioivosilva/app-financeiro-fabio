@@ -1,88 +1,91 @@
 ---
 name: app-financeiro-close-item
 description: >
-  Protocolo obrigatório de fechamento de tarefa no App Financeiro Fabio.
-  Use ao concluir qualquer feature, bugfix ou melhoria — antes de considerar
-  a sessão encerrada. Ativa quando o usuário disser "terminamos", "pode fechar",
-  "commita", "faz o build", "marca como feito" ou ao finalizar qualquer item
-  do backlog do projeto App Financeiro Fabio.
+  Protocolo obrigatorio de fechamento de tarefa no App Financeiro Fabio.
+  Use ao concluir qualquer item do backlog.
 ---
 
-# Skill: App Financeiro — Fechar Item do Backlog
+# Skill: App Financeiro - Fechar Item do Backlog
 
-## Por que esta skill existe
-Fabio e Thiago precisam ver o resultado no executável Windows para validar o trabalho.
-Sem o build, a feature existe só no código e ninguém consegue testar.
-Sem o commit + push, o outro desenvolvedor e a próxima IA ficam desatualizados.
-Sem a atualização do vault, o contexto se perde na próxima sessão.
+## Estado base
 
-Nunca encerrar uma sessão sem executar estes 5 passos.
+O repositorio foi zerado em 2026-05-02.
+Enquanto o scaffold desktop nao for recriado, nao existe `build_desktop.bat`
+nem `ControleFinanceiro.exe` para validar.
 
-## Os 5 Passos de Fechamento (nesta ordem)
+O fechamento oficial agora e:
 
-### 1. Marcar no Backlog
-Abrir `obsidian-vault/05_PENDENCIAS.md` e mudar o item de `[ ]` ou `[/]` para `[x]`.
+1. atualizar backlog;
+2. atualizar checkpoint;
+3. validar o que for possivel para o estado atual;
+4. commitar;
+5. dar push.
+
+Quando a trilha desktop recriar o build, o passo de build volta a ser obrigatorio
+para itens que alterem codigo executavel.
+
+## Passo 1 - Marcar no backlog
+
+Abrir `obsidian-vault/05_PENDENCIAS.md` e mudar o item:
 
 ```markdown
-# Exemplo:
-- [x] **Fluxo de Aporte em Meta:** Endpoint POST /goals/{id}/deposit implementado.
+- [x] `[M]` R0 - Scaffolding minimo do repo
 ```
 
-### 2. Atualizar o Checkpoint
-Editar `obsidian-vault/10_CHECKPOINT_ATUAL.md`:
-- Adicionar o item na tabela "✅ Últimas Features Entregues"
-- Atualizar a seção "🔴 Próxima Tarefa" para o próximo item do backlog
-- Atualizar a data no topo do arquivo
+Se a tarefa ficar incompleta, manter `[/]` e deixar uma nota clara no item.
 
-### 3. Commit com Mensagem Descritiva
+## Passo 2 - Atualizar checkpoint
+
+Editar `obsidian-vault/10_CHECKPOINT_ATUAL.md`:
+
+- registrar o que foi concluido;
+- atualizar a proxima tarefa;
+- registrar pendencias ou riscos;
+- manter a data atualizada.
+
+## Passo 3 - Validar
+
+Escolha a validacao de acordo com o estado do repo:
+
+- Apenas vault/backlog: revisar markdown e rodar `git status`.
+- Apos R0: rodar checks basicos do scaffold criado.
+- Apos desktop existir: rodar `build_desktop.bat` e validar timestamp do exe.
+
+Nunca declarar build desktop feito se ainda nao houver scaffold desktop.
+
+## Passo 4 - Commit
+
 ```bash
 git add -A
-git commit -m "tipo(escopo): descrição curta em português
-
-- Detalhe 1 do que foi feito
-- Detalhe 2 se houver"
+git commit -m "tipo(escopo): descricao curta"
 ```
 
-**Tipos de commit:** `feat` (nova feature), `fix` (correção), `chore` (infra/config), `refactor`, `docs`
+Tipos comuns:
 
-**Exemplos reais do projeto:**
-```
-feat(goals): add POST /goals/{id}/deposit endpoint and deposit modal UI
-fix(cards): render spending by person summary
-chore(obsidian): update checkpoint and compact session state
-```
+- `docs`
+- `chore`
+- `feat`
+- `fix`
+- `refactor`
 
-### 4. Build do Executável Windows
-```bash
-# Na máquina do Fabio ou Thiago — não é possível rodar no container da IA
-build_desktop.bat
-```
+## Passo 5 - Push
 
-Após o build, confirmar que `ControleFinanceiro.exe` (na raiz) tem timestamp novo.
-Se o `.exe` estiver aberto/travado, fechar o app antes de rodar o build.
-
-### 5. Push para o Remoto
 ```bash
 git push origin develop
 ```
 
-Confirmar: "✅ Push feito. Thiago pode dar `git pull origin develop` para sincronizar."
+Mensagem final esperada:
 
----
-
-## Checklist de Fechamento (copiar e colar)
-```
-- [ ] [x] marcado em 05_PENDENCIAS.md
-- [ ] 10_CHECKPOINT_ATUAL.md atualizado (feature + próxima tarefa + data)
-- [ ] git commit feito com mensagem descritiva
-- [ ] build_desktop.bat rodado — ControleFinanceiro.exe com novo timestamp
-- [ ] git push origin develop
+```text
+Push feito no develop. Proxima sessao deve comecar pelo vault.
 ```
 
-## Mensagem de Handoff para Próxima IA
-Ao final da sessão, deixar uma nota curta no `10_CHECKPOINT_ATUAL.md`:
-```markdown
-## 💬 Nota da Sessão Anterior
-Feito: [o que foi implementado em 1-2 linhas]
-Pendente: [se alguma coisa ficou pela metade, especificar claramente]
+## Checklist
+
+```text
+- [ ] 05_PENDENCIAS.md atualizado
+- [ ] 10_CHECKPOINT_ATUAL.md atualizado
+- [ ] validacao possivel executada
+- [ ] commit feito
+- [ ] push feito no develop
 ```
