@@ -30,6 +30,9 @@ export default function DashboardPage() {
   const formatCurrency = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+  const formatPercent = (v: number) =>
+    `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
+
   const formatDate = (d: string) => {
     const dt = new Date(d + 'T00:00:00');
     return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -48,18 +51,47 @@ export default function DashboardPage() {
   };
 
   // Prepare data for BarChart (Person Spending)
-  const personChartData = data.spending_by_person.map(p => ({
-    name: p.person_name || 'Sem Pessoa',
-    total: p.total,
-    fill: p.person_name === 'Fernanda' ? '#f97316' : '#820AD1'
-  }));
+  const personChartData = [...data.spending_by_person]
+    .sort((a, b) => b.total - a.total)
+    .map(p => ({
+      name: p.person_name || 'Sem Pessoa',
+      total: p.total,
+      fill: p.person_name === 'Fernanda' ? '#f97316' : '#820AD1'
+    }));
 
   // Prepare data for PieChart (Category Spending)
-  const categoryChartData = data.spending_by_category.map((c, index) => ({
+  const sortedCategorySpending = [...data.spending_by_category].sort((a, b) => b.total - a.total);
+  const totalCategorySpending = sortedCategorySpending.reduce((sum, c) => sum + c.total, 0);
+  const categoryChartData = sortedCategorySpending.map((c, index) => ({
     name: c.category_name,
     value: c.total,
+    percentage: totalCategorySpending > 0 ? (c.total / totalCategorySpending) * 100 : 0,
     color: COLORS[index % COLORS.length]
   }));
+
+  const sortedCategoryLimits = [...data.category_limits].sort((a, b) => {
+    if (a.over_budget !== b.over_budget) return a.over_budget ? -1 : 1;
+    if (b.percentage !== a.percentage) return b.percentage - a.percentage;
+    return b.spent - a.spent;
+  });
+
+  const renderPieLabel = ({ name, percent }: any) => {
+    if (!percent || percent < 0.08) return '';
+    return `${name} ${formatPercent(percent * 100)}`;
+  };
+
+  const renderCategoryTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    const item = payload[0].payload;
+    return (
+      <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 shadow-card">
+        <p className="text-label-md font-semibold text-on-surface">{item.name}</p>
+        <p className="text-label-sm text-outline">
+          {formatCurrency(item.value)} ({formatPercent(item.percentage)})
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -146,7 +178,7 @@ export default function DashboardPage() {
         <div className="card flex flex-col">
           <h3 className="text-body-lg font-semibold mb-4">Limites por Categoria</h3>
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 max-h-64 custom-scrollbar">
-            {data.category_limits.map(cl => (
+            {sortedCategoryLimits.map(cl => (
               <div key={cl.category_id}>
                 <div className="flex justify-between text-label-md mb-1">
                   <span>{cl.category_name}</span>
@@ -189,12 +221,14 @@ export default function DashboardPage() {
                       outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
+                      labelLine={false}
+                      label={renderPieLabel}
                     >
                       {categoryChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <RechartsTooltip formatter={(value: any) => formatCurrency(Number(value))} />
+                    <RechartsTooltip content={renderCategoryTooltip} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -205,7 +239,9 @@ export default function DashboardPage() {
                       <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: sc.color }} />
                       <div className="truncate">
                         <p className="text-label-md truncate" title={sc.name}>{sc.name}</p>
-                        <p className="text-label-sm text-outline">{formatCurrency(sc.value)}</p>
+                        <p className="text-label-sm text-outline">
+                          {formatCurrency(sc.value)} • {formatPercent(sc.percentage)}
+                        </p>
                       </div>
                     </div>
                   ))}
