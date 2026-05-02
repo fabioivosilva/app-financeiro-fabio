@@ -16,12 +16,9 @@ import pdfplumber
 
 # Regex patterns for Itaú PDF format
 _DATE_PATTERN = re.compile(r"^(\d{2})\s*/\s*([a-zA-Z]{3}|\d{2})\s+")
-_AMOUNT_PATTERN = re.compile(r"([\d.,]+)\s*$")
+_AMOUNT_PATTERN = re.compile(r"(?P<credit>-\s*)?R?\$?\s*(?P<amount>[\d.,]+)\s*$")
 _INSTALLMENT_PATTERN = re.compile(r"(\d{2})/(\d{2})\s*$")
-_CARD_SECTION_PATTERN = re.compile(
-    r"(?:cartão|cartao|cart[aã]o)\s+.*?final\s+(\d{4})",
-    re.IGNORECASE,
-)
+_CARD_SECTION_PATTERN = re.compile(r"\bfinal\s+(\d{4})\b", re.IGNORECASE)
 _TOTAL_PATTERN = re.compile(
     r"(?:total|valor\s+da\s+fatura|total\s+da\s+fatura)",
     re.IGNORECASE,
@@ -45,17 +42,18 @@ def _normalize_text(text: str) -> str:
 
 
 def _parse_amount(text: str) -> Optional[float]:
-    """Extract amount from end of line. Returns negative (expense)."""
+    """Extract amount from end of line, preserving statement credits."""
     match = _AMOUNT_PATTERN.search(text)
     if not match:
         return None
-    raw = match.group(1).strip()
+    raw = match.group("amount").strip()
     # Handle Brazilian number format: 1.234,56 → 1234.56
     raw = raw.replace(".", "").replace(",", ".")
     try:
-        return float(raw)
+        amount = float(raw)
     except ValueError:
         return None
+    return -amount if match.group("credit") else amount
 
 
 def _parse_date(text: str, reference_year: int, reference_month: int) -> Optional[date]:
@@ -185,14 +183,15 @@ def parse_itau_pdf(file_content: bytes) -> List[Dict[str, Any]]:
                 if not line or len(line) < 5:
                     continue
 
-                # Check for card section header
-                card_match = _CARD_SECTION_PATTERN.search(line)
-                if card_match:
-                    current_card_digits = card_match.group(1)
-                    continue
-
                 # Skip non-transaction lines
                 if _should_skip_line(line):
+                    continue
+
+                # Check for card section header. Latam Pass statements use
+                # holder lines like "name - final 1234 (titular)".
+                card_match = _CARD_SECTION_PATTERN.search(line)
+                if card_match and not _DATE_PATTERN.search(line):
+                    current_card_digits = card_match.group(1)
                     continue
 
                 # Try to parse as transaction (must start with date)
@@ -222,7 +221,7 @@ def parse_itau_pdf(file_content: bytes) -> List[Dict[str, Any]]:
                 transactions.append({
                     "date": txn_date,
                     "description": description,
-                    "amount": -abs(amount),  # Credit card = always expense (negative)
+                    "amount": -amount,  # Purchases are negative; credits/refunds are positive.
                     "transaction_type": "expense",
                     "source": "credit_card",
                     "card_last_digits": current_card_digits,

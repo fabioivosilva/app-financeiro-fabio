@@ -29,3 +29,10 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - Criar a funcionalidade de backup automático e sincronização em nuvem.
 - Implementar leitura automatizada de extratos Open Finance (se aplicável).
 - Evoluir os gráficos Recharts com tooltips personalizados e exportação em PDF.
+
+## Atualização de sessão - 2026-05-02T02:23:53-03:00
+- Corrigido bug no parser PDF Itaú/Latam Pass que deslocava o final do cartão entre seções da fatura.
+- Ajustado parser para reconhecer cabeçalhos `final XXXX`, ignorar totais antes de trocar a seção de cartão e preservar créditos/estornos `- R$` como redução da fatura.
+- Adicionado teste unitário `backend/test_itau_pdf_parser.py` cobrindo seções Latam Pass, parcelas e crédito.
+- Validações: `python -m unittest test_itau_pdf_parser.py`, `python test_parser.py` e `python -m py_compile app/services/itau_pdf_parser.py test_itau_pdf_parser.py`.
+- Próximo passo: rebuildar o `ControleFinanceiro.exe` para testar o fix dentro do executável.
