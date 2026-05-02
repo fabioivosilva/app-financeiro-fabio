@@ -2,7 +2,7 @@
 
 ---
 
-## ⚡ SNAPSHOT — Leia só isso. Pare aqui se a tarefa estiver clara.
+## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
 STATUS     : Projeto zerado. Nenhum código ainda.
