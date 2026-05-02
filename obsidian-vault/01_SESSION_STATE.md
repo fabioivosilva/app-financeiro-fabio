@@ -1,20 +1,30 @@
-# SESSION STATE — App Financeiro Fabio
-> Estado compacto. Detalhes históricos em `04_LOG_DE_EXECUCAO.md`.
-> Para handoff completo, use `10_CHECKPOINT_ATUAL.md`.
+# SESSION_STATE
 
-## Status Geral
-MVP concluído. App roda como executável Windows (PyWebView + FastAPI + SQLite).
-Stack: React/Vite/Tailwind (frontend) · FastAPI/SQLAlchemy/SQLite (backend) · PyInstaller onedir (build).
+> Arquivo mantido apenas por compatibilidade com fluxos antigos.
 
-## Branch / Repo
-- Branch: `develop`
-- Repo: https://github.com/fabioivosilva/app-financeiro-fabio
-- Executável: `ControleFinanceiro.exe` na **raiz** do projeto (não em `backend/dist/`)
-- Banco: `data/finance.db` ao lado do executável
+## Fonte da Verdade
 
-## Próximo Passo
-Ver `10_CHECKPOINT_ATUAL.md` — seção "🔴 Próxima Tarefa".
+O handoff operacional do projeto agora fica em:
 
-## Regra de Compactação
-Não acumular logs de sessão aqui. Registrar apenas decisões que mudam a arquitetura ou o produto.
-Handoffs vão em `10_CHECKPOINT_ATUAL.md`.
+`obsidian-vault/10_CHECKPOINT_ATUAL.md`
+
+O backlog vivo fica em:
+
+`obsidian-vault/05_PENDENCIAS.md`
+
+## Regra para IAs e Pessoas
+
+Ao iniciar uma sessao:
+
+1. Atualize o repo na branch `develop`.
+2. Leia `obsidian-vault/10_CHECKPOINT_ATUAL.md`.
+3. Leia `obsidian-vault/05_PENDENCIAS.md`.
+4. Escolha apenas itens sem claim ativo de outra pessoa.
+
+Ao fechar uma tarefa:
+
+1. Marque `[x]` no item em `obsidian-vault/05_PENDENCIAS.md`.
+2. Atualize `obsidian-vault/10_CHECKPOINT_ATUAL.md`.
+3. Commit, build desktop e push.
+
+Nao registrar novos handoffs neste arquivo. Use sempre `10_CHECKPOINT_ATUAL.md`.

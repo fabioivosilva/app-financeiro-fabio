@@ -4,6 +4,23 @@
 
 ---
 
+## Fonte da Verdade para Retomar o Projeto
+
+Este e o unico arquivo de handoff operacional.
+
+Qualquer IA ou pessoa que entrar no projeto deve comecar por aqui e depois abrir
+`obsidian-vault/05_PENDENCIAS.md` para ver o backlog completo.
+
+Arquivos como `NEXT_SESSION.md` e `obsidian-vault/01_SESSION_STATE.md` sao apenas
+ponte/compatibilidade. Se houver conflito, este checkpoint vence.
+
+### Protocolo de Inicio
+1. `git checkout develop`
+2. `git pull origin develop`
+3. Ler este arquivo.
+4. Ler `obsidian-vault/05_PENDENCIAS.md`.
+5. Checar claims ativos antes de iniciar qualquer tarefa.
+
 ## 🟡 Estado do Projeto — MIGRAÇÃO v2.0 EM PLANEJAMENTO
 
 **Decisão:** Frontend descartado e reescrito do zero com design system Etheris Finance (Stitch).
