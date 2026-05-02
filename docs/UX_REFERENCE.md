@@ -1,94 +1,102 @@
-﻿# UX Reference — App Financeiro Fabio
+# UX Reference — App Financeiro Fabio v2.0
 
-## Fonte do Design
-- Protótipo: `stitch_instant_finance_tracker (4).zip`
-- Ferramenta: Stitch (Google)
-- Data de extração: 2026-05-01
+## Design System: Etheris Finance
 
-## Telas Identificadas
+Gerado pelo Stitch em 2026-05-02.
+Spec completo: `C:\Users\fabio\Downloads\stitch_preview\stitch_instant_finance_tracker\etheris_finance\DESIGN.md`
 
-### 1. Dashboard (`dashboard_financeiro/`)
-- **Hero card**: Saldo do Mês em destaque (verde positivo)
-- **Sub-cards**: Total Fatura, Saldo Restante
-- **Gasto por Pessoa**: barras horizontais Você (purple 60%) vs Fernanda (orange 40%)
-- **Limites por Categoria**: iFood/Keeta, Mercado, Farmácia com barras de progresso
-- **Meta de Reserva**: barra 65% com mensagem motivacional
-- **Evolução do Saldo**: gráfico de linha
+---
 
-### 2. Importar Dados (`importar_dados/`)
-- **Upload**: Drag & drop com borda tracejada purple
-- **Arquivos**: Lista com ícone PDF (vermelho) e OFX (verde)
-- **Resumo**: Painel lateral com total, categorizadas, pendentes
-- **Impacto**: Entradas, saídas, fatura Itaú
+## Tokens de Cor (Tailwind)
 
-### 3. Transações (`transa_es/`)
-- **Filtros**: Pills (Mês, Categoria, Pessoa, Origem) + Toggle Pendentes
-- **Lista**: Agrupada por data, com ícone, descrição, chip categoria, pessoa, valor, status
-- **Edição**: Popover para alterar categoria com busca e opção de criar regra
+```js
+colors: {
+  // Superfícies
+  "background":               "#17111b",  // fundo geral
+  "surface":                  "#17111b",
+  "surface-dim":              "#17111b",
+  "surface-container-lowest": "#110c16",
+  "surface-container-low":    "#1f1923",
+  "surface-container":        "#231d28",  // cards
+  "surface-container-high":   "#2e2832",
+  "surface-container-highest":"#39323d",
+  "surface-bright":           "#3e3742",
 
-### 4. Cartão (`an_lise_de_cart_o_consolidada/`)
-- **Hero**: Total da fatura + barra de limite
-- **Tabs**: Resumo, Por pessoa, Parcelas futuras, Recorrentes
-- **Por Pessoa**: Avatar + final cartão + barra de progresso
-- **Por Categoria**: Lista com dots coloridos
+  // Texto
+  "on-surface":         "#ebdfed",  // texto principal
+  "on-surface-variant": "#d0c2d7",  // texto secundário
+  "outline":            "#998ca0",  // texto placeholder/label
+  "outline-variant":    "#4d4354",  // bordas sutis
 
-### 5. Regras (`regras_de_automa_o/`)
-- **Header**: Título + botão Nova Regra
-- **Vínculos de Cartão**: Cards mapeando final → pessoa
-- **Lista de Regras**: Grid com palavra-chave, categoria, pessoa, origem, ações
-- **Paginação**
+  // Primário (roxo)
+  "primary":            "#e0b6ff",  // texto sobre roxo
+  "primary-container":  "#820AD1",  // botões, destaques
+  "on-primary":         "#4b007d",
+  "on-primary-container":"#e4c0ff",
+  "inverse-primary":    "#8a1dd9",
 
-### 6. Metas (`metas_financeiras/`)
-- **Progresso**: Valor atual vs objetivo, barra animada
-- **Insight**: Card purple sólido com sugestão mensal
-- **Gráfico**: SVG line chart da evolução
+  // Erro / Sucesso / Warning
+  "error":              "#ffb4ab",
+  "error-container":    "#93000a",
 
-### 7. Configurações (`configura_es/`)
-- **Pessoas**: Lista com avatares (iniciais)
-- **Cartões**: Items com mini-card visual
-- **Categorias**: Tabela com cor, nome, limite (separada por Fixas/Variáveis)
-- **Sistema**: Pasta de importação + botão reset (zona de perigo)
+  // Secundário (ciano — usar com parcimônia)
+  "secondary":          "#e6feff",
+  "secondary-container":"#00f4fe",
+}
+```
 
-## Design System
+---
 
-### Cores Principais
-| Token | Hex | Uso |
-|-------|-----|-----|
-| primary | `#6200a0` | Textos e ações primárias |
-| primary-container | `#820AD1` | Botões, barras, brand forte |
-| background | `#fff7fd` | Canvas principal |
-| on-surface | `#1f1923` | Texto principal |
-| outline | `#7f7386` | Texto secundário |
-| error | `#ba1a1a` | Alertas, limites estourados |
-| success (custom) | `#0e8345` | Saldo positivo |
-| warning (custom) | `#eab308` | Perto do limite |
-| orange (Fernanda) | `#f97316` | Barra de gastos Fernanda |
+## Glassmorphism — Regras de Implementação
 
-### Tipografia
-- **Font**: Inter (Google Fonts)
-- headline-xl: 40px bold
-- headline-lg: 32px semibold
-- headline-md: 24px semibold
-- body-lg: 18px regular
-- body-md: 16px regular
-- label-md: 14px medium
-- label-sm: 12px semibold
+| Elemento | Regra |
+|---|---|
+| **Cards** | `backdrop-filter: blur(20px)` · bg rgba(255,255,255,0.03) · border 1px rgba(255,255,255,0.12) · border-radius 1rem |
+| **Modais** | blur(20px) · bg rgba(255,255,255,0.08) · border 1px rgba(255,255,255,0.20) · border-radius 1.5rem |
+| **Botão primary** | bg `#820AD1` · hover: `box-shadow: 0 0 15px #820AD1` |
+| **Botão ghost** | glass border · backdrop blur · texto branco |
+| **Input** | bg semi-transparente dark · active glow `#820AD1` |
+| **Rows de tabela** | hover: opacidade de 3% → 6% |
 
-### Componentes
-- **Cards**: `bg-white rounded-[24px] shadow-[0_4px_12px_rgba(0,0,0,0.04)]`
-- **Botões**: `bg-[#820AD1] text-white rounded-lg`
-- **Progress bars**: `h-2 rounded-full`
-- **Chips**: `rounded-full bg-tint`
-- **Sidebar**: `w-64 bg-gray-50 border-r`
-- **Active nav**: `bg-purple-50 text-[#820AD1] font-bold`
+---
 
-### Icons
-- Material Symbols Outlined
-- Active icons: `font-variation-settings: 'FILL' 1`
+## Tipografia — Inter
 
-### Layout
-- Grid: 12 colunas desktop, 1 coluna mobile
-- Spacing base: 8px
-- Card padding: 24px (p-6)
-- Page margins: 16px mobile, 32px desktop
-- Container max: 1200px
+| Role | Tamanho | Peso |
+|---|---|---|
+| display-lg | 48px | 700 |
+| headline-md | 24px | 600 |
+| title-sm | 18px | 600 |
+| body-base | 16px | 400 |
+| body-sm | 14px | 400 |
+| label-caps | 12px | 700, letter-spacing 0.05em |
+| numeric-data | 16px | 500, tabular-nums |
+
+---
+
+## Protótipos HTML (referência por tela)
+
+| Tela | Arquivo HTML |
+|---|---|
+| Dashboard | `stitch_instant_finance_tracker\dashboard_consolidado\code.html` |
+| Importar | `stitch_instant_finance_tracker\importar_arquivos\code.html` |
+| Transações | `stitch_instant_finance_tracker\transa_es_do_ciclo\code.html` |
+| Provisões | `stitch_instant_finance_tracker\provis_es_e_futuro\code.html` |
+| Configurações | *(não gerado — criar do zero seguindo este design system)* |
+| Metas, Regras, Cartão | *(não gerados — adaptar páginas existentes)* |
+
+**Caminho base:** `C:\Users\fabio\Downloads\stitch_preview\`
+
+---
+
+## Nota sobre o gráfico do Dashboard
+
+O gráfico "Fluxo de Caixa Futuro" do protótipo Stitch tem problema de clareza
+(barras mistas + linha sem legenda). **Não seguir o protótipo neste ponto.**
+
+Implementar como barras agrupadas simples:
+- Verde = Receita prevista
+- Vermelho = Despesa prevista
+- Roxo `#820AD1` = Saldo projetado
+
+Gráfico deve ocupar pelo menos 50% da altura inferior do Dashboard.
