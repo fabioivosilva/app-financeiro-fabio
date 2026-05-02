@@ -95,3 +95,10 @@ Nenhuma, o MVP (Minimum Viable Product) especificado estÃ¡ 100% finalizado.
 - Meta automatica atrelada a categorias ja constava no backlog (Metas Inteligentes).
 - Efetuando commit unificado das mudancas de regra contabil (exclude_from_totals) geradas pelo Codex e da atualizacao de session state.
 
+
+## Handoff / Final de Sessao (Antigravity -> Codex / Futuro) - 2026-05-02T03:33:39-03:00
+- Sessao finalizada garantindo o sincronismo total entre repositório e Obsidian.
+- Ideia adicionada ao backlog: Aba de Insights (Inteligencia Financeira para corte de gastos e simulacao de metas).
+- **Instrucao para proxima IA (Antigravity ou Codex):**
+  Ao iniciar a sessao amanha, LEIA O ARQUIVO  5_PENDENCIAS.md para ver as prioridades (Titular do Cartao Excel, Soft-Delete Categorias, Ordenacao Transacoes, Multiplas Metas, Insights). Nao ha código quebrado. O executavel na raiz (ControleFinanceiro.exe) esta estavel com as regras contabeis aplicadas.
+
