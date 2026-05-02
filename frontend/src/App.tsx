@@ -6,6 +6,7 @@ import TransactionsPage from './pages/TransactionsPage';
 import CardPage from './pages/CardPage';
 import RulesPage from './pages/RulesPage';
 import GoalsPage from './pages/GoalsPage';
+import ProvisionsPage from './pages/ProvisionsPage';
 import SettingsPage from './pages/SettingsPage';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/cartao" element={<CardPage />} />
           <Route path="/regras" element={<RulesPage />} />
           <Route path="/metas" element={<GoalsPage />} />
+          <Route path="/provisoes" element={<ProvisionsPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
       </Routes>

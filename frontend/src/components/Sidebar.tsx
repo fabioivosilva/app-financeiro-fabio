@@ -7,6 +7,7 @@ const navItems = [
   { to: '/cartao',        icon: 'credit_card',     label: 'Cartão' },
   { to: '/regras',        icon: 'tune',            label: 'Regras' },
   { to: '/metas',         icon: 'savings',         label: 'Metas' },
+  { to: '/provisoes',     icon: 'event_repeat',    label: 'Provisões' },
   { to: '/configuracoes', icon: 'settings',        label: 'Configurações' },
 ];
 

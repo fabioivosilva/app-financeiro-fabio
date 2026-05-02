@@ -151,6 +151,49 @@ class Goal(Base):
 
 
 # ---------------------------------------------------------------------------
+# Provisions
+# ---------------------------------------------------------------------------
+class Provision(Base):
+    __tablename__ = "provisions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(String(200), nullable=False)
+    amount = Column(Float, nullable=False)
+    type = Column(String(10), nullable=False)  # expense | income
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    recurrence = Column(String(20), nullable=False)  # once | monthly | quarterly | annual
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=True)
+    notes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    category = relationship("Category")
+    occurrences = relationship(
+        "ProvisionOccurrence",
+        back_populates="provision",
+        cascade="all, delete-orphan",
+        order_by="ProvisionOccurrence.expected_date",
+    )
+
+
+class ProvisionOccurrence(Base):
+    __tablename__ = "provision_occurrences"
+
+    id = Column(Integer, primary_key=True, index=True)
+    provision_id = Column(Integer, ForeignKey("provisions.id"), nullable=False)
+    expected_date = Column(Date, nullable=False)
+    expected_amount = Column(Float, nullable=False)
+    status = Column(String(20), nullable=False, default="pending")  # pending | realized | adjusted
+    linked_transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    provision = relationship("Provision", back_populates="occurrences")
+    linked_transaction = relationship("Transaction")
+
+
+# ---------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------
 class Setting(Base):

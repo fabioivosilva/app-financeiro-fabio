@@ -189,6 +189,58 @@ class GoalOut(GoalBase):
 
 
 # ---------------------------------------------------------------------------
+# Provisions
+# ---------------------------------------------------------------------------
+class ProvisionOccurrenceOut(BaseModel):
+    id: int
+    provision_id: int
+    expected_date: date
+    expected_amount: float
+    status: str
+    linked_transaction_id: Optional[int] = None
+    notes: Optional[str] = None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class OccurrenceStatusUpdate(BaseModel):
+    status: str
+    notes: Optional[str] = None
+
+class ProvisionBase(BaseModel):
+    description: str
+    amount: float
+    type: str
+    category_id: Optional[int] = None
+    recurrence: str
+    start_date: date
+    end_date: Optional[date] = None
+    notes: Optional[str] = None
+
+class ProvisionCreate(ProvisionBase):
+    pass
+
+class ProvisionUpdate(BaseModel):
+    description: Optional[str] = None
+    amount: Optional[float] = None
+    type: Optional[str] = None
+    category_id: Optional[int] = None
+    recurrence: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    notes: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class ProvisionOut(ProvisionBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    occurrences: List[ProvisionOccurrenceOut] = []
+    pending_count: int = 0
+    realized_count: int = 0
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
 # File Imports
 # ---------------------------------------------------------------------------
 class FileImportOut(BaseModel):

@@ -66,6 +66,34 @@ export interface Goal {
   created_at: string;
 }
 
+export interface ProvisionOccurrence {
+  id: number;
+  provision_id: number;
+  expected_date: string;
+  expected_amount: number;
+  status: string; // pending | realized | adjusted
+  linked_transaction_id: number | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface Provision {
+  id: number;
+  description: string;
+  amount: number;
+  type: string; // expense | income
+  category_id: number | null;
+  recurrence: string; // once | monthly | quarterly | annual
+  start_date: string;
+  end_date: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  occurrences: ProvisionOccurrence[];
+  pending_count: number;
+  realized_count: number;
+}
+
 export interface FileImport {
   id: number;
   filename: string;

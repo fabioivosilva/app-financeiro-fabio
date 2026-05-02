@@ -20,6 +20,7 @@ from .routers import (
     cards,
     persons,
     settings,
+    provisions,
 )
 
 # Create tables
@@ -61,6 +62,7 @@ api_router.include_router(goals.router)
 api_router.include_router(cards.router)
 api_router.include_router(persons.router)
 api_router.include_router(settings.router)
+api_router.include_router(provisions.router)
 
 @api_router.get("/", tags=["status"])
 def root():

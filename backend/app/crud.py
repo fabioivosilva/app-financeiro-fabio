@@ -270,6 +270,146 @@ def delete_goal(db: Session, goal_id: int) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Provisions
+# ---------------------------------------------------------------------------
+import calendar as _cal
+
+def _add_months(dt: date, months: int) -> date:
+    month = dt.month - 1 + months
+    year = dt.year + month // 12
+    month = month % 12 + 1
+    day = min(dt.day, _cal.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def _generate_occurrences(provision: models.Provision) -> list:
+    result = []
+    current = provision.start_date
+    end = provision.end_date
+    rec = provision.recurrence
+
+    if rec == "once":
+        result.append(models.ProvisionOccurrence(
+            expected_date=current,
+            expected_amount=provision.amount,
+            status="pending",
+        ))
+        return result
+
+    delta = {"monthly": 1, "quarterly": 3, "annual": 12}.get(rec, 1)
+    max_occ = {"monthly": 24, "quarterly": 8, "annual": 5}.get(rec, 24)
+
+    count = 0
+    while count < max_occ:
+        if end and current > end:
+            break
+        result.append(models.ProvisionOccurrence(
+            expected_date=current,
+            expected_amount=provision.amount,
+            status="pending",
+        ))
+        current = _add_months(current, delta)
+        count += 1
+
+    return result
+
+
+def _enrich_provision(provision: models.Provision) -> models.Provision:
+    occs = provision.occurrences
+    setattr(provision, "pending_count", sum(1 for o in occs if o.status == "pending"))
+    setattr(provision, "realized_count", sum(1 for o in occs if o.status == "realized"))
+    return provision
+
+
+def get_provisions(db: Session) -> list:
+    provisions = (
+        db.query(models.Provision)
+        .filter(models.Provision.is_active == True)
+        .order_by(models.Provision.created_at.desc())
+        .all()
+    )
+    return [_enrich_provision(p) for p in provisions]
+
+
+def get_provision(db: Session, provision_id: int) -> Optional[models.Provision]:
+    p = db.query(models.Provision).filter(models.Provision.id == provision_id).first()
+    return _enrich_provision(p) if p else None
+
+
+def create_provision(db: Session, **kwargs) -> models.Provision:
+    p = models.Provision(**kwargs)
+    db.add(p)
+    db.flush()
+    for occ in _generate_occurrences(p):
+        occ.provision_id = p.id
+        db.add(occ)
+    db.commit()
+    db.refresh(p)
+    return _enrich_provision(p)
+
+
+def update_provision(db: Session, provision_id: int, **kwargs) -> Optional[models.Provision]:
+    p = db.query(models.Provision).filter(models.Provision.id == provision_id).first()
+    if not p:
+        return None
+
+    regenerate = any(k in kwargs for k in ("amount", "start_date", "end_date", "recurrence"))
+
+    for k, v in kwargs.items():
+        if hasattr(p, k):
+            setattr(p, k, v)
+
+    if regenerate:
+        realized_dates = {
+            occ.expected_date
+            for occ in p.occurrences
+            if occ.status in ("realized", "adjusted")
+        }
+        db.query(models.ProvisionOccurrence).filter(
+            models.ProvisionOccurrence.provision_id == provision_id,
+            models.ProvisionOccurrence.status == "pending",
+        ).delete(synchronize_session="fetch")
+        for occ in _generate_occurrences(p):
+            if occ.expected_date not in realized_dates:
+                occ.provision_id = p.id
+                db.add(occ)
+
+    db.commit()
+    db.refresh(p)
+    return _enrich_provision(p)
+
+
+def delete_provision(db: Session, provision_id: int) -> bool:
+    p = db.query(models.Provision).filter(models.Provision.id == provision_id).first()
+    if not p:
+        return False
+    db.delete(p)
+    db.commit()
+    return True
+
+
+def get_occurrences(db: Session, provision_id: int) -> list:
+    return (
+        db.query(models.ProvisionOccurrence)
+        .filter(models.ProvisionOccurrence.provision_id == provision_id)
+        .order_by(models.ProvisionOccurrence.expected_date)
+        .all()
+    )
+
+
+def update_occurrence(db: Session, occurrence_id: int, **kwargs) -> Optional[models.ProvisionOccurrence]:
+    occ = db.query(models.ProvisionOccurrence).filter(models.ProvisionOccurrence.id == occurrence_id).first()
+    if not occ:
+        return None
+    for k, v in kwargs.items():
+        if hasattr(occ, k) and v is not None:
+            setattr(occ, k, v)
+    db.commit()
+    db.refresh(occ)
+    return occ
+
+
+# ---------------------------------------------------------------------------
 # File Imports
 # ---------------------------------------------------------------------------
 def get_imports(db: Session) -> List[models.FileImport]:
