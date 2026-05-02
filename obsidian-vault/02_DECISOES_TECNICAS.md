@@ -1,6 +1,6 @@
 ﻿# 02_DECISOES_TECNICAS
 
-Decisoes estaveis. Para estado atual e pendencias, usar `01_SESSION_STATE.md` e `05_PENDENCIAS.md`.
+Decisoes estaveis. Para estado atual e pendencias, usar `10_CHECKPOINT_ATUAL.md` e `05_PENDENCIAS.md`.
 
 ## Stack
 

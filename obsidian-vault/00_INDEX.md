@@ -13,8 +13,8 @@ quais regras nao podem ser quebradas e qual protocolo usar ao fechar item.
 `05_PENDENCIAS.md` e o backlog vivo. Ele complementa o checkpoint, mas nao substitui
 o handoff central.
 
-`NEXT_SESSION.md` e `01_SESSION_STATE.md` existem apenas por compatibilidade e devem
-apontar para este fluxo.
+Arquivos antigos de handoff fora deste fluxo devem ser removidos para evitar
+contexto duplicado.
 
 ## 🚀 Início Obrigatório de Sessão (nesta ordem)
 1. `10_CHECKPOINT_ATUAL.md` — handoff canonico, onde parou, proxima tarefa, protocolo de fechamento

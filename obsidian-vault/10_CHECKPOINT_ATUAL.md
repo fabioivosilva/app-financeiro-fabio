@@ -11,8 +11,8 @@ Este e o unico arquivo de handoff operacional.
 Qualquer IA ou pessoa que entrar no projeto deve comecar por aqui e depois abrir
 `obsidian-vault/05_PENDENCIAS.md` para ver o backlog completo.
 
-Arquivos como `NEXT_SESSION.md` e `obsidian-vault/01_SESSION_STATE.md` sao apenas
-ponte/compatibilidade. Se houver conflito, este checkpoint vence.
+Arquivos antigos de handoff fora deste fluxo devem ser removidos para evitar
+contexto duplicado. Se houver conflito em algum documento antigo, este checkpoint vence.
 
 ### Protocolo de Inicio
 1. `git checkout develop`

@@ -5,9 +5,8 @@ Este arquivo é lido automaticamente pelo Claude Code e outros agentes de IA.
 ## 🚨 Leitura Obrigatória ao Iniciar
 
 Antes de qualquer código ou sugestão, ler nesta ordem:
-1. `NEXT_SESSION.md` — contexto resumido do estado atual e o que fazer
-2. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — último estado + próxima tarefa
-3. `obsidian-vault/05_PENDENCIAS.md` — backlog completo com trilhas A→B→C→D
+1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — handoff canônico, último estado e próxima tarefa
+2. `obsidian-vault/05_PENDENCIAS.md` — backlog completo com trilhas A→B→C→D
 
 ## Stack
 
@@ -23,7 +22,7 @@ Antes de qualquer código ou sugestão, ler nesta ordem:
 
 Frontend está sendo reescrito do zero com design system **Etheris Finance**.
 Backend (FastAPI + SQLite) está completo e **não muda**.
-Ver `NEXT_SESSION.md` para o ponto exato de onde retomar.
+Ver `obsidian-vault/10_CHECKPOINT_ATUAL.md` para o ponto exato de onde retomar.
 
 ## Regras de Ouro
 

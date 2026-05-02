@@ -61,11 +61,11 @@ sync_and_run.bat
 
 ## Para Desenvolvedores (Fabio & Thiago)
 
-**Leia primeiro:** [`NEXT_SESSION.md`](NEXT_SESSION.md)
+**Leia primeiro:** [`obsidian-vault/10_CHECKPOINT_ATUAL.md`](obsidian-vault/10_CHECKPOINT_ATUAL.md)
 
 O projeto usa o Obsidian vault (`obsidian-vault/`) como cérebro compartilhado.
 Backlog em `obsidian-vault/05_PENDENCIAS.md`.
-Estado atual em `obsidian-vault/10_CHECKPOINT_ATUAL.md`.
+Estado atual e handoff canônico em `obsidian-vault/10_CHECKPOINT_ATUAL.md`.
 
 Branch de trabalho: `develop`. Nunca commitar direto em `main`.
 

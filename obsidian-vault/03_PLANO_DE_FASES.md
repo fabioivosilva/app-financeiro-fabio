@@ -4,7 +4,7 @@ Status: HISTORICO. O MVP ja foi concluido e empacotado como desktop. Nao usar es
 
 Para proximas tarefas, usar:
 - `05_PENDENCIAS.md` para backlog vivo.
-- `01_SESSION_STATE.md` para ultimo handoff.
+- `10_CHECKPOINT_ATUAL.md` para ultimo handoff.
 - `00_INDEX.md` para mapa de busca.
 
 ## Plano Original do MVP

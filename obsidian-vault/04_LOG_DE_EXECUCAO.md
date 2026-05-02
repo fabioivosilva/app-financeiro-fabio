@@ -7,4 +7,4 @@ Resumo util:
 - UX original veio de `stitch_instant_finance_tracker (4).zip`.
 - O MVP evoluiu para app desktop React + FastAPI + SQLite + PyWebView.
 
-Para execucao atual, consultar `01_SESSION_STATE.md` e `05_PENDENCIAS.md`.
+Para execucao atual, consultar `10_CHECKPOINT_ATUAL.md` e `05_PENDENCIAS.md`.

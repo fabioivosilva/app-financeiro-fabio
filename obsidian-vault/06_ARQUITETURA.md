@@ -44,4 +44,4 @@ frontend/src/
 
 - Ciclo financeiro usado no dashboard/cartao: dia 27 ao dia 26.
 - Excel Itau e o caminho principal para fatura de cartao.
-- Session state vive somente no Obsidian (`01_SESSION_STATE.md`), nao no repo.
+- Handoff operacional vive somente no Obsidian (`10_CHECKPOINT_ATUAL.md`), nao em arquivo solto na raiz.

@@ -30,4 +30,4 @@ Este é o **design oficial** a ser implementado no frontend v2.0.
 
 Os `.jsx` do Claude são protótipos — **não copiar direto**.
 Reescrever em TypeScript, conectar na API real, seguir os padrões do projeto.
-Ver `NEXT_SESSION.md` na raiz para o plano de implementação.
+Ver `obsidian-vault/10_CHECKPOINT_ATUAL.md` para o plano de implementação atual.
