@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — Frontend antigo removido
+> Última atualização: 2026-05-02 — A4 em andamento
 
 ---
 
@@ -31,15 +31,15 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**B1 — Dashboard v2** — reconectar o Dashboard novo na API real
+**A4 — Reset Arquitetural mantendo Motor de Parsers** — limpar backend antigo sem perder parsers
 
 **O que fazer:**
-1. Partir da nova base visual carregada de `C:\Users\fabio\Downloads\App-financeiro.zip`
-2. Trocar os dados mockados do Dashboard por `/api/dashboard/`
-3. Manter gráfico de Fluxo de Caixa Futuro em barras agrupadas simples
-4. Manter KPIs, limites de categoria e alertas no visual Etheris
+1. Remover carcaça antiga do backend de produto
+2. Manter `ofx_parser.py`, `itau_pdf_parser.py` e `itau_excel_parser.py`
+3. Criar API mínima nova: `/api/health`, `/api/imports`, `/api/transactions`, `/api/dashboard`
+4. Validar frontend novo + backend novo + build desktop
 
-Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
+Referência: item A4 em `obsidian-vault/05_PENDENCIAS.md`
 
 ## 📋 Ordem de Execução
 
@@ -47,16 +47,17 @@ Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 1. `[M]` A1 — Setup Design System Etheris Finance ✅
 2. `[P]` A2 — Layout Base + Sidebar novo ✅
 3. `[P]` A3 — Fix build_desktop.bat (remover pause) ✅
+4. `[G]` A4 — Reset Arquitetural mantendo Motor de Parsers ← **AGORA**
 
 ### Trilha B — Migração das Telas (após A1+A2)
-4. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout) ← **AGORA**
-5. `[M]` B2 — Importar v2
-6. `[M]` B3 — Transações v2
-7. `[M]` B4 — Provisões v2
-8. `[M]` B5 — Configurações v2 (criar do zero no novo design)
-9. `[P]` B6 — Metas v2
-10. `[P]` B7 — Regras v2
-11. `[P]` B8 — Cartão v2
+5. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout)
+6. `[M]` B2 — Importar v2
+7. `[M]` B3 — Transações v2
+8. `[M]` B4 — Provisões v2
+9. `[M]` B5 — Configurações v2 (criar do zero no novo design)
+10. `[P]` B6 — Metas v2
+11. `[P]` B7 — Regras v2
+12. `[P]` B8 — Cartão v2
 
 ### Trilha C — Features Novas (após B completa)
 12. `[G]` C1 — Vinculação Provisão ↔ Transação Real
@@ -78,8 +79,8 @@ Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
 
 ## 💬 Nota da Sessão Anterior
-Feito: o frontend antigo foi removido do build. `frontend/src/App.tsx` agora usa a base visual do zip novo, `frontend/src/styles/prototype.css` veio do protótipo, e os arquivos antigos de páginas/router/API foram apagados.
-Pendente: iniciar B1 conectando o Dashboard novo na API real e removendo os dados mockados.
+Feito: o frontend antigo foi removido do build. O usuário decidiu também limpar a carcaça antiga do backend, mantendo apenas o motor de parsers para não gastar retrabalho.
+Pendente: concluir A4 criando uma API mínima nova em volta dos parsers preservados.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`

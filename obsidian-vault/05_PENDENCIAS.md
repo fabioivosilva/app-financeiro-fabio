@@ -66,6 +66,14 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Testar que o build roda sem travar via PowerShell
   - Commitar — habilita o agente a buildar automaticamente ao fechar itens
 
+- [/] `[G]` 🔒 [FABIO] **A4 — Reset Arquitetural mantendo Motor de Parsers**
+  - Apagar a carcaça antiga de produto do backend: routers, CRUD, schemas e models antigos
+  - Manter o motor de parsers: OFX, PDF Itaú e Excel Itaú
+  - Criar API mínima nova: health, imports, transactions e dashboard
+  - Permitir banco local novo/zerado para nova importação
+  - Manter build desktop funcionando com o novo frontend
+  - Próxima etapa após A4: reconectar Dashboard/Importar à API nova
+
 ---
 
 ## 🔴 Trilha B — Migração das Telas (em ordem de prioridade)
