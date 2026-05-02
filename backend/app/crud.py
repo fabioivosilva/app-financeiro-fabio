@@ -66,8 +66,11 @@ def update_card(db: Session, card_id: int, **kwargs) -> Optional[models.Card]:
 # ---------------------------------------------------------------------------
 # Categories
 # ---------------------------------------------------------------------------
-def get_categories(db: Session) -> List[models.Category]:
-    return db.query(models.Category).order_by(models.Category.kind, models.Category.name).all()
+def get_categories(db: Session, active_only: bool = True) -> List[models.Category]:
+    q = db.query(models.Category)
+    if active_only:
+        q = q.filter(models.Category.is_active == True)
+    return q.order_by(models.Category.kind, models.Category.name).all()
 
 def get_category(db: Session, category_id: int) -> Optional[models.Category]:
     return db.query(models.Category).filter(models.Category.id == category_id).first()
@@ -85,6 +88,14 @@ def update_category(db: Session, category_id: int, **kwargs) -> Optional[models.
         for k, v in kwargs.items():
             if hasattr(c, k) and v is not None:
                 setattr(c, k, v)
+        db.commit()
+        db.refresh(c)
+    return c
+
+def soft_delete_category(db: Session, category_id: int) -> Optional[models.Category]:
+    c = get_category(db, category_id)
+    if c:
+        c.is_active = False
         db.commit()
         db.refresh(c)
     return c

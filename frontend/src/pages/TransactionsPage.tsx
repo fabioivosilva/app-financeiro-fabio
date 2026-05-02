@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
 import type { Transaction, Category, Person } from '../types';
 
@@ -15,6 +15,7 @@ export default function TransactionsPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
   const [selectedPerson, setSelectedPerson] = useState<number | ''>('');
   const [selectedSource, setSelectedSource] = useState<string>('');
+  const [sortMode, setSortMode] = useState<'date' | 'amount_desc'>('date');
 
   const loadData = () => {
     setLoading(true);
@@ -47,8 +48,17 @@ export default function TransactionsPage() {
     return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
   };
 
+  const sortedTransactions = useMemo(() => {
+    if (sortMode === 'date') return transactions;
+    return [...transactions].sort((a, b) => {
+      const amountDiff = Math.abs(b.amount) - Math.abs(a.amount);
+      if (amountDiff !== 0) return amountDiff;
+      return b.date.localeCompare(a.date);
+    });
+  }, [transactions, sortMode]);
+
   // Group by date
-  const grouped = transactions.reduce<Record<string, Transaction[]>>((acc, t) => {
+  const grouped = sortedTransactions.reduce<Record<string, Transaction[]>>((acc, t) => {
     const key = t.date;
     if (!acc[key]) acc[key] = [];
     acc[key].push(t);
@@ -123,6 +133,16 @@ export default function TransactionsPage() {
           <span className="material-symbols-outlined text-sm mr-1">warning</span>
           Pendentes
         </button>
+
+        <select
+          value={sortMode}
+          onChange={e => setSortMode(e.target.value as 'date' | 'amount_desc')}
+          className="px-4 py-2 rounded-full border border-gray-200 text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface cursor-pointer"
+          title="Ordenação"
+        >
+          <option value="date">Mais recentes</option>
+          <option value="amount_desc">Maior valor</option>
+        </select>
       </div>
 
       {loading ? (

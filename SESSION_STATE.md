@@ -102,3 +102,13 @@ Nenhuma, o MVP (Minimum Viable Product) especificado estÃ¡ 100% finalizado.
 - **Instrucao para proxima IA (Antigravity ou Codex):**
   Ao iniciar a sessao amanha, LEIA O ARQUIVO  5_PENDENCIAS.md para ver as prioridades (Titular do Cartao Excel, Soft-Delete Categorias, Ordenacao Transacoes, Multiplas Metas, Insights). Nao ha código quebrado. O executavel na raiz (ControleFinanceiro.exe) esta estavel com as regras contabeis aplicadas.
 
+
+## Atualizacao de sessao - 2026-05-02T10:08:49-03:00
+- Implementado pacote de usabilidade pos-MVP: titular do cartao no Excel Itau, exclusao logica de categorias e ordenacao por maior valor na aba Transacoes.
+- Parser Excel agora propaga `cardholder_first_name` por secao de cartao; importacao cria/reusa `Person` pelo primeiro nome normalizado, vincula `Card.person_id` e grava `Transaction.person_id`.
+- Categorias ganharam `DELETE /api/categories/{id}` com soft-delete (`is_active = False`); listagem padrao oculta inativas sem apagar historico.
+- Frontend: Configuracoes ganhou botao de lixeira por categoria; Transacoes ganhou seletor de ordenacao `Mais recentes` / `Maior valor`.
+- Validacoes: `python -m unittest test_dashboard_service.py test_transaction_learning.py test_itau_pdf_parser.py test_accounting_rules.py test_itau_excel_parser.py test_usability_backlog.py`, `python -m py_compile app\routers\imports.py app\routers\categories.py app\services\itau_excel_parser.py`, `npm.cmd run build`, `build_desktop.bat`.
+- Novo executavel validado: `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`, timestamp `2026-05-02 10:08:12`, tamanho `46028185` bytes.
+- Artefatos locais nao rastreados de build/debug continuam fora do commit por intencao.
+- Proximo passo sugerido: testar importando a fatura Excel real e confirmar se o Dashboard `Gastos por Pessoa` separa Fabio/Fernanda corretamente; depois seguir para tooltips do grafico de pizza ou Metas Inteligentes.

@@ -17,6 +17,7 @@ from xml.etree import ElementTree
 
 
 _CARD_SECTION_PATTERN = re.compile(r"\bfinal\s+(\d{4})\b", re.IGNORECASE)
+_CARDHOLDER_PATTERN = re.compile(r"^\s*(?P<name>.+?)\s+-\s+final\s+\d{4}\b", re.IGNORECASE)
 _INSTALLMENT_PATTERN = re.compile(r"(\d{2})/(\d{2})\s*$")
 _DATE_PATTERN = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 _OLE_HEADER = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
@@ -52,6 +53,7 @@ def parse_itau_excel(file_content: bytes) -> List[Dict[str, Any]]:
 def _rows_to_transactions(rows: Dict[int, Dict[int, Any]]) -> List[Dict[str, Any]]:
     transactions: List[Dict[str, Any]] = []
     current_card_digits: Optional[str] = None
+    current_cardholder_first_name: Optional[str] = None
 
     for row_idx in sorted(rows):
         row = rows[row_idx]
@@ -65,11 +67,15 @@ def _rows_to_transactions(rows: Dict[int, Dict[int, Any]]) -> List[Dict[str, Any
 
         card_match = _CARD_SECTION_PATTERN.search(first)
         if card_match:
+            if normalized_first.startswith("total"):
+                continue
             current_card_digits = card_match.group(1)
+            current_cardholder_first_name = _extract_cardholder_first_name(first)
             continue
 
         if "encargos e servicos" in normalized_first:
             current_card_digits = None
+            current_cardholder_first_name = None
             continue
 
         if _is_non_transaction_row(normalized_first, normalized_second):
@@ -96,6 +102,7 @@ def _rows_to_transactions(rows: Dict[int, Dict[int, Any]]) -> List[Dict[str, Any
             "transaction_type": "expense",
             "source": "credit_card",
             "card_last_digits": current_card_digits,
+            "cardholder_first_name": current_cardholder_first_name,
             "installment_current": inst_current,
             "installment_total": inst_total,
         })
@@ -421,6 +428,20 @@ def _extract_installment(description: str) -> Tuple[str, Optional[int], Optional
         return description, None, None
     clean_desc = description[:match.start()].strip()
     return clean_desc, int(match.group(1)), int(match.group(2))
+
+
+def _extract_cardholder_first_name(text: str) -> Optional[str]:
+    match = _CARDHOLDER_PATTERN.search(text)
+    if not match:
+        return None
+    name = match.group("name").strip()
+    normalized_name = _normalize(name)
+    if not name or normalized_name.startswith("total"):
+        return None
+    first_name = name.split()[0].strip()
+    if not first_name:
+        return None
+    return first_name[:1].upper() + first_name[1:].lower()
 
 
 def _is_non_transaction_row(first: str, second: str) -> bool:

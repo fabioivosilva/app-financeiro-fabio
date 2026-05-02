@@ -1,16 +1,45 @@
 """Router: File imports - OFX, PDF and Excel endpoints."""
+import re
+import unicodedata
+
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 
 from .. import crud, schemas
 from ..database import get_db
-from ..models import Transaction, FileImport
+from ..models import Transaction, FileImport, Person
 from ..services.categorizer import categorize
 from ..services.itau_excel_parser import parse_itau_excel
 from ..services.itau_pdf_parser import parse_itau_pdf
 from ..services.ofx_parser import parse_ofx
 
 router = APIRouter(prefix="/imports", tags=["imports"])
+
+
+def _normalize_person_name(name: str) -> str:
+    clean = unicodedata.normalize("NFKD", name or "")
+    clean = "".join(ch for ch in clean if not unicodedata.combining(ch))
+    return re.sub(r"\s+", " ", clean).strip().lower()
+
+
+def _find_or_create_person_by_first_name(db: Session, first_name: str | None) -> Person | None:
+    if not first_name:
+        return None
+
+    normalized_first = _normalize_person_name(first_name).split(" ", 1)[0]
+    if not normalized_first:
+        return None
+
+    for person in db.query(Person).all():
+        person_first = _normalize_person_name(person.name).split(" ", 1)[0]
+        if person_first == normalized_first:
+            return person
+
+    display_name = first_name.strip()[:1].upper() + first_name.strip()[1:].lower()
+    person = Person(name=display_name)
+    db.add(person)
+    db.flush()
+    return person
 
 
 def _import_credit_card_transactions(
@@ -35,6 +64,10 @@ def _import_credit_card_transactions(
 
     for raw in raw_transactions:
         card_digits = raw.get("card_last_digits")
+        cardholder = _find_or_create_person_by_first_name(
+            db,
+            raw.get("cardholder_first_name"),
+        )
 
         # Resolve card -> person.
         card_id = None
@@ -43,10 +76,18 @@ def _import_credit_card_transactions(
             card = crud.get_card_by_digits(db, card_digits)
             if card:
                 card_id = card.id
+                if cardholder and card.person_id != cardholder.id:
+                    card.person_id = cardholder.id
+                    db.flush()
                 person_from_card = card.person_id
             else:
-                card = crud.create_card(db, last_digits=card_digits)
+                card = crud.create_card(
+                    db,
+                    last_digits=card_digits,
+                    person_id=cardholder.id if cardholder else None,
+                )
                 card_id = card.id
+                person_from_card = card.person_id
 
         tx_hash = Transaction.compute_hash(
             raw["date"],

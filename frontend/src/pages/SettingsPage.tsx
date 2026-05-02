@@ -115,6 +115,19 @@ export default function SettingsPage() {
     }
   };
 
+  const handleCategoryDelete = async (category: Category) => {
+    if (!window.confirm(`Excluir a categoria "${category.name}"? As transações antigas continuam preservadas.`)) {
+      return;
+    }
+    try {
+      await api.delete(`/categories/${category.id}`);
+      loadData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir categoria');
+    }
+  };
+
   const formatCurrency = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -215,8 +228,16 @@ export default function SettingsPage() {
                   <button 
                     onClick={() => openCategoryModal(cat)}
                     className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary-container p-1 transition-opacity"
+                    title="Editar categoria"
                   >
                     <span className="material-symbols-outlined text-xl">edit</span>
+                  </button>
+                  <button
+                    onClick={() => handleCategoryDelete(cat)}
+                    className="opacity-0 group-hover:opacity-100 text-outline hover:text-error p-1 transition-opacity"
+                    title="Excluir categoria"
+                  >
+                    <span className="material-symbols-outlined text-xl">delete</span>
                   </button>
                 </div>
               ))}

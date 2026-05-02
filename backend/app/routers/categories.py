@@ -24,3 +24,11 @@ def update_category(category_id: int, data: schemas.CategoryUpdate, db: Session 
     if not c:
         raise HTTPException(status_code=404, detail="Category not found")
     return c
+
+
+@router.delete("/{category_id}", response_model=schemas.CategoryOut)
+def delete_category(category_id: int, db: Session = Depends(get_db)):
+    c = crud.soft_delete_category(db, category_id)
+    if not c:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return c

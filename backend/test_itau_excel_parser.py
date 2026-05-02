@@ -43,6 +43,9 @@ def _minimal_biff_workbook():
         "encargos e servicos",
         "03/05/2026",
         "Envio Mens.automatica",
+        "FERNANDA Y CHECCHIA - final 5678 (adicional)",
+        "04/05/2026",
+        "Mercado Teste",
     ]
     return b"".join([
         _bof(0x0005),
@@ -65,6 +68,10 @@ def _minimal_biff_workbook():
         _label_sst(8, 0, 10),
         _label_sst(8, 1, 11),
         _number(8, 3, 7.99),
+        _label_sst(10, 0, 12),
+        _label_sst(11, 0, 13),
+        _label_sst(11, 1, 14),
+        _number(11, 3, 42.0),
         _record(0x000A),
     ])
 
@@ -73,24 +80,33 @@ class ItauExcelParserTest(unittest.TestCase):
     def test_parse_biff_statement_rows(self):
         transactions = parse_itau_excel(_minimal_biff_workbook())
 
-        self.assertEqual(len(transactions), 3)
+        self.assertEqual(len(transactions), 4)
 
         purchase = transactions[0]
         self.assertEqual(purchase["date"], date(2026, 5, 1))
         self.assertEqual(purchase["description"], "Loja Teste")
         self.assertEqual(purchase["amount"], -100.0)
         self.assertEqual(purchase["card_last_digits"], "1234")
+        self.assertEqual(purchase["cardholder_first_name"], "Fabio")
         self.assertEqual(purchase["installment_current"], 2)
         self.assertEqual(purchase["installment_total"], 3)
 
         credit = transactions[1]
         self.assertEqual(credit["amount"], 25.5)
         self.assertEqual(credit["card_last_digits"], "1234")
+        self.assertEqual(credit["cardholder_first_name"], "Fabio")
 
         fee = transactions[2]
         self.assertEqual(fee["date"], date(2026, 5, 3))
         self.assertEqual(fee["amount"], -7.99)
         self.assertIsNone(fee["card_last_digits"])
+        self.assertIsNone(fee["cardholder_first_name"])
+
+        additional = transactions[3]
+        self.assertEqual(additional["date"], date(2026, 5, 4))
+        self.assertEqual(additional["amount"], -42.0)
+        self.assertEqual(additional["card_last_digits"], "5678")
+        self.assertEqual(additional["cardholder_first_name"], "Fernanda")
 
 
 if __name__ == "__main__":
