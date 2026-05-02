@@ -27,6 +27,7 @@ call .venv\Scripts\pyinstaller.exe ^
     --collect-all pdfminer ^
     --collect-all pdfplumber ^
     --collect-all ofxparse ^
+    --noconfirm ^
     main_desktop.py
 
 if %errorlevel% neq 0 (
