@@ -77,6 +77,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
   - [ ] Criar rota /configuracoes (Pessoas, Cartões, Categorias, Sistema)
   - [ ] Cor primary: separar #6200a0 (texto) de #820AD1 (brand/botões)
   - [ ] Backlog v2: switch light/dark mode (tokens já preparados no index.css)
+  **NOTA:** design light mode em elaboração com designer (Claude.ai) — sessão estourou tokens antes de concluir. Arquivo incompleto. Retomar quando designer tiver nova sessão.
 
 - [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · depende T0.1+T0.2*
   `rodar.bat` sobe backend + abre browser · `auto_sync.ps1` só faz git pull + notificação (sem rebuild exe)
