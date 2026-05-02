@@ -52,7 +52,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Testar: abrir qualquer página e ver se os tokens aplicam corretamente
   - **Não tocar em nenhuma página ainda — só a fundação**
 
-- [/] `[P]` 🔒 [FABIO] **A2 — Layout Base + Sidebar novo**
+- [x] `[P]` **A2 — Layout Base + Sidebar novo**
   - Reescrever `frontend/src/components/Sidebar.tsx` seguindo o HTML do Stitch
     - Logo "Alpha Finance" (ou o nome final) + badge "Institutional Grade"
     - Avatar do usuário no rodapé com nome e role
@@ -61,7 +61,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Ajustar `frontend/src/layouts/MainLayout.tsx` se necessário
   - **Não tocam nas páginas — só shell**
 
-- [ ] `[P]` **A3 — Fix build_desktop.bat**
+- [x] `[P]` **A3 — Fix build_desktop.bat**
   - Remover linha `pause` do final do `build_desktop.bat`
   - Testar que o build roda sem travar via PowerShell
   - Commitar — habilita o agente a buildar automaticamente ao fechar itens
