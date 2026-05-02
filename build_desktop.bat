@@ -24,6 +24,9 @@ call .venv\Scripts\pyinstaller.exe ^
     --hidden-import pydantic ^
     --hidden-import sqlalchemy ^
     --hidden-import sqlite3 ^
+    --collect-all pdfminer ^
+    --collect-all pdfplumber ^
+    --collect-all ofxparse ^
     main_desktop.py
 
 if %errorlevel% neq 0 (

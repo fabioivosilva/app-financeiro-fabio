@@ -9,17 +9,22 @@ import {
 const COLORS = ['#820AD1', '#f97316', '#0e8345', '#eab308', '#ba1a1a', '#0ea5e9', '#d946ef', '#64748b'];
 
 export default function DashboardPage() {
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthStr);
 
   useEffect(() => {
-    api.get('/dashboard/')
+    setLoading(true);
+    api.get(`/dashboard/?month=${selectedMonth}`)
       .then(res => setData(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedMonth]);
 
-  if (loading) return <div className="animate-pulse text-outline">Carregando...</div>;
+  if (loading && !data) return <div className="animate-pulse text-outline">Carregando...</div>;
   if (!data) return <div className="text-error">Erro ao carregar dashboard</div>;
 
   const formatCurrency = (v: number) =>
@@ -41,8 +46,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="page-title">Dashboard</h2>
-      <p className="page-subtitle">Resumo financeiro de {data.month}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="page-title">Dashboard</h2>
+          <p className="page-subtitle">Resumo financeiro de {data.month}</p>
+        </div>
+        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center">
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="px-4 py-2 rounded-lg border-none text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-transparent font-medium"
+          />
+        </div>
+      </div>
 
       {/* Hero cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

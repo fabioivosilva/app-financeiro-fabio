@@ -42,6 +42,8 @@ export default function ImportPage() {
         });
         newResults.push(res.data);
       } catch (err: any) {
+        const errorDetail = err.response?.data?.detail || err.message || 'Erro desconhecido';
+        alert(`Erro ao importar ${file.name}: ${errorDetail}`);
         newResults.push({
           filename: file.name,
           total_read: 0,
