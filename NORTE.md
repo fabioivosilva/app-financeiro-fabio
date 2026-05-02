@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Projeto zerado. Nenhum código ainda. Decisão: sem .exe, usar rodar.bat + browser.
+STATUS     : Em andamento. T0.2a iniciado (frontend shell).
 BRANCH     : develop
 PRÓXIMA    : T0.1 — Setup Backend Base [G]
-CLAIMS     : nenhum
+CLAIMS     : 🔒 [FABIO] T0.2a — Frontend Shell (scaffold + layout + router + API client)
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
@@ -49,7 +49,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*Nenhum claim ativo no momento.*
+🔒 **[FABIO]** — T0.2a Frontend Shell (scaffold + layout + router + API client tipado)
 
 ---
 
