@@ -1,34 +1,45 @@
-# AI SESSION STATE — FINANCE APP FABIO
+# CHECKPOINT ATUAL — App Financeiro Fabio
+> **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
+> Última atualização: 2026-05-02 — Claude (claude.ai)
 
-Este arquivo serve como o "cérebro" compartilhado entre diferentes instâncias de IA.
-**Última Atualização:** 2026-05-02 (Sessão de Metas e Dashboard)
+---
 
-## 🎯 O Que Foi Implementado
-1. **Multi-Metas & Cofrinho:**
-   - Backend: Coluna `goal_id` em `categories`. CRUD de Goals agora soma `current_amount` + transações vinculadas.
-   - Frontend: `GoalsPage.tsx` refatorada para cards. Modal de categoria com vínculo de meta.
-2. **Dashboard de Performance:**
-   - Comparativo mensal com badges de variação (+/- %) e setas.
-   - Listagem de metas (stack) substituindo o card único de reserva.
-3. **Navegação Temporal:**
-   - Componente `MonthSelector` em todas as abas principais.
-4. **Configurações de Sistema:**
-   - Cadastro de "Pasta de Importação" persistido no banco.
-   - Botão de "Reset de Sistema" (Danger Zone) para limpar transações.
+## 🟢 Estado do Projeto
+- MVP 100% concluído e funcionando como executável Windows (`ControleFinanceiro.exe`).
+- Branch ativa: `develop`. Último commit: `feat(cofrinho): implement goal sensitization...`
+- Executável em: `ControleFinanceiro.exe` (raiz) — use **sempre este**, não o de `backend/dist/`.
 
-## 📋 Backlog Prioritário (Próximos Passos)
-- [ ] **Previsão de Gastos Futuros:** Implementar lógica no Dashboard para mostrar o total comprometido em meses futuros (parcelas).
-- [ ] **Importação Assistida:** Usar a "Pasta de Importação" para listar arquivos novos e importar com 1 clique.
-- [ ] **Segurança:** Avaliar criptografia do banco SQLite local.
-- [ ] **Inteligência:** Aba de insights para sugerir onde economizar baseado em limites.
+## ✅ Últimas Features Entregues
+| Feature | Commit/Status |
+|---|---|
+| Multi-Metas & Cofrinho (CRUD + vinculo categoria→meta) | ✅ commitado |
+| Dashboard comparativo mensal (badges +/- %) | ✅ commitado |
+| MonthSelector em todas as abas | ✅ commitado |
+| Configuração Pasta de Importação + Reset (Danger Zone) | ✅ commitado |
+| Titular do cartão Excel → Dashboard Gastos por Pessoa | ✅ commitado |
+| Soft-delete categorias + ordenação transações | ✅ commitado |
+| Gráfico pizza com tooltips/labels | ✅ commitado |
+| Atalhos clicáveis Dashboard + Top 3 gastos + Estados vazios | ✅ commitado |
+| Splash screen + build onedir (startup mais rápido) | ✅ commitado |
 
-## 📂 Estrutura do Projeto
-- `backend/`: FastAPI + SQLAlchemy (SQLite).
-- `frontend/`: React + Vite + Tailwind/Shadcn (Estilo Stitch Premium).
-- `ControleFinanceiro/`: Pasta do build executável (Windows).
+## 🔴 Próxima Tarefa (Iniciar Aqui)
+**Fluxo de Aporte em Meta (Cofrinho)** — item `[/]` no backlog = em aberto.
 
-## 💡 Instruções para a próxima IA
-- Leia o arquivo `docs/AI_SESSION_STATE.md` e o `05_PENDENCIAS.md` (se disponível no Obsidian local).
-- Sempre reconstrua o executável usando `build_desktop.bat` após mudanças visuais ou lógicas.
-- Mantenha o estilo visual "Premium/Moderno" (dark mode, glassmorphism, micro-animações).
-- **Trabalhando agora:** Implementando o **Fluxo de Aporte em Meta (Cofrinho)**. O objetivo é que transações do extrato categorizadas como "Reserva" alimentem automaticamente o saldo das metas vinculadas.
+**O que falta:**
+- Backend: endpoint `POST /goals/{id}/deposit` (recebe `amount`, `description`, `date` → cria Transaction + atualiza `current_amount`)
+- Frontend: botão "💰 Registrar Aporte" no card de meta → modal → chama endpoint
+- A transação gerada deve aparecer na aba Transações com origem `"Aporte Manual"`
+
+## 📋 Próximos Itens do Backlog (em ordem)
+1. `[/]` Fluxo de Aporte em Meta ← **AGORA**
+2. `[ ]` Preenchimento automático de meta ao selecionar categoria vinculada
+3. `[ ]` Previsão de Gastos Futuros (parcelas futuras no Dashboard)
+4. `[ ]` Importação Assistida pela Pasta Padrão
+5. `[ ]` Aba de Insights/IA
+
+## ⚠️ Protocolo Obrigatório ao Fechar Item
+1. Marcar `[x]` em `05_PENDENCIAS.md`
+2. Atualizar este arquivo (seção acima)
+3. `git add -A && git commit -m "feat(...): ..."` na branch `develop`
+4. Rodar `build_desktop.bat` → confirmar novo timestamp do `ControleFinanceiro.exe`
+5. Push: `git push origin develop`
