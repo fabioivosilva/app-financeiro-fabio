@@ -36,3 +36,9 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - Adicionado teste unitário `backend/test_itau_pdf_parser.py` cobrindo seções Latam Pass, parcelas e crédito.
 - Validações: `python -m unittest test_itau_pdf_parser.py`, `python test_parser.py` e `python -m py_compile app/services/itau_pdf_parser.py test_itau_pdf_parser.py`.
 - Próximo passo: rebuildar o `ControleFinanceiro.exe` para testar o fix dentro do executável.
+
+## Atualização de sessão - 2026-05-02T02:30:00-03:00
+- Ajustado fluxo de build desktop para copiar automaticamente `backend\dist\ControleFinanceiro.exe` para `ControleFinanceiro.exe` na raiz do projeto.
+- Regra operacional: usar/testar o `.exe` da raiz, pois ele fica junto de `data\finance.db` e preserva as categorias/regras ajustadas pelo usuário.
+- O artefato em `backend\dist` continua sendo gerado pelo PyInstaller, mas não deve ser o executável principal de uso diário quando o banco real está em `data\finance.db`.
+- Validação executada: `build_desktop.bat` concluiu com sucesso e deixou `backend\dist\ControleFinanceiro.exe` e `ControleFinanceiro.exe` com timestamp `2026-05-02 02:31:16` e tamanho `46009438` bytes.

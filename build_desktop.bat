@@ -2,7 +2,7 @@
 echo Iniciando build do Controle Financeiro...
 
 echo.
-echo [1/3] Compilando o Frontend (React + Vite)...
+echo [1/4] Compilando o Frontend (React + Vite)...
 cd frontend
 call npm run build
 if %errorlevel% neq 0 (
@@ -12,7 +12,7 @@ if %errorlevel% neq 0 (
 cd ..
 
 echo.
-echo [2/3] Empacotando o Backend e Frontend num executavel (PyInstaller)...
+echo [2/4] Empacotando o Backend e Frontend num executavel (PyInstaller)...
 cd backend
 call .venv\Scripts\pyinstaller.exe ^
     --name ControleFinanceiro ^
@@ -35,7 +35,17 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [3/3] Sucesso!
-echo O executavel foi gerado em: backend\dist\ControleFinanceiro.exe
 cd ..
+echo [3/4] Copiando executavel para a pasta do banco local...
+copy /Y "backend\dist\ControleFinanceiro.exe" "ControleFinanceiro.exe" >nul
+if %errorlevel% neq 0 (
+    echo Erro ao copiar o executavel para a raiz do projeto!
+    exit /b %errorlevel%
+)
+
+echo.
+echo [4/4] Sucesso!
+echo Executavel para uso/teste: %cd%\ControleFinanceiro.exe
+echo Banco usado por este executavel: %cd%\data\finance.db
+echo Artefato original tambem permanece em: backend\dist\ControleFinanceiro.exe
 pause
