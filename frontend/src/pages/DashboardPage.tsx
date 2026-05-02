@@ -93,6 +93,14 @@ export default function DashboardPage() {
     );
   };
 
+  const limitStatus = (spent: number, limit: number) => {
+    const delta = Math.abs(spent - limit);
+    if (spent > limit) {
+      return { text: `Estourou ${formatCurrency(delta)}`, className: 'text-error' };
+    }
+    return { text: `Faltam ${formatCurrency(delta)}`, className: 'text-outline' };
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -180,9 +188,14 @@ export default function DashboardPage() {
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 max-h-64 custom-scrollbar">
             {sortedCategoryLimits.map(cl => (
               <div key={cl.category_id}>
-                <div className="flex justify-between text-label-md mb-1">
-                  <span>{cl.category_name}</span>
-                  <span className={cl.over_budget ? 'text-error font-bold' : ''}>
+                <div className="flex justify-between gap-3 text-label-md mb-1">
+                  <div className="min-w-0">
+                    <p className="truncate">{cl.category_name}</p>
+                    <p className={`text-label-sm font-medium ${limitStatus(cl.spent, cl.limit).className}`}>
+                      {limitStatus(cl.spent, cl.limit).text}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 text-right ${cl.over_budget ? 'text-error font-bold' : ''}`}>
                     {formatCurrency(cl.spent)} / {formatCurrency(cl.limit)}
                   </span>
                 </div>
