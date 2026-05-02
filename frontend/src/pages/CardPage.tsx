@@ -18,7 +18,7 @@ export default function CardPage() {
     
     Promise.all([
       api.get('/cards/'),
-      api.get(`/transactions/?source=credit_card&month=${month}`),
+      api.get(`/transactions/?source=credit_card&month=${month}&cycle=true`),
     ]).then(([cRes, txRes]) => {
       setCards(cRes.data);
       setTransactions(txRes.data);
@@ -49,7 +49,7 @@ export default function CardPage() {
     
     return Array.from(personMap.entries()).map(([name, total]) => ({
       name,
-      total,
+      total: Math.abs(total),
       fill: name === 'Fernanda' ? '#f97316' : '#820AD1'
     }));
   }, [filteredTransactions]);
@@ -108,7 +108,7 @@ export default function CardPage() {
       ) : (
         <div className="space-y-6">
           <div className="card bg-gradient-to-br from-error to-red-500 text-white transition-transform hover:-translate-y-1">
-            <p className="text-label-md opacity-80">Total da Fatura (Mês)</p>
+            <p className="text-label-md opacity-80">Total da Fatura (Ciclo)</p>
             <p className="text-headline-xl mt-1">{formatCurrency(totalCard)}</p>
           </div>
 

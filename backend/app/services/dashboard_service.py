@@ -7,24 +7,10 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 from ..models import Transaction, Category, Person, Goal
+from ..crud import financial_period
 from ..schemas import (
     DashboardOut, SpendingByPerson, SpendingByCategory, CategoryLimit,
 )
-
-
-FINANCIAL_CYCLE_START_DAY = 27
-
-
-def _financial_period(month: str) -> tuple[date, date]:
-    year, m = map(int, month.split("-"))
-    if m == 1:
-        start_year, start_month = year - 1, 12
-    else:
-        start_year, start_month = year, m - 1
-    return (
-        date(start_year, start_month, FINANCIAL_CYCLE_START_DAY),
-        date(year, m, FINANCIAL_CYCLE_START_DAY - 1),
-    )
 
 
 def _countable_transaction_filter():
@@ -43,7 +29,7 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
         year, m = now.year, now.month
         month = f"{year:04d}-{m:02d}"
 
-    period_start, period_end = _financial_period(month)
+    period_start, period_end = financial_period(month)
     month_filter = and_(
         Transaction.date >= period_start,
         Transaction.date <= period_end,

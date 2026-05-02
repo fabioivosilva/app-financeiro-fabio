@@ -23,6 +23,7 @@ def list_transactions(
     person_id: Optional[int] = None,
     source: Optional[str] = None,
     pending: bool = False,
+    cycle: bool = Query(False, description="Use financial cycle 27-26 for month filtering"),
     db: Session = Depends(get_db),
 ):
     txns = crud.get_transactions(
@@ -32,6 +33,7 @@ def list_transactions(
         person_id=person_id,
         source=source,
         pending_only=pending,
+        financial_cycle=cycle,
     )
     results = []
     for t in txns:

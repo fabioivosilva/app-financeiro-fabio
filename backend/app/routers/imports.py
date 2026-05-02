@@ -42,6 +42,28 @@ def _find_or_create_person_by_first_name(db: Session, first_name: str | None) ->
     return person
 
 
+def _backfill_duplicate_credit_card_transaction(
+    db: Session,
+    tx_hash: str,
+    person_id: int | None,
+    card_id: int | None,
+) -> bool:
+    txn = crud.get_transaction_by_hash(db, tx_hash)
+    if not txn:
+        return False
+
+    changed = False
+    if person_id is not None and txn.person_id is None:
+        txn.person_id = person_id
+        changed = True
+    if card_id is not None and txn.card_id is None:
+        txn.card_id = card_id
+        changed = True
+    if changed:
+        db.flush()
+    return changed
+
+
 def _import_credit_card_transactions(
     db: Session,
     filename: str,
@@ -98,6 +120,12 @@ def _import_credit_card_transactions(
         )
 
         if crud.transaction_exists(db, hash_val=tx_hash):
+            _backfill_duplicate_credit_card_transaction(
+                db,
+                tx_hash=tx_hash,
+                person_id=person_from_card,
+                card_id=card_id,
+            )
             duplicates_skipped += 1
             continue
 

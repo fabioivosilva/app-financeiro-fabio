@@ -8,6 +8,21 @@ from sqlalchemy import extract
 from . import models
 
 
+FINANCIAL_CYCLE_START_DAY = 27
+
+
+def financial_period(month: str) -> tuple[date, date]:
+    year, m = map(int, month.split("-"))
+    if m == 1:
+        start_year, start_month = year - 1, 12
+    else:
+        start_year, start_month = year, m - 1
+    return (
+        date(start_year, start_month, FINANCIAL_CYCLE_START_DAY),
+        date(year, m, FINANCIAL_CYCLE_START_DAY - 1),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Persons
 # ---------------------------------------------------------------------------
@@ -111,14 +126,22 @@ def get_transactions(
     person_id: Optional[int] = None,
     source: Optional[str] = None,
     pending_only: bool = False,
+    financial_cycle: bool = False,
 ) -> List[models.Transaction]:
     q = db.query(models.Transaction)
     if month:
-        year, m = map(int, month.split("-"))
-        q = q.filter(
-            extract("year", models.Transaction.date) == year,
-            extract("month", models.Transaction.date) == m,
-        )
+        if financial_cycle:
+            period_start, period_end = financial_period(month)
+            q = q.filter(
+                models.Transaction.date >= period_start,
+                models.Transaction.date <= period_end,
+            )
+        else:
+            year, m = map(int, month.split("-"))
+            q = q.filter(
+                extract("year", models.Transaction.date) == year,
+                extract("month", models.Transaction.date) == m,
+            )
     if category_id:
         q = q.filter(models.Transaction.category_id == category_id)
     if person_id:
@@ -153,6 +176,9 @@ def transaction_exists(db: Session, external_id: str = None, hash_val: str = Non
             models.Transaction.hash == hash_val
         ).first() is not None
     return False
+
+def get_transaction_by_hash(db: Session, hash_val: str) -> Optional[models.Transaction]:
+    return db.query(models.Transaction).filter(models.Transaction.hash == hash_val).first()
 
 
 # ---------------------------------------------------------------------------

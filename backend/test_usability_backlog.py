@@ -8,6 +8,7 @@ from app.database import Base
 from app.models import Card, Category, Person, Transaction
 from app.routers.categories import delete_category, list_categories
 from app.routers.imports import _import_credit_card_transactions
+from app.routers.transactions import list_transactions
 
 
 class UsabilityBacklogTest(unittest.TestCase):
@@ -74,6 +75,85 @@ class UsabilityBacklogTest(unittest.TestCase):
             self.assertEqual(loja.person_id, fabio.id)
             self.assertEqual(mercado.person_id, fernanda.id)
             self.assertIsNone(fee.person_id)
+        finally:
+            db.close()
+
+    def test_excel_reimport_backfills_duplicate_transaction_person(self):
+        db = self.Session()
+        try:
+            card = Card(last_digits="1234")
+            db.add(card)
+            db.flush()
+            existing = Transaction(
+                date=date(2026, 4, 29),
+                description="Loja Teste",
+                amount=-100.0,
+                transaction_type="expense",
+                source="credit_card",
+                card_id=card.id,
+                hash=Transaction.compute_hash(
+                    date(2026, 4, 29),
+                    "Loja Teste",
+                    -100.0,
+                    "credit_card",
+                    card.id,
+                ),
+            )
+            db.add(existing)
+            db.commit()
+
+            result = _import_credit_card_transactions(
+                db=db,
+                filename="fatura.xls",
+                file_type="credit_card_excel",
+                raw_transactions=[
+                    {
+                        "date": date(2026, 4, 29),
+                        "description": "Loja Teste",
+                        "amount": -100.0,
+                        "transaction_type": "expense",
+                        "source": "credit_card",
+                        "card_last_digits": "1234",
+                        "cardholder_first_name": "Fabio",
+                    },
+                ],
+            )
+
+            db.refresh(card)
+            db.refresh(existing)
+            person = db.query(Person).filter(Person.name == "Fabio").one()
+            self.assertEqual(result.duplicates_skipped, 1)
+            self.assertEqual(card.person_id, person.id)
+            self.assertEqual(existing.person_id, person.id)
+        finally:
+            db.close()
+
+    def test_transaction_cycle_filter_uses_financial_period(self):
+        db = self.Session()
+        try:
+            included = Transaction(
+                date=date(2026, 4, 27),
+                description="Compra Ciclo Maio",
+                amount=-50.0,
+                transaction_type="expense",
+                source="credit_card",
+                is_reviewed=True,
+            )
+            excluded = Transaction(
+                date=date(2026, 4, 26),
+                description="Compra Ciclo Abril",
+                amount=-60.0,
+                transaction_type="expense",
+                source="credit_card",
+                is_reviewed=True,
+            )
+            db.add_all([included, excluded])
+            db.commit()
+
+            txns = list_transactions(month="2026-05", source="credit_card", cycle=True, db=db)
+            descriptions = [txn.description for txn in txns]
+
+            self.assertEqual(descriptions, ["Compra Ciclo Maio"])
         finally:
             db.close()
 
