@@ -1,101 +1,88 @@
 ---
 name: app-financeiro-startup
 description: >
-  Protocolo obrigatório de início de sessão no projeto App Financeiro Fabio.
-  Use SEMPRE ao iniciar qualquer sessão neste projeto — seja para desenvolver,
-  revisar, debugar ou planejar. Ativa ao receber o token do GitHub, ao mencionar
-  "app financeiro", "projeto fabio", "app-financeiro-fabio", ou ao receber o
-  prompt de início de sessão padrão do projeto.
+  Protocolo obrigatorio de inicio de sessao no projeto App Financeiro Fabio.
+  Use sempre ao iniciar qualquer sessao neste projeto.
 ---
 
-# Skill: App Financeiro — Startup de Sessão
+# Skill: App Financeiro - Startup de Sessao
 
-## Por que esta skill existe
-Projeto desenvolvido em duo (Fabio + Thiago) com múltiplos agentes de IA alternando sessões.
-Cada IA deve partir do estado mais recente do repositório e checar se há tarefas já em andamento
-pelo outro desenvolvedor antes de sugerir qualquer trabalho.
+## Estado base
 
----
+Em 2026-05-02 o repositorio foi zerado por decisao do Fabio.
+O unico codigo/artefato que deve existir como fonte de verdade e o vault:
 
-## Passo 1 — Atualizar o Repositório
+- `.git/`
+- `obsidian-vault/`
+
+Frontend, backend, build desktop, configs e prototipos antigos foram removidos.
+Nao assuma que arquivos fora do vault existem.
+
+## Passo 1 - Atualizar o repositorio
 
 ```bash
 git checkout develop
 git pull origin develop
-git log --oneline -3   # mostrar os últimos commits ao usuário
+git log --oneline -3
 ```
 
-Se ainda não clonado:
+Se ainda nao clonado:
+
 ```bash
 git clone https://<TOKEN>@github.com/fabioivosilva/app-financeiro-fabio.git
-cd app-financeiro-fabio && git checkout develop
+cd app-financeiro-fabio
+git checkout develop
 ```
 
----
+## Passo 2 - Ler o vault, nesta ordem
 
-## Passo 2 — Ler o Vault (nesta ordem, mínimo de tokens)
+1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` - estado atual e proxima tarefa
+2. `obsidian-vault/05_PENDENCIAS.md` - backlog oficial com sizing
+3. `obsidian-vault/09_COMANDOS.md` - comandos permitidos no estado atual
 
-1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — último estado + próxima tarefa
-2. `obsidian-vault/05_PENDENCIAS.md` — backlog com sizing P/M/G e claims 🔒
+Leia outros arquivos so quando a tarefa pedir.
 
-Não ler outros arquivos a menos que a tarefa exija (ver `obsidian-vault/00_INDEX.md`).
+## Passo 3 - Checar claims
 
----
+No backlog, respeite itens marcados com claim:
 
-## Passo 3 — Checar Tarefas em Andamento (🔒 Claims)
+- `[/] [FABIO]` - Fabio esta trabalhando
+- `[/] [THIAGO]` - Thiago esta trabalhando
 
-Ao ler o backlog, verificar se há itens marcados com 🔒:
-- `🔒 [FABIO]` — Fabio está trabalhando nisso
-- `🔒 [THIAGO]` — Thiago está trabalhando nisso
+Se o item estiver com claim de outra pessoa, nao assuma a tarefa sem alinhar.
 
-Se houver claim ativo do **outro desenvolvedor**, avisar claramente e não sugerir aquele item.
-Se o claim for do **próprio usuário** desta sessão, perguntar se quer continuar ou liberar.
+## Passo 4 - Estado que deve ser apresentado
 
----
+Ao iniciar a sessao, diga de forma curta:
 
-## Passo 4 — Gerar Orçamento de Sessão
-
-Apresentar ao usuário:
-
-```
-## 🧠 Estado Atual
-Último trabalho: [extraído do checkpoint]
-Últimos commits: [git log --oneline -3]
-
-## 🔒 Tarefas em Andamento
-[listar itens com 🔒 e por quem — ou "nenhuma" se limpo]
-
-## 💰 Orçamento da Sessão
-Capacidade: 1G  ·  ou  ·  2-3M  ·  ou  ·  4-6P
-
-Próximos itens disponíveis (sem claim):
-  [/] [M] 🔒 [FABIO] Aporte Manual em Meta .... em andamento por Fabio
-  [ ] [P] Preenchimento Automático Categoria .. disponível
-  [ ] [G] Parsers Plugáveis ................... disponível (sessão própria)
-
-Sugestão para hoje: [o que cabe, excluindo itens com claim de outro dev]
+```text
+Estado atual: repo zerado, vault e a fonte de verdade.
+Proxima tarefa: [extraida do 10_CHECKPOINT_ATUAL.md]
+Backlog: [primeiros itens disponiveis do 05_PENDENCIAS.md]
+Build: indisponivel ate recriar scaffold desktop.
 ```
 
----
+## Passo 5 - Ao iniciar uma tarefa
 
-## Passo 5 — Ao Iniciar uma Tarefa
+Antes de codar, marcar claim no backlog:
 
-Antes de começar a codar, marcar o item no backlog com o claim:
 ```markdown
-- [/] `[M]` 🔒 [FABIO] Nome da tarefa...
+- [/] `[M]` [FABIO] R0 - Scaffolding minimo do repo
 ```
-Fazer commit imediato do backlog atualizado:
+
+Depois commitar e dar push:
+
 ```bash
 git add obsidian-vault/05_PENDENCIAS.md
-git commit -m "chore(backlog): 🔒 [FABIO] inicia tarefa Nome Da Tarefa"
+git commit -m "chore(backlog): Fabio inicia R0 scaffolding minimo"
 git push origin develop
 ```
-Isso avisa o Thiago (e a IA dele) que o item está sendo trabalhado.
 
----
+## Regras fixas
 
-## Referências Rápidas
-- Design System: `obsidian-vault/07_UX_REFERENCE.md` (dark mode, glassmorphism, `#820AD1`)
-- Regras de categorização: `backend/app/seed.py`
-- Arquitetura: `obsidian-vault/06_ARQUITETURA.md`
-- Comandos: `obsidian-vault/09_COMANDOS.md`
+- Branch sempre `develop`.
+- Vault e fonte de verdade.
+- Nao reaproveitar frontend/backend removidos.
+- Parser engine sera recriado como modulo novo, com foco multi-banco.
+- UI alvo: dark mode, glassmorphism, Inter, Material Symbols Outlined, `#820AD1`.
+- Ciclo financeiro: dia 27 ao dia 26.

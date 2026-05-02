@@ -1,44 +1,38 @@
-﻿# 09_COMANDOS
+# 09_COMANDOS
 
-Comandos atuais do projeto. Executar a partir de `C:\Users\fabio\Projects\app-financeiro-fabio` salvo indicacao contraria.
+O repo foi zerado. Estes comandos passam a valer depois que `R0 - Scaffolding minimo` for concluido.
 
-## Validacao Backend
+## Inicio
 
 ```powershell
-cd backend
-.\.venv\Scripts\python.exe -m unittest test_itau_pdf_parser.py test_itau_excel_parser.py
-.\.venv\Scripts\python.exe -m py_compile app\main.py app\database.py app\models.py app\routers\imports.py app\routers\transactions.py app\routers\dashboard.py
+git checkout develop
+git pull origin develop
 ```
 
-## Frontend
+## Frontend futuro
 
 ```powershell
 cd frontend
-npm.cmd run build
+npm install
+npm run build
 ```
 
-## Desktop
+## Backend futuro
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+python -m py_compile app\main.py
+```
+
+## Desktop futuro
 
 ```powershell
 .\build_desktop.bat
 ```
 
-Executavel de uso: `ControleFinanceiro\ControleFinanceiro.exe` na raiz do repo. `backend\dist\ControleFinanceiro\` e artefato intermediario.
+## Agora
 
-Se a copia para a raiz falhar, fechar instancias abertas do app:
-
-```powershell
-Get-Process | Where-Object { $_.ProcessName -like '*ControleFinanceiro*' }
-Stop-Process -Id <PID> -Force
-Copy-Item -LiteralPath backend\dist\ControleFinanceiro -Destination ControleFinanceiro -Recurse -Force
-```
-
-## Git
-
-```powershell
-git status --short
-git add <arquivos>
-git commit -m "tipo(escopo): descricao"
-```
-
-Nao commitar artefatos locais: `ControleFinanceiro.exe`, `backend\data`, `backend\*.spec`, debug/testes soltos, bancos locais.
+Antes do R0, nao ha codigo para buildar. Use apenas o vault para planejar.

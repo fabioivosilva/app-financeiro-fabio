@@ -1,25 +1,22 @@
-﻿{
-    "current_state":  "MVP concluido; trabalho atual e Pos-MVP/backlog.",
-    "memory_policy":  "Obsidian compacto: 00_INDEX para roteamento, 01_SESSION_STATE para handoff curto, 05_PENDENCIAS para backlog vivo.",
-    "routing":  {
-                    "commands":  "09_COMANDOS.md",
-                    "parsers":  "08_PARSERS.md",
-                    "current_status":  "01_SESSION_STATE.md",
-                    "architecture":  "06_ARQUITETURA.md",
-                    "backlog":  "05_PENDENCIAS.md"
-                },
-    "repo":  {
-                 "url":  "https://github.com/fabioivosilva/app-financeiro-fabio",
-                 "local_path":  "C:\\Users\\fabio\\Projects\\app-financeiro-fabio",
-                 "current_branch":  "develop"
-             },
-    "last_updated":  "2026-05-02T10:58:00-03:00",
-    "runtime":  {
-                    "frontend_build":  "npm.cmd run build",
-                    "database":  "C:\\Users\\fabio\\Projects\\app-financeiro-fabio\\data\\finance.db",
-                    "app_exe":  "C:\\Users\\fabio\\Projects\\app-financeiro-fabio\\ControleFinanceiro.exe",
-                    "backend_venv":  "backend\\.venv",
-                    "build_cmd":  ".\\build_desktop.bat"
-                },
-    "project":  "app-financeiro-fabio"
+{
+  "project": "app-financeiro-fabio",
+  "current_state": "Repo zerado em 2026-05-02; somente obsidian-vault permanece.",
+  "memory_policy": "10_CHECKPOINT_ATUAL.md e a fonte canonica; 05_PENDENCIAS.md e o backlog da reconstrucao.",
+  "repo": {
+    "url": "https://github.com/fabioivosilva/app-financeiro-fabio",
+    "local_path": "C:\\Users\\fabio\\Projects\\app-financeiro-fabio",
+    "current_branch": "develop"
+  },
+  "routing": {
+    "current_status": "10_CHECKPOINT_ATUAL.md",
+    "backlog": "05_PENDENCIAS.md",
+    "architecture": "06_ARQUITETURA.md",
+    "commands": "09_COMANDOS.md",
+    "parsers_history": "08_PARSERS.md"
+  },
+  "runtime": {
+    "status": "not_scaffolded",
+    "note": "Nao ha frontend/backend/build ate concluir R0."
+  },
+  "last_updated": "2026-05-02T00:00:00-03:00"
 }
