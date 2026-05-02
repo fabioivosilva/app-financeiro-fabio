@@ -8,6 +8,7 @@ export interface Card {
   id: number;
   last_digits: string;
   person_id: number | null;
+  person_name: string | null;
   description: string | null;
   created_at: string;
 }

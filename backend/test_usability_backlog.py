@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.database import Base
 from app.models import Card, Category, Person, Transaction
+from app.routers.cards import list_cards
 from app.routers.categories import delete_category, list_categories
 from app.routers.imports import _import_credit_card_transactions
 from app.routers.transactions import list_transactions
@@ -154,6 +155,22 @@ class UsabilityBacklogTest(unittest.TestCase):
             descriptions = [txn.description for txn in txns]
 
             self.assertEqual(descriptions, ["Compra Ciclo Maio"])
+        finally:
+            db.close()
+
+    def test_card_list_includes_owner_name(self):
+        db = self.Session()
+        try:
+            person = Person(name="Fabio")
+            db.add(person)
+            db.flush()
+            db.add(Card(last_digits="1609", person_id=person.id))
+            db.commit()
+
+            cards = list_cards(db=db)
+
+            self.assertEqual(cards[0].last_digits, "1609")
+            self.assertEqual(cards[0].person_name, "Fabio")
         finally:
             db.close()
 

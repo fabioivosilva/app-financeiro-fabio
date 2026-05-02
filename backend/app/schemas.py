@@ -41,6 +41,7 @@ class CardUpdate(CardBase):
 class CardOut(CardBase):
     id: int
     created_at: datetime
+    person_name: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 

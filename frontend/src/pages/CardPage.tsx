@@ -88,7 +88,7 @@ export default function CardPage() {
             <option value="">Todos os cartões</option>
             {cards.map(c => (
               <option key={c.id} value={c.id}>
-                Cartão final {c.last_digits} {c.description ? `(${c.description})` : ''}
+                Cartão final {c.last_digits}{c.person_name ? ` - ${c.person_name}` : ''}{c.description ? ` (${c.description})` : ''}
               </option>
             ))}
           </select>

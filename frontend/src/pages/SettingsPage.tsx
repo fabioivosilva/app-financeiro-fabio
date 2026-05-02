@@ -185,7 +185,12 @@ export default function SettingsPage() {
               {cards.map(c => (
                 <div key={c.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <span className="material-symbols-outlined text-primary-container">credit_card</span>
-                  <span className="text-body-md">•••• {c.last_digits}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-body-md">•••• {c.last_digits}</p>
+                    <p className="text-label-sm text-outline">
+                      {c.person_name ? `Cartão de ${c.person_name}` : 'Pessoa não identificada'}
+                    </p>
+                  </div>
                   {c.description && <span className="text-label-sm text-outline">({c.description})</span>}
                 </div>
               ))}
