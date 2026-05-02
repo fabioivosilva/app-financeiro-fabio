@@ -7,107 +7,181 @@
 | `[M]` Médio — 1 endpoint + 1 componente UI | ~8–20k | 2–3 itens M |
 | `[G]` Grande — novo modelo + backend + UI | ~20k+ | 1 item G |
 
-## Convenção de Tarefas em Andamento
-> Antes de começar uma tarefa, marque com `🔒 [SEU_NOME]` no item e faça commit.
-> Isso avisa a outra pessoa (e a IA dela) que aquele item está sendo trabalhado.
->
-> **Como marcar:** `- [/] `[M]` 🔒 [FABIO] Nome da tarefa...`
-> **Como liberar:** remover o 🔒 ao fechar o item (virar `[x]`).
-
 > **Capacidade de uma sessão:** 1G · ou · 2-3M · ou · 4-6P
 
 ---
 
-## 🔴 Trilha 1 — Metas & Cofrinho (completar o sistema)
-> Estes 3 itens formam um sistema único. Atacar em sequência.
+## ⚠️ CONTEXTO DA MIGRAÇÃO v2.0
 
-- [/] `[M]` **Aporte Manual em Meta:** Endpoint `POST /goals/{id}/deposit` + modal "Registrar Aporte" no card da meta. Transação gerada aparece no extrato com origem `Aporte Manual` e alimenta o progresso automaticamente. ← **PRÓXIMA TAREFA**
+**Decisão tomada em 2026-05-02:** Descartar o frontend atual e reescrever do zero
+com o design system **Etheris Finance** (gerado pelo Stitch).
 
-- [ ] `[P]` **Preenchimento Automático pela Categoria:** Ao selecionar uma categoria vinculada a uma meta em uma transação, preencher o vínculo de meta automaticamente. (Fazer junto com o item acima — é rápido.)
+**O que muda:**
+- Frontend: reescrito do zero em React + Tailwind com tokens do Etheris Finance
+- Backend: mantido (FastAPI + SQLite) — apenas ajustes pontuais se necessário
+- Build: remover `pause` do `build_desktop.bat` para permitir execução automatizada
 
-- [ ] `[M]` **Cofrinho por Keyword ou Regra Manual:** Uma meta pode ser alimentada por reconhecimento de texto na transação (ex: "COFRINHO VIAGEM") ou por uma regra explícita. Abordagem: adicionar `goal_id` opcional ao modelo `Rule` — quando a regra for aplicada, vincula a meta além de categorizar.
+**O que NÃO muda:**
+- Toda a lógica de negócio do backend (models, crud, routers)
+- Banco de dados e seeds
+- Estrutura de pastas
 
----
-
-## 🟡 Trilha 2 — Importação Multi-Banco
-> ⚠️ Respeitar a dependência: item A ANTES do item B.
-
-- [ ] `[G]` **A — Arquitetura de Parsers Plugável:** Refatorar os 3 parsers atuais (Itaú Excel, Itaú PDF, OFX) para implementarem uma interface base `BaseParser`. Criar `PARSER_REGISTRY = { ("itau", "excel"): ItauExcelParser, ... }`. Na tela de importação, o usuário seleciona banco + formato — o sistema despacha para o parser certo. Para adicionar Bradesco ou Nubank futuramente, basta criar o parser e registrar.
-  - Impacto: `services/` (interface base), `routers/imports.py` (unificar 3 endpoints em 1), `ImportPage.tsx` (dropdown banco + formato).
-
-- [ ] `[M]` **B — Importação Assistida pela Pasta Padrão** *(depende do item A):* Usar a pasta configurada em Configurações para listar arquivos `.xls/.xlsx/.pdf/.ofx` ainda não importados. Destacar os novos e permitir importar com menos cliques. Só faz sentido após a refatoração dos parsers.
-
----
-
-## 🟡 Trilha 3 — Provisões e Fluxo de Caixa
-> Feature estrutural. Atacar em 3 sessões na ordem indicada — cada uma depende da anterior.
-
-- [x] `[G]` **1 — Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
-  - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única/mensal/trimestral/anual), `start_date`, `end_date`, `notes`.
-  - Ao criar provisão recorrente → sistema gera `ProvisionOccurrence` com `expected_date`, `expected_amount`, `status` (pendente/realizada/ajustada).
-  - CRUD completo + tela "Provisões" no frontend.
-  - Casos de uso: assinaturas, parcelas de fatura, prestações de empréstimo/financiamento.
-
-- [ ] `[G]` **2 — Vinculação Provisão ↔ Transação Real** *(depende do item 1):* Ao importar, oferecer ao usuário a opção de atrelar a transação a uma `ProvisionOccurrence` pendente.
-  - Se valor diferir do provisionado: perguntar causa (variação normal vs. juros/encargos).
-  - Se juros/encargos: registrar diferença como transação separada na categoria "Juros e Encargos" para não distorcer a categoria original.
-  - Atualizar `status` da ocorrência para "realizada" e guardar `linked_transaction_id`.
-
-- [ ] `[G]` **3 — Relatório de Fluxo de Caixa Futuro** *(depende dos itens 1 e 2):* Nova aba mostrando a projeção dos próximos meses.
-  - Por mês: Receitas previstas | Despesas previstas | Saldo projetado.
-  - Distinguir realizado (transações importadas) vs. provisionado (ocorrências futuras pendentes).
-  - Drill-down por mês para ver quais provisões compõem o total.
+**Arquivos de referência:**
+- Design system: `C:\Users\fabio\Downloads\stitch_preview\stitch_instant_finance_tracker\etheris_finance\DESIGN.md`
+- Telas HTML prontas (protótipos Stitch para converter em React):
+  - Dashboard: `stitch_instant_finance_tracker\dashboard_consolidado\code.html`
+  - Importar: `stitch_instant_finance_tracker\importar_arquivos\code.html`
+  - Transações: `stitch_instant_finance_tracker\transa_es_do_ciclo\code.html`
+  - Provisões: `stitch_instant_finance_tracker\provis_es_e_futuro\code.html`
+- Backup v0.1.0: `C:\Users\fabio\Downloads\App-financeiro-v0.1.0.zip`
 
 ---
 
-## 🔵 Baixa Prioridade
+## 🔴 Trilha A — Fundação do Novo Frontend
+> Fazer ANTES de qualquer tela. Tudo depende disso.
 
-- [ ] `[G]` **Menu de Insights/IA** *(melhor após Trilha 3):* Aba com gastos altos, sugestões de corte, simulação de metas ("se economizar R$ X no iFood, chego na meta Y em Z meses"). Com as Provisões implementadas, os insights ganham dados de fluxo futuro e ficam muito mais ricos.
+- [ ] `[M]` **A1 — Setup Design System Etheris Finance**
+  - Atualizar `frontend/tailwind.config.ts` com todos os tokens de cor do DESIGN.md
+  - Instalar fonte Inter via `@fontsource/inter` ou importar do Google Fonts no index.html
+  - Criar `frontend/src/styles/globals.css` com utilitários de glassmorphism:
+    - `.glass-card` → `backdrop-filter: blur(20px)`, bg 3% white, border 1px 12% white, border-radius 1rem
+    - `.glass-modal` → blur(20px), bg 8% white, border 1px 20% white
+    - `.btn-primary` → bg #820AD1, hover glow `box-shadow: 0 0 15px #820AD1`
+    - `.btn-ghost` → glass border, backdrop blur, text white
+  - Remover classes legadas do Tailwind atual que conflitam
+  - Testar: abrir qualquer página e ver se os tokens aplicam corretamente
+  - **Não tocar em nenhuma página ainda — só a fundação**
 
-- [ ] `[P]` **Evitar Confusão entre Executáveis:** Melhoria no `build_desktop.bat` ou README para deixar claro que o único executável para o usuário é `ControleFinanceiro.exe` na raiz.
+- [ ] `[P]` **A2 — Layout Base + Sidebar novo**
+  - Reescrever `frontend/src/components/Sidebar.tsx` seguindo o HTML do Stitch
+    - Logo "Alpha Finance" (ou o nome final) + badge "Institutional Grade"
+    - Avatar do usuário no rodapé com nome e role
+    - Item ativo: destaque roxo #820AD1 com glass effect
+    - Itens: Dashboard, Importar, Transações, Provisões, Metas, Regras, Configurações
+  - Ajustar `frontend/src/layouts/MainLayout.tsx` se necessário
+  - **Não tocam nas páginas — só shell**
 
-### Segurança *(trilha própria — não misturar com features)*
-- [ ] `[P]` **Avaliação de Criptografia Local:** Mapear opções para proteger `data\finance.db` (SQLCipher, chave derivada de senha, impacto no app desktop).
-- [ ] `[P]` **Plano de Senha/Master Key:** Se criptografia adotada — UX de senha mestre, recuperação, troca de senha.
-- [ ] `[M]` **Varredura de Brechas de Segurança:** Auditoria: deps Python/Node, CORS, localhost, path traversal, dados sensíveis em logs.
-- [ ] `[M]` **Hardening do Desktop:** PyInstaller/PyWebView, porta aleatória, remoção de arquivos debug antes de distribuir.
+- [ ] `[P]` **A3 — Fix build_desktop.bat**
+  - Remover linha `pause` do final do `build_desktop.bat`
+  - Testar que o build roda sem travar via PowerShell
+  - Commitar — habilita o agente a buildar automaticamente ao fechar itens
+
+---
+
+## 🔴 Trilha B — Migração das Telas (em ordem de prioridade)
+> Fazer APÓS A1 e A2 concluídos. Cada item é independente dos outros.
+> Referência: converter os HTML do Stitch para React + conectar na API.
+
+- [ ] `[G]` **B1 — Dashboard v2**
+  - Converter `dashboard_consolidado/code.html` para `DashboardPage.tsx`
+  - Manter todos os dados da API atual (`/api/dashboard/`)
+  - **Corrigir o gráfico** de Fluxo de Caixa Futuro:
+    - Trocar mixed chart (barras+linha confuso) por barras agrupadas simples
+    - Verde = Receita prevista, Vermelho = Despesa prevista, Roxo = Saldo projetado
+    - Legenda visível, gráfico maior (50%+ da tela)
+  - Manter: KPIs do topo (Balanço, Entradas, Saídas, Projeção), Limites de Categoria, Alertas
+  - Remover: card "Atenção aos Gastos" laranja em posição ruim — absorver como badge nos KPIs
+
+- [ ] `[M]` **B2 — Importar v2**
+  - Converter `importar_arquivos/code.html` para `ImportPage.tsx`
+  - Manter lógica de upload (OFX, Excel, PDF)
+  - Novo: painel lateral "Resumo da Extração" com counters (capturadas, auto-cat, pendentes)
+  - Novo: fila de arquivos com status (sucesso / duplicado / erro)
+  - Botão "Processar Ciclo 27-26" destacado
+
+- [ ] `[M]` **B3 — Transações v2**
+  - Converter `transa_es_do_ciclo/code.html` para `TransactionsPage.tsx`
+  - Manter: tabela, filtros, categorização inline, paginação
+  - Novo: banner de ação necessária quando há pendentes
+  - Novo: seletor Anterior / Próximo ciclo no topo
+  - Novo: total movimentado destacado no header da tabela
+
+- [ ] `[M]` **B4 — Provisões v2**
+  - Converter `provis_es_e_futuro/code.html` para `ProvisionsPage.tsx`
+  - Manter lógica atual (CRUD + ocorrências + marcar como realizado)
+  - Novo: 3 meses futuros no topo com valor comprometido + % vinculado
+  - Novo: painel lateral "Projeção de Saldo" com timeline de eventos
+
+- [ ] `[M]` **B5 — Configurações v2**
+  - Não tem protótipo Stitch — criar do zero seguindo Etheris Finance
+  - Layout em abas: Pessoas & Cartões | Categorias | Sistema | Zona de Perigo
+  - Categorias: barra de busca + filtro por grupo + grid de cards compactos com cor destacada
+  - Badge de limite mensal e vínculo de meta visíveis no card de categoria
+  - Zona de Perigo: card borda vermelha, botão outline até hover
+
+- [ ] `[P]` **B6 — Metas v2**
+  - Não tem protótipo Stitch — adaptar GoalsPage.tsx para Etheris Finance
+  - Glass cards com PieChart, mesma lógica atual
+  - Ajustar cores e tipografia para os novos tokens
+
+- [ ] `[P]` **B7 — Regras v2**
+  - Adaptar RulesPage.tsx para Etheris Finance
+  - Tabela com glass rows, busca, filtros — mesma lógica atual
+
+- [ ] `[P]` **B8 — Cartão v2**
+  - Adaptar CardPage.tsx para Etheris Finance
+  - Mesma lógica, visual novo
 
 ---
 
-## ✅ Concluídos
+## 🟡 Trilha C — Features Novas (após migração completa)
+> Só iniciar quando Trilha A e B estiverem concluídas.
 
-### Metas e Cofrinho
-- [x] Conectar categorias a metas automaticamente (category.goal_id)
-- [x] Calcular progresso de meta por transações vinculadas
-- [x] Multi-Metas: CRUD completo com modal e cards
-- [x] Transação categorizada alimenta meta vinculada automaticamente
+- [ ] `[G]` **C1 — Trilha 3 Item 2: Vinculação Provisão ↔ Transação Real**
+  - Ao importar, oferecer opção de atrelar transação a uma ProvisionOccurrence pendente
+  - Se valor diferir: perguntar causa (variação normal vs. juros/encargos)
+  - Se juros/encargos: registrar diferença como transação separada em "Juros e Encargos"
+  - Atualizar status da ocorrência para "realizada" + guardar linked_transaction_id
 
-### Melhorias de Usabilidade
-- [x] Titular do Cartão no Excel → Dashboard "Gastos por Pessoa"
-- [x] Soft-delete de categorias
-- [x] Ordenação de transações por maior valor
-- [x] Gráfico pizza com labels e tooltips
-- [x] MonthSelector em todas as abas
+- [ ] `[G]` **C2 — Trilha 3 Item 3: Relatório Fluxo de Caixa Futuro**
+  - Nova aba ou seção no Dashboard com projeção dos próximos meses
+  - Por mês: Receitas previstas | Despesas previstas | Saldo projetado
+  - Distinguir realizado vs. provisionado
+  - Drill-down por mês
 
-### Cartões
-- [x] Gráfico "Gasto por Pessoa no Cartão" corrigido
-- [x] Diagnóstico visual quando gráfico por pessoa estiver vazio
+- [ ] `[G]` **C3 — Trilha 2A: Arquitetura de Parsers Plugável**
+  - Interface base `BaseParser` com método `parse(file_bytes) -> List[Transaction]`
+  - `PARSER_REGISTRY = {("itau", "excel"): ItauExcelParser, ...}`
+  - Dropdown banco + formato na tela de Importar
+  - Unificar 3 endpoints em 1
 
-### Dashboard UX
-- [x] Alertas de Limite: "Estourou R$ X" / "Faltam R$ Y"
-- [x] Atalhos clicáveis: Pendentes, Saídas, categorias → Transações filtradas
-- [x] Top 3 gastos do ciclo
-- [x] Comparativo por Ciclo com variação %
-- [x] Estados Vazios Guiados com ações diretas
+- [ ] `[M]` **C4 — Trilha 1: Aporte Manual em Meta**
+  - `POST /goals/{id}/deposit` + modal "Registrar Aporte" no card de meta
+  - Transação gerada com origem "Aporte Manual"
 
-### Desktop e Performance
-- [x] Build onedir (startup mais rápido)
-- [x] Splash screen enquanto backend sobe
-- [x] build_desktop.bat copia exe para a raiz automaticamente
-
-### Sistema
-- [x] Configuração de Pasta de Importação
-- [x] Reset Local com confirmação forte
+- [ ] `[P]` **C5 — Trilha 1: Preenchimento Automático pela Categoria**
+  - Ao selecionar categoria vinculada a uma meta em transação, preencher vínculo automaticamente
 
 ---
-*Última atualização: 2026-05-02 — Claude (claude.ai)*
+
+## 🔵 Trilha D — Segurança e Infraestrutura
+- [ ] `[P]` **D1 — Avaliação de Criptografia Local** — mapear opções para proteger `data\finance.db`
+- [ ] `[P]` **D2 — Plano de Senha/Master Key** — UX de senha mestre se criptografia adotada
+- [ ] `[M]` **D3 — Varredura de Brechas** — auditoria deps Python/Node, CORS, path traversal
+- [ ] `[M]` **D4 — Hardening Desktop** — porta aleatória, remover arquivos debug no build
+
+---
+
+## ✅ Concluídos (v0.1.0 — preservados como referência)
+
+### Backend (mantido na v2.0)
+- [x] Models: Person, Card, Category, Transaction, Rule, FileImport, Goal, Setting, Provision, ProvisionOccurrence
+- [x] CRUD completo para todas as entidades
+- [x] Parsers: OFX, PDF Itaú, Excel Itaú
+- [x] Auto-categorização por regras de keyword
+- [x] Dashboard endpoint com ciclo 27-26
+- [x] Geração automática de ocorrências de Provisões
+
+### Frontend v0.1.0 (descartado — backup em App-financeiro-v0.1.0.zip)
+- [x] Dashboard com KPIs, gráficos, metas, alertas
+- [x] Importar com upload OFX/PDF/Excel
+- [x] Transações com filtros e categorização inline
+- [x] Cartão com gastos por pessoa
+- [x] Regras de auto-categorização
+- [x] Metas/Cofrinhos com PieChart e progresso
+- [x] Provisões com CRUD e ocorrências expandíveis
+- [x] Configurações com Pessoas, Cartões, Categorias, Sistema, Danger Zone
+
+---
+
+*Última atualização: 2026-05-02 — Início da migração v2.0 (Etheris Finance)*
