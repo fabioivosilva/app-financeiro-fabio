@@ -1,34 +1,30 @@
 # SESSION_STATE
 
 ## Status geral
-FASE 8 concluída. A interface foi amplamente refinada com a adoção da biblioteca Recharts, trazendo gráficos interativos (Pizza, Barras e Donut) para o Dashboard, Metas e Cartão. Além disso, melhorias no filtro de Transações e efeitos de micro-interações ("hover") elevaram a percepção de qualidade do aplicativo ("Premium Design"). A próxima e última etapa é a FASE 9 (Empacotamento Desktop).
+O MVP do "App Financeiro Fabio" foi totalmente concluído. A aplicação agora opera como um executável Desktop autossuficiente (`ControleFinanceiro.exe`), construído em Python (FastAPI + Pywebview + SQLite) com a interface renderizada em React/TailwindCSS usando os tokens visuais Stitch.
 
 ## Última fase concluída
-- FASE 8: Integração Final, Refinamento UX e UI.
+- FASE 9: Empacotamento Desktop (Pyinstaller + Pywebview) concluído com sucesso.
 
 ## Fase atual
-Preparando FASE 9 (Desktop packaging com pywebview + PyInstaller → ControleFinanceiro.exe).
+Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 
 ## Repo
 - URL: https://github.com/fabioivosilva/app-financeiro-fabio
 - Local: C:\Users\fabio\Projects\app-financeiro-fabio
 - Branch: develop
-- Último commit: feat: add Recharts and refine UX/UI for Dashboard, Card, Goals and Transactions (FASE 8)
+- Último commit: feat: setup pywebview and PyInstaller for desktop distribution (FASE 9)
 
 ## Stack
-- Python 3.12.10 (C:\Users\fabio\AppData\Local\Programs\Python\Python312\python.exe)
-- Venv: backend/.venv
-- Backend: FastAPI, SQLite
-- Frontend: React + Vite + TypeScript + TailwindCSS v3 + Recharts
+- Backend: FastAPI, SQLAlchemy, SQLite, Uvicorn, Pywebview, PyInstaller
+- Frontend: React 19, Vite, TailwindCSS, Recharts
 
-## Telas implementadas (Frontend)
-- **Dashboard:** Refinado com gráficos Recharts.
-- **Importar:** Ok.
-- **Transações:** Refinado com Filtros em Pills.
-- **Cartão:** Refinado com Abas e gráfico por pessoa.
-- **Regras:** Ok, CRUD funcionando.
-- **Metas:** Refinado com gráfico Donut.
-- **Configurações:** Ok, CRUD funcionando.
+## Produto Final
+- O executável encontra-se em `backend/dist/ControleFinanceiro.exe`.
+- Ele roda um servidor local em background e abre uma janela web nativa no Windows.
+- O banco de dados (`app.db`) será criado/preservado automaticamente na mesma pasta em que o usuário executar o arquivo `.exe`.
 
-## Plano de fases restantes
-- FASE 9: Desktop packaging (pywebview + PyInstaller → ControleFinanceiro.exe). Empacotar tudo em um executável self-contained que inicia o backend e renderiza o front sem depender de navegadores externos.
+## Próximos Passos Pós-MVP (Backlog Futuro)
+- Criar a funcionalidade de backup automático e sincronização em nuvem.
+- Implementar leitura automatizada de extratos Open Finance (se aplicável).
+- Evoluir os gráficos Recharts com tooltips personalizados e exportação em PDF.
