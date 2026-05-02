@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Projeto zerado. Nenhum código ainda.
+STATUS     : Projeto zerado. Nenhum código ainda. Decisão: sem .exe, usar rodar.bat + browser.
 BRANCH     : develop
 PRÓXIMA    : T0.1 — Setup Backend Base [G]
 CLAIMS     : nenhum
@@ -65,9 +65,9 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
   Vite + React 19 + TS + Tailwind · Layout shell (sidebar + conteúdo + MonthSelector) · Design system (tokens, Button, Card, Modal, Badge) · react-router · API client tipado
   **Saída:** shell navegável com design system visível
 
-- [ ] `[P]` **T0.3 — Build Desktop** · *Fabio · depende T0.1+T0.2*
-  `main_desktop.py` PyWebView+Uvicorn · `build_desktop.bat` · `auto_sync.ps1` instalado
-  **Saída:** `ControleFinanceiro.exe` abrindo o shell
+- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · depende T0.1+T0.2*
+  `rodar.bat` sobe backend + abre browser · `auto_sync.ps1` só faz git pull + notificação (sem rebuild exe)
+  **Saída:** app abrindo no browser via rodar.bat
 
 ---
 
