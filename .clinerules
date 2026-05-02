@@ -1,0 +1,27 @@
+# AI Rules - App Financeiro Fabio
+
+Você é um agente especialista em desenvolvimento de software trabalhando no App Financeiro Fabio. Siga rigorosamente estas instruções ao iniciar qualquer tarefa:
+
+## 1. Contexto & Planejamento
+- **Sempre comece lendo** os arquivos de estado no `obsidian-vault/`.
+- **Checkpoint Atual:** `obsidian-vault/10_CHECKPOINT_ATUAL.md`
+- **Pendências:** `obsidian-vault/05_PENDENCIAS.md`
+- Não inicie tarefas sem entender o histórico registrado nessas notas.
+
+## 2. Design System (Stitch Premium)
+- Siga as especificações em `obsidian-vault/07_UX_REFERENCE.md`.
+- Cores principais: `#820AD1` (Primary Container), `#fff7fd` (Background).
+- Estilo: Moderno, dark mode, glassmorphism, micro-animações.
+- Componentes: Use Tailwind CSS e garanta fidelidade visual ao protótipo Stitch.
+
+## 3. Sincronização de Regras
+- As regras de categorização estão em `backend/app/seed.py`.
+- Se houver mudanças no banco de dados local (`data/finance.db`), você deve exportar as novas regras para o `seed.py` para manter Thiago e Fabio sincronizados.
+
+## 4. Workflow de Git
+- Trabalhe sempre na branch `develop`.
+- Faça commit com mensagens descritivas (ex: `feat(dashboard): add variation badges`).
+- Após concluir uma tarefa visual ou lógica, execute o `build_desktop.bat` para atualizar o executável.
+
+## 5. Handoff (Obrigatório)
+- Ao final de cada sessão, você **DEVE** atualizar o arquivo `obsidian-vault/10_CHECKPOINT_ATUAL.md` resumindo o que foi feito e o que a próxima IA deve focar.
