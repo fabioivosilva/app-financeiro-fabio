@@ -52,7 +52,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Testar: abrir qualquer página e ver se os tokens aplicam corretamente
   - **Não tocar em nenhuma página ainda — só a fundação**
 
-- [ ] `[P]` **A2 — Layout Base + Sidebar novo**
+- [/] `[P]` 🔒 [FABIO] **A2 — Layout Base + Sidebar novo**
   - Reescrever `frontend/src/components/Sidebar.tsx` seguindo o HTML do Stitch
     - Logo "Alpha Finance" (ou o nome final) + badge "Institutional Grade"
     - Avatar do usuário no rodapé com nome e role
