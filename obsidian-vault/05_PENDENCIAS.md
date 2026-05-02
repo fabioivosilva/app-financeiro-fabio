@@ -42,7 +42,7 @@
 ## 🟡 Trilha 3 — Provisões e Fluxo de Caixa
 > Feature estrutural. Atacar em 3 sessões na ordem indicada — cada uma depende da anterior.
 
-- [ ] `[G]` **1 — Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
+- [/] `[G]` 🔒 [FABIO] **1 — Modelo Base de Provisões:** Novo modelo `Provision` para registrar despesas e receitas futuras esperadas.
   - Campos: `description`, `amount`, `type` (despesa/receita), `category_id`, `recurrence` (única/mensal/trimestral/anual), `start_date`, `end_date`, `notes`.
   - Ao criar provisão recorrente → sistema gera `ProvisionOccurrence` com `expected_date`, `expected_amount`, `status` (pendente/realizada/ajustada).
   - CRUD completo + tela "Provisões" no frontend.
