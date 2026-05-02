@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
-import type { Person, Card, Category } from '../types';
+import type { Person, Card, Category, Goal } from '../types';
 import Modal from '../components/Modal';
 
 type ModalType = 'person' | 'category' | null;
@@ -9,6 +9,7 @@ export default function SettingsPage() {
   const [persons, setPersons] = useState<Person[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal State
@@ -24,14 +25,16 @@ export default function SettingsPage() {
   const [catLimit, setCatLimit] = useState<number | ''>('');
   const [catColor, setCatColor] = useState('#cccccc');
   const [catExcludeFromTotals, setCatExcludeFromTotals] = useState(false);
+  const [catGoalId, setCatGoalId] = useState<number | ''>('');
 
   const loadData = () => {
     setLoading(true);
-    Promise.all([api.get('/persons/'), api.get('/cards/'), api.get('/categories/')])
-      .then(([pRes, cRes, catRes]) => {
+    Promise.all([api.get('/persons/'), api.get('/cards/'), api.get('/categories/'), api.get('/goals/')])
+      .then(([pRes, cRes, catRes, goalRes]) => {
         setPersons(pRes.data);
         setCards(cRes.data);
         setCategories(catRes.data);
+        setGoals(goalRes.data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -61,6 +64,7 @@ export default function SettingsPage() {
       setCatLimit(c.monthly_limit || '');
       setCatColor(c.color || '#cccccc');
       setCatExcludeFromTotals(c.exclude_from_totals);
+      setCatGoalId(c.goal_id || '');
     } else {
       setEditingId(null);
       setCatName('');
@@ -68,6 +72,7 @@ export default function SettingsPage() {
       setCatLimit('');
       setCatColor('#820AD1');
       setCatExcludeFromTotals(false);
+      setCatGoalId('');
     }
   };
 
@@ -99,7 +104,8 @@ export default function SettingsPage() {
       kind: catKind,
       monthly_limit: catLimit === '' ? null : Number(catLimit),
       color: catColor,
-      exclude_from_totals: catExcludeFromTotals
+      exclude_from_totals: catExcludeFromTotals,
+      goal_id: catGoalId === '' ? null : Number(catGoalId)
     };
     try {
       if (editingId) {
@@ -324,6 +330,20 @@ export default function SettingsPage() {
               onChange={e => setCatLimit(e.target.value ? Number(e.target.value) : '')}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
             />
+          </div>
+          <div>
+            <label className="block text-label-md mb-1">Vincular a uma Meta (Cofrinho Opcional)</label>
+            <select
+              value={catGoalId}
+              onChange={e => setCatGoalId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-white"
+            >
+              <option value="">-- Não vincular --</option>
+              {goals.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+            <p className="text-label-sm text-outline mt-1">Transações desta categoria irão alimentar automaticamente a meta selecionada.</p>
           </div>
           <label className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
             <input

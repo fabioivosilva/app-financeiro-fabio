@@ -7,9 +7,9 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 from ..models import Transaction, Category, Person, Goal
-from ..crud import financial_period
+from ..crud import financial_period, _enrich_goal
 from ..schemas import (
-    DashboardOut, SpendingByPerson, SpendingByCategory, CategoryLimit,
+    DashboardOut, SpendingByPerson, SpendingByCategory, CategoryLimit, DashboardGoal
 )
 
 
@@ -35,6 +35,17 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
         Transaction.date <= period_end,
     )
 
+    prev_m = m - 1
+    prev_year = year
+    if prev_m == 0:
+        prev_m = 12
+        prev_year -= 1
+    prev_period_start, prev_period_end = financial_period(f"{prev_year:04d}-{prev_m:02d}")
+    prev_month_filter = and_(
+        Transaction.date >= prev_period_start,
+        Transaction.date <= prev_period_end,
+    )
+
     # --- Total income ---
     total_income = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
@@ -45,13 +56,32 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
     )
 
     # --- Total expenses ---
-    total_expenses = (
+    total_expenses_raw = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
         .outerjoin(Category, Transaction.category_id == Category.id)
         .filter(month_filter, Transaction.transaction_type == "expense")
         .filter(_countable_transaction_filter())
         .scalar()
     )
+    total_expenses = abs(total_expenses_raw)
+
+    # --- Previous Month Summary ---
+    previous_income = (
+        db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
+        .filter(prev_month_filter, Transaction.transaction_type == "income")
+        .filter(_countable_transaction_filter())
+        .scalar()
+    )
+
+    previous_expenses_raw = (
+        db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
+        .filter(prev_month_filter, Transaction.transaction_type == "expense")
+        .filter(_countable_transaction_filter())
+        .scalar()
+    )
+    previous_expenses = abs(previous_expenses_raw)
     total_expenses = abs(total_expenses)
 
     # --- Credit card total ---
@@ -157,11 +187,20 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
             over_budget=spent > cat.monthly_limit,
         ))
 
-    # --- Reserve goal ---
-    goal = db.query(Goal).first()
-    reserve_current = goal.current_amount if goal else 0
-    reserve_goal = goal.target_amount if goal else 0
-    reserve_pct = (reserve_current / reserve_goal * 100) if reserve_goal > 0 else 0
+    # --- Goals ---
+    db_goals = db.query(Goal).all()
+    goals_list = []
+    for g in db_goals:
+        enriched = _enrich_goal(db, g)
+        total_saved = enriched.current_amount + getattr(enriched, "linked_transactions_sum", 0)
+        pct = (total_saved / enriched.target_amount * 100) if enriched.target_amount > 0 else 0
+        goals_list.append(DashboardGoal(
+            id=enriched.id,
+            name=enriched.name,
+            target_amount=enriched.target_amount,
+            current_amount=total_saved,
+            percentage=round(pct, 1)
+        ))
 
     # --- Pending review ---
     pending_count = (
@@ -176,13 +215,13 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
         period_end=period_end,
         total_income=total_income,
         total_expenses=total_expenses,
+        previous_income=previous_income,
+        previous_expenses=previous_expenses,
         credit_card_total=credit_card_total,
         bank_expenses_total=bank_expenses_total,
         monthly_balance=monthly_balance,
         planned_savings=0,  # can be set via settings
-        reserve_current=reserve_current,
-        reserve_goal=reserve_goal,
-        reserve_percentage=round(reserve_pct, 1),
+        goals=goals_list,
         spending_by_person=spending_by_person,
         spending_by_category=spending_by_category,
         category_limits=category_limits,

@@ -6,6 +6,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
+import MonthSelector from '../components/MonthSelector';
 
 const COLORS = ['#820AD1', '#f97316', '#0e8345', '#eab308', '#ba1a1a', '#0ea5e9', '#d946ef', '#64748b'];
 
@@ -40,16 +41,22 @@ export default function DashboardPage() {
     return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const formatMonthLabel = (month: string) => {
-    const [year, m] = month.split('-').map(Number);
-    const dt = new Date(year, m - 1, 1);
-    return dt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  };
-
-  const changeMonth = (delta: number) => {
-    const [year, m] = selectedMonth.split('-').map(Number);
-    const dt = new Date(year, m - 1 + delta, 1);
-    setSelectedMonth(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`);
+  const renderVariation = (current: number, previous: number, isInverse = false) => {
+    if (!previous || previous === 0) return null;
+    const diff = ((current - previous) / previous) * 100;
+    if (Math.abs(diff) < 0.1) return null;
+    const isIncrease = diff > 0;
+    const isPositive = isInverse ? !isIncrease : isIncrease;
+    const colorClass = isPositive ? 'text-success' : 'text-error';
+    
+    return (
+      <span className={`inline-flex items-center gap-0.5 font-bold ${colorClass}`} title={`Anterior: ${formatCurrency(previous)}`}>
+        <span className="material-symbols-outlined text-sm">
+          {isIncrease ? 'trending_up' : 'trending_down'}
+        </span>
+        {Math.abs(diff).toFixed(0)}%
+      </span>
+    );
   };
 
   // Prepare data for BarChart (Person Spending)
@@ -112,34 +119,13 @@ export default function DashboardPage() {
             Ciclo financeiro de {formatDate(data.period_start)} a {formatDate(data.period_end)}
           </p>
         </div>
-        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => changeMonth(-1)}
-            className="w-10 h-10 rounded-lg hover:bg-primary-50 text-outline hover:text-primary-container transition-colors flex items-center justify-center"
-            title="Mês anterior"
-          >
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <span className="min-w-40 text-center text-label-md font-semibold text-on-surface capitalize">
-            {formatMonthLabel(selectedMonth)}
-          </span>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-2 py-2 w-36 rounded-lg border-none text-label-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface cursor-pointer"
-            title="Selecionar mês"
-          />
-          <button
-            type="button"
-            onClick={() => changeMonth(1)}
-            className="w-10 h-10 rounded-lg hover:bg-primary-50 text-outline hover:text-primary-container transition-colors flex items-center justify-center"
-            title="Próximo mês"
-          >
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
+        <div>
+          <h2 className="page-title">Dashboard</h2>
+          <p className="page-subtitle">
+            Ciclo financeiro de {formatDate(data.period_start)} a {formatDate(data.period_end)}
+          </p>
         </div>
+        <MonthSelector month={selectedMonth} onChange={setSelectedMonth} />
       </div>
 
       {/* Hero cards */}
@@ -153,7 +139,10 @@ export default function DashboardPage() {
           onClick={() => navigate(`/transacoes?month=${selectedMonth}&source=bank_statement`)}
           title="Ver entradas do mês"
         >
-          <p className="text-label-md text-outline">Total Entradas</p>
+          <div className="flex items-baseline justify-between">
+            <p className="text-label-md text-outline">Total Entradas</p>
+            {renderVariation(data.total_income, data.previous_income)}
+          </div>
           <p className="text-headline-md text-success mt-1">{formatCurrency(data.total_income)}</p>
           <p className="text-label-sm text-outline mt-1 flex items-center gap-1">
             <span className="material-symbols-outlined text-xs">open_in_new</span> Ver transações
@@ -164,7 +153,10 @@ export default function DashboardPage() {
           onClick={() => navigate(`/transacoes?month=${selectedMonth}`)}
           title="Ver saídas do mês"
         >
-          <p className="text-label-md text-outline">Total Saídas</p>
+          <div className="flex items-baseline justify-between">
+            <p className="text-label-md text-outline">Total Saídas</p>
+            {renderVariation(data.total_expenses, data.previous_expenses, true)}
+          </div>
           <p className="text-headline-md text-error mt-1">{formatCurrency(data.total_expenses)}</p>
           <p className="text-label-sm text-outline mt-1 flex items-center gap-1">
             <span className="material-symbols-outlined text-xs">open_in_new</span> Ver transações
@@ -308,18 +300,40 @@ export default function DashboardPage() {
 
         {/* Small insights col */}
         <div className="space-y-4">
-          <div className="card transition-transform hover:-translate-y-1">
-            <h3 className="text-body-lg font-semibold mb-2">Meta de Reserva</h3>
-            <p className="text-headline-md text-primary-container">{data.reserve_percentage}%</p>
-            <div className="progress-bar mt-2">
-              <div
-                className="progress-bar-fill bg-primary-container"
-                style={{ width: `${Math.min(data.reserve_percentage, 100)}%` }}
-              />
+          <div className="card">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-body-lg font-semibold">Minhas Metas</h3>
+              <button 
+                onClick={() => navigate('/metas')}
+                className="text-outline hover:text-primary-container flex items-center"
+                title="Ver todas as metas"
+              >
+                <span className="material-symbols-outlined text-sm">open_in_new</span>
+              </button>
             </div>
-            <p className="text-label-sm text-outline mt-2">
-              {formatCurrency(data.reserve_current)} de {formatCurrency(data.reserve_goal)}
-            </p>
+            <div className="space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              {data.goals.length === 0 ? (
+                <p className="text-label-sm text-outline text-center py-4">Nenhuma meta configurada.</p>
+              ) : data.goals.map(g => (
+                <div key={g.id}>
+                  <div className="flex justify-between text-label-sm mb-1">
+                    <span className="font-medium truncate pr-2" title={g.name}>{g.name}</span>
+                    <span className={`shrink-0 font-bold ${g.percentage >= 100 ? 'text-success' : 'text-primary-container'}`}>
+                      {g.percentage}%
+                    </span>
+                  </div>
+                  <div className="progress-bar h-1.5 mb-1 bg-gray-100">
+                    <div
+                      className={`progress-bar-fill ${g.percentage >= 100 ? 'bg-success' : 'bg-primary-container'}`}
+                      style={{ width: `${Math.min(g.percentage, 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-outline text-right">
+                    {formatCurrency(g.current_amount)} / {formatCurrency(g.target_amount)}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div

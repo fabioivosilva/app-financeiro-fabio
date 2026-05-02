@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import type { Card, Transaction } from '../types';
+import MonthSelector from '../components/MonthSelector';
 
 export default function CardPage() {
   const navigate = useNavigate();
@@ -23,9 +24,6 @@ export default function CardPage() {
     ]).then(([cRes, txRes]) => {
       setCards(cRes.data);
       setTransactions(txRes.data);
-      if (cRes.data.length > 0 && selectedCardId === '') {
-        setSelectedCardId(cRes.data[0].id);
-      }
     }).catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -84,12 +82,7 @@ export default function CardPage() {
       </div>
 
       <div className="flex flex-wrap gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <input
-          type="month"
-          value={month}
-          onChange={e => setMonth(e.target.value)}
-          className="px-4 py-2 rounded-full border border-gray-200 text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface"
-        />
+        <MonthSelector month={month} onChange={setMonth} />
         
         {cards.length > 0 && (
           <select

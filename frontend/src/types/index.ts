@@ -21,6 +21,7 @@ export interface Category {
   color: string | null;
   is_active: boolean;
   exclude_from_totals: boolean;
+  goal_id: number | null;
   created_at: string;
 }
 
@@ -60,6 +61,7 @@ export interface Goal {
   name: string;
   target_amount: number;
   current_amount: number;
+  linked_transactions_sum: number;
   target_date: string | null;
   created_at: string;
 }
@@ -111,13 +113,19 @@ export interface Dashboard {
   period_end: string;
   total_income: number;
   total_expenses: number;
+  previous_income: number;
+  previous_expenses: number;
   credit_card_total: number;
   bank_expenses_total: number;
   monthly_balance: number;
   planned_savings: number;
-  reserve_current: number;
-  reserve_goal: number;
-  reserve_percentage: number;
+  goals: {
+    id: number;
+    name: string;
+    target_amount: number;
+    current_amount: number;
+    percentage: number;
+  }[];
   spending_by_person: SpendingByPerson[];
   spending_by_category: SpendingByCategory[];
   category_limits: CategoryLimit[];

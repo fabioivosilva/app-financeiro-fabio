@@ -55,6 +55,7 @@ class CategoryBase(BaseModel):
     color: Optional[str] = None
     is_active: bool = True
     exclude_from_totals: bool = False
+    goal_id: Optional[int] = None
 
 class CategoryCreate(CategoryBase):
     pass
@@ -66,6 +67,7 @@ class CategoryUpdate(BaseModel):
     color: Optional[str] = None
     is_active: Optional[bool] = None
     exclude_from_totals: Optional[bool] = None
+    goal_id: Optional[int] = None
 
 class CategoryOut(CategoryBase):
     id: int
@@ -178,6 +180,8 @@ class GoalUpdate(BaseModel):
 class GoalOut(GoalBase):
     id: int
     created_at: datetime
+    # The total accumulated from transactions linked via categories
+    linked_transactions_sum: float = 0.0
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -229,19 +233,26 @@ class CategoryLimit(BaseModel):
     percentage: float
     over_budget: bool
 
+class DashboardGoal(BaseModel):
+    id: int
+    name: str
+    target_amount: float
+    current_amount: float
+    percentage: float
+
 class DashboardOut(BaseModel):
     month: str
     period_start: date
     period_end: date
     total_income: float
     total_expenses: float
+    previous_income: float
+    previous_expenses: float
     credit_card_total: float
     bank_expenses_total: float
     monthly_balance: float
     planned_savings: float
-    reserve_current: float
-    reserve_goal: float
-    reserve_percentage: float
+    goals: List[DashboardGoal]
     spending_by_person: List[SpendingByPerson]
     spending_by_category: List[SpendingByCategory]
     category_limits: List[CategoryLimit]

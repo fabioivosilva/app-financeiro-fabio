@@ -44,6 +44,11 @@ def ensure_database_schema() -> None:
                 "ALTER TABLE categories "
                 "ADD COLUMN exclude_from_totals BOOLEAN NOT NULL DEFAULT 0"
             ))
+        if "goal_id" not in category_columns:
+            conn.execute(text(
+                "ALTER TABLE categories "
+                "ADD COLUMN goal_id INTEGER REFERENCES goals(id)"
+            ))
 
 
 def get_db():

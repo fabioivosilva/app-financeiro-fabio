@@ -219,28 +219,54 @@ def delete_rule(db: Session, rule_id: int) -> bool:
 # ---------------------------------------------------------------------------
 # Goals
 # ---------------------------------------------------------------------------
+from sqlalchemy import func
+
+def _enrich_goal(db: Session, goal: models.Goal) -> models.Goal:
+    if not goal:
+        return goal
+    linked_sum = db.query(func.coalesce(func.sum(models.Transaction.amount), 0))\
+        .join(models.Category, models.Transaction.category_id == models.Category.id)\
+        .filter(models.Category.goal_id == goal.id)\
+        .scalar()
+    # Assuming expenses are negative or positive, we want the absolute sum stored
+    setattr(goal, "linked_transactions_sum", abs(linked_sum))
+    return goal
+
 def get_goals(db: Session) -> List[models.Goal]:
-    return db.query(models.Goal).all()
+    goals = db.query(models.Goal).all()
+    return [_enrich_goal(db, g) for g in goals]
 
 def get_goal(db: Session, goal_id: int) -> Optional[models.Goal]:
-    return db.query(models.Goal).filter(models.Goal.id == goal_id).first()
+    goal = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
+    return _enrich_goal(db, goal)
 
 def create_goal(db: Session, **kwargs) -> models.Goal:
     g = models.Goal(**kwargs)
     db.add(g)
     db.commit()
     db.refresh(g)
-    return g
+    return _enrich_goal(db, g)
 
 def update_goal(db: Session, goal_id: int, **kwargs) -> Optional[models.Goal]:
-    g = get_goal(db, goal_id)
+    g = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
     if g:
         for k, v in kwargs.items():
             if hasattr(g, k) and v is not None:
                 setattr(g, k, v)
         db.commit()
         db.refresh(g)
-    return g
+    return _enrich_goal(db, g)
+
+def delete_goal(db: Session, goal_id: int) -> bool:
+    g = db.query(models.Goal).filter(models.Goal.id == goal_id).first()
+    if g:
+        # Nullify goal_id in associated categories
+        db.query(models.Category).filter(models.Category.goal_id == goal_id)\
+          .update({models.Category.goal_id: None})
+        db.delete(g)
+        db.commit()
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------

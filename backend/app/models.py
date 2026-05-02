@@ -55,10 +55,12 @@ class Category(Base):
     color = Column(String(20), nullable=True)
     is_active = Column(Boolean, default=True)
     exclude_from_totals = Column(Boolean, default=False, nullable=False)
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     transactions = relationship("Transaction", back_populates="category")
     rules = relationship("Rule", back_populates="category")
+    goal = relationship("Goal", back_populates="categories")
 
 
 # ---------------------------------------------------------------------------
@@ -144,6 +146,8 @@ class Goal(Base):
     current_amount = Column(Float, default=0.0)
     target_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    categories = relationship("Category", back_populates="goal")
 
 
 # ---------------------------------------------------------------------------

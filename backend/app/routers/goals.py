@@ -24,3 +24,11 @@ def update_goal(goal_id: int, data: schemas.GoalUpdate, db: Session = Depends(ge
     if not g:
         raise HTTPException(status_code=404, detail="Goal not found")
     return g
+
+
+@router.delete("/{goal_id}", status_code=204)
+def delete_goal(goal_id: int, db: Session = Depends(get_db)):
+    success = crud.delete_goal(db, goal_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return None

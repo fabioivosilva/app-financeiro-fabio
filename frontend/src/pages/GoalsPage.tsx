@@ -11,8 +11,8 @@ export default function GoalsPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
-  const [targetAmount, setTargetAmount] = useState(0);
-  const [currentAmount, setCurrentAmount] = useState(0);
+  const [targetAmount, setTargetAmount] = useState<number | ''>('');
+  const [currentAmount, setCurrentAmount] = useState<number | ''>('');
   const [editingGoalId, setEditingGoalId] = useState<number | null>(null);
 
   const loadData = () => {
@@ -27,11 +27,18 @@ export default function GoalsPage() {
     loadData();
   }, []);
 
-  const openModal = (goal: Goal) => {
-    setEditingGoalId(goal.id);
-    setName(goal.name);
-    setTargetAmount(goal.target_amount);
-    setCurrentAmount(goal.current_amount);
+  const openModal = (goal?: Goal) => {
+    if (goal) {
+      setEditingGoalId(goal.id);
+      setName(goal.name);
+      setTargetAmount(goal.target_amount);
+      setCurrentAmount(goal.current_amount);
+    } else {
+      setEditingGoalId(null);
+      setName('');
+      setTargetAmount('');
+      setCurrentAmount(0); // Cofrinho novo costuma começar zerado
+    }
     setIsModalOpen(true);
   };
 
@@ -42,14 +49,18 @@ export default function GoalsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingGoalId) return;
+    const payload = {
+      name,
+      target_amount: Number(targetAmount),
+      current_amount: Number(currentAmount)
+    };
 
     try {
-      await api.put(`/goals/${editingGoalId}`, {
-        name,
-        target_amount: targetAmount,
-        current_amount: currentAmount
-      });
+      if (editingGoalId) {
+        await api.put(`/goals/${editingGoalId}`, payload);
+      } else {
+        await api.post('/goals/', payload);
+      }
       closeModal();
       loadData();
     } catch (err) {
@@ -58,111 +69,145 @@ export default function GoalsPage() {
     }
   };
 
+  const handleDelete = async (goal: Goal) => {
+    if (!window.confirm(`Tem certeza que deseja excluir a meta "${goal.name}"?\nIsso não apagará as transações vinculadas, apenas removerá o vínculo.`)) return;
+    
+    try {
+      await api.delete(`/goals/${goal.id}`);
+      loadData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir a meta');
+    }
+  };
+
   const formatCurrency = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  if (loading) return <div className="animate-pulse text-outline">Carregando...</div>;
-
-  const goal = goals[0];
-  if (!goal) return null;
-
-  const pct = goal.target_amount > 0
-    ? Math.round((goal.current_amount / goal.target_amount) * 100)
-    : 0;
-
-  const remaining = goal.target_amount - goal.current_amount;
-  const monthsLeft = 12;
-  const monthlySuggestion = remaining > 0 ? remaining / monthsLeft : 0;
-
-  const pieData = [
-    { name: 'Guardado', value: goal.current_amount, color: '#820AD1' }, // primary-container
-    { name: 'Falta', value: remaining > 0 ? remaining : 0, color: '#e5e7eb' }, // gray-200
-  ];
+  if (loading && goals.length === 0) return <div className="animate-pulse text-outline">Carregando...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="page-title">Metas Financeiras</h2>
-          <p className="page-subtitle">{goal.name}</p>
+          <h2 className="page-title">Metas e Cofrinhos</h2>
+          <p className="page-subtitle">Gerencie seus objetivos financeiros e acompanhe a evolução</p>
         </div>
-        <button className="btn-primary shadow-md hover:shadow-lg transition-shadow" onClick={() => openModal(goal)}>
-          <span className="material-symbols-outlined text-xl">edit</span>
-          Editar Meta
+        <button className="btn-primary shadow-md hover:shadow-lg transition-shadow" onClick={() => openModal()}>
+          <span className="material-symbols-outlined text-xl">add</span>
+          Nova Meta
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Progress card with Donut Chart */}
-        <div className="card col-span-1 lg:col-span-2 flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 w-full">
-            <h3 className="text-body-lg font-semibold mb-4">Progresso Geral</h3>
-            <div className="flex items-end gap-4 mb-4">
-              <div>
-                <p className="text-label-sm text-outline">Atual</p>
-                <p className="text-headline-md text-primary-container">{formatCurrency(goal.current_amount)}</p>
-              </div>
-              <div>
-                <p className="text-label-sm text-outline">Objetivo</p>
-                <p className="text-headline-md text-on-surface">{formatCurrency(goal.target_amount)}</p>
-              </div>
-            </div>
-            <div className="progress-bar h-3 bg-gray-100 mt-6">
-              <div
-                className="progress-bar-fill bg-primary-container"
-                style={{ width: `${Math.min(pct, 100)}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-label-sm font-medium">
-              <span className="text-primary-container">{pct}% concluído</span>
-              <span className="text-outline">Faltam {formatCurrency(remaining)}</span>
-            </div>
+      {goals.length === 0 && !loading && (
+        <div className="card text-center py-16 bg-surface-sidebar border border-dashed border-gray-300">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-primary-container">
+            <span className="material-symbols-outlined text-3xl">savings</span>
           </div>
-
-          <div className="w-full md:w-48 h-48 shrink-0 relative flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  startAngle={90}
-                  endAngle={-270}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip formatter={(value: any) => formatCurrency(Number(value))} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
-              <span className="text-2xl font-bold text-primary-container">{pct}%</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Insight card */}
-        <div className="card bg-gradient-to-br from-primary-container to-primary text-white shadow-lg transition-transform hover:-translate-y-1 flex flex-col justify-center relative overflow-hidden">
-          {/* Decorative background element */}
-          <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white opacity-10 blur-2xl"></div>
-          
-          <h3 className="text-body-lg font-semibold mb-2 flex items-center gap-2">
-            <span className="material-symbols-outlined">lightbulb</span>
-            Sugestão Mensal
-          </h3>
-          <p className="text-headline-lg mt-2">{formatCurrency(monthlySuggestion)}</p>
-          <p className="text-label-md opacity-80 mt-2">
-            Para atingir sua meta em {monthsLeft} meses
+          <p className="text-body-lg font-medium text-on-surface">Nenhuma meta criada</p>
+          <p className="text-label-md text-outline mt-1 mb-6 max-w-md mx-auto">
+            Crie "Cofrinhos" para organizar dinheiro guardado. Se você vincular uma categoria a esta meta (ex: "Viagem"), todas as despesas dela alimentarão automaticamente a sua meta.
           </p>
+          <button className="text-primary-container font-semibold hover:underline" onClick={() => openModal()}>
+            Criar minha primeira Meta
+          </button>
         </div>
+      )}
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {goals.map((goal) => {
+          const totalSaved = goal.current_amount + goal.linked_transactions_sum;
+          const pct = goal.target_amount > 0 ? Math.round((totalSaved / goal.target_amount) * 100) : 0;
+          const remaining = goal.target_amount - totalSaved;
+          const pieData = [
+            { name: 'Guardado', value: totalSaved, color: '#820AD1' },
+            { name: 'Falta', value: remaining > 0 ? remaining : 0, color: '#e5e7eb' },
+          ];
+
+          return (
+            <div key={goal.id} className="card flex flex-col sm:flex-row items-center gap-6 relative group overflow-hidden">
+              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => openModal(goal)}
+                  className="w-8 h-8 rounded bg-gray-100 text-outline hover:text-primary-container flex items-center justify-center transition-colors"
+                  title="Editar Meta"
+                >
+                  <span className="material-symbols-outlined text-[20px]">edit</span>
+                </button>
+                <button
+                  onClick={() => handleDelete(goal)}
+                  className="w-8 h-8 rounded bg-gray-100 text-outline hover:text-error flex items-center justify-center transition-colors"
+                  title="Excluir Meta"
+                >
+                  <span className="material-symbols-outlined text-[20px]">delete</span>
+                </button>
+              </div>
+
+              <div className="flex-1 w-full pt-2">
+                <h3 className="text-body-lg font-semibold mb-4 pr-16">{goal.name}</h3>
+                <div className="flex items-end gap-6 mb-4">
+                  <div>
+                    <p className="text-label-sm text-outline">Total Guardado</p>
+                    <p className="text-headline-md text-primary-container">{formatCurrency(totalSaved)}</p>
+                  </div>
+                  <div>
+                    <p className="text-label-sm text-outline">Objetivo</p>
+                    <p className="text-body-lg font-medium text-on-surface">{formatCurrency(goal.target_amount)}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-label-sm">
+                  <span className="text-outline">Saldo manual: {formatCurrency(goal.current_amount)}</span>
+                  <span className="text-success font-medium">Cofrinho: +{formatCurrency(goal.linked_transactions_sum)}</span>
+                </div>
+
+                <div className="progress-bar h-3 bg-gray-100">
+                  <div
+                    className={`progress-bar-fill ${pct >= 100 ? 'bg-success' : 'bg-primary-container'}`}
+                    style={{ width: `${Math.min(pct, 100)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between mt-2 text-label-sm font-medium">
+                  <span className={pct >= 100 ? 'text-success' : 'text-primary-container'}>
+                    {pct >= 100 ? '🎉 Concluído!' : `${pct}% alcançado`}
+                  </span>
+                  <span className="text-outline">
+                    {remaining > 0 ? `Faltam ${formatCurrency(remaining)}` : 'Meta batida!'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-full sm:w-40 h-40 shrink-0 relative flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={65}
+                      startAngle={90}
+                      endAngle={-270}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={pct >= 100 && entry.name === 'Guardado' ? '#0e8345' : entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip formatter={(value: any) => formatCurrency(Number(value))} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
+                  <span className={`text-xl font-bold ${pct >= 100 ? 'text-success' : 'text-primary-container'}`}>{pct}%</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={closeModal} title="Editar Meta">
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={editingGoalId ? "Editar Meta" : "Nova Meta"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-label-md mb-1 text-on-surface">Nome da Meta *</label>
@@ -170,31 +215,42 @@ export default function GoalsPage() {
               required
               type="text" 
               value={name}
+              placeholder="Ex: Reserva de Emergência, Viagem pra Disney"
               onChange={e => setName(e.target.value)}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
             />
           </div>
-          <div>
-            <label className="block text-label-md mb-1 text-on-surface">Valor Alvo (R$) *</label>
-            <input 
-              required
-              type="number" 
-              step="0.01"
-              value={targetAmount}
-              onChange={e => setTargetAmount(Number(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-label-md mb-1 text-on-surface">Valor Alvo (R$) *</label>
+              <input 
+                required
+                type="number" 
+                step="0.01"
+                min="0.01"
+                value={targetAmount}
+                onChange={e => setTargetAmount(e.target.value ? Number(e.target.value) : '')}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
+              />
+            </div>
+            <div>
+              <label className="block text-label-md mb-1 text-on-surface">Saldo Inicial (R$)</label>
+              <input 
+                required
+                type="number" 
+                step="0.01"
+                min="0"
+                value={currentAmount}
+                onChange={e => setCurrentAmount(e.target.value ? Number(e.target.value) : '')}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-label-md mb-1 text-on-surface">Valor Atual Guardado (R$) *</label>
-            <input 
-              required
-              type="number" 
-              step="0.01"
-              value={currentAmount}
-              onChange={e => setCurrentAmount(Number(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
-            />
+          <div className="bg-primary-50 p-3 rounded-lg border border-primary-100 flex gap-3">
+            <span className="material-symbols-outlined text-primary-container mt-0.5">info</span>
+            <p className="text-label-sm text-primary-container">
+              **Cofrinho Automático**: Para que o valor desta meta cresça sozinho, vá em **Configurações &gt; Categorias**, edite uma categoria (ex: Reserva) e vincule ela a esta meta.
+            </p>
           </div>
           <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
             <button 

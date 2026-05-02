@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../api/client';
 import type { Transaction, Category, Person } from '../types';
+import MonthSelector from '../components/MonthSelector';
 
 export default function TransactionsPage() {
   const [searchParams] = useSearchParams();
@@ -90,12 +91,7 @@ export default function TransactionsPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <input
-          type="month"
-          value={month}
-          onChange={e => setMonth(e.target.value)}
-          className="px-4 py-2 rounded-full border border-gray-200 text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface"
-        />
+        <MonthSelector month={month} onChange={setMonth} />
         
         <select
           value={selectedCategory}
