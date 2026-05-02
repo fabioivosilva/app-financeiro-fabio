@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — A1 Design System concluído
+> Última atualização: 2026-05-02 — A2 Layout Base concluído
 
 ---
 
@@ -31,22 +31,21 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**A2 — Layout Base + Sidebar novo** — shell visual do Etheris Finance
+**A3 — Fix build_desktop.bat** — remover pausa final do build
 
 **O que fazer:**
-1. Reescrever `frontend/src/components/Sidebar.tsx` seguindo o design Claude/Stitch
-2. Ajustar `frontend/src/layouts/MainLayout.tsx` se necessário
-3. Manter itens: Dashboard, Importar, Transações, Provisões, Metas, Regras, Configurações
-4. **Não tocar nas páginas ainda** — só layout/shell
+1. Verificar `build_desktop.bat`
+2. Remover `pause` do final se ainda existir
+3. Testar que o build roda sem travar via PowerShell
 
-Referência visual: `design/App-financeiro-claude-design.zip`, componente `components/shell.jsx`
+Referência: item A3 em `obsidian-vault/05_PENDENCIAS.md`
 
 ## 📋 Ordem de Execução
 
 ### Trilha A — Fundação (fazer primeiro)
 1. `[M]` A1 — Setup Design System Etheris Finance ✅
-2. `[P]` A2 — Layout Base + Sidebar novo ← **AGORA**
-3. `[P]` A3 — Fix build_desktop.bat (remover pause)
+2. `[P]` A2 — Layout Base + Sidebar novo ✅
+3. `[P]` A3 — Fix build_desktop.bat (remover pause) ← **AGORA**
 
 ### Trilha B — Migração das Telas (após A1+A2)
 4. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout)
@@ -72,11 +71,12 @@ Referência visual: `design/App-financeiro-claude-design.zip`, componente `compo
 | Provisões — Modelo Base (Trilha 3 Item 1) | ✅ backend pronto |
 | Multi-Metas & Cofrinho | ✅ backend pronto |
 | A1 — Setup Design System Etheris Finance | ✅ tokens Tailwind, Inter e utilitários glass globais |
+| A2 — Layout Base + Sidebar novo | ✅ Sidebar Etheris + layout base com área principal alinhada |
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
 
 ## 💬 Nota da Sessão Anterior
-Feito: A1 concluiu a fundação visual do Etheris Finance em `frontend/tailwind.config.js`, `frontend/src/styles/globals.css`, `frontend/src/main.tsx` e `frontend/index.html`.
-Pendente: iniciar A2 com o novo Sidebar/Layout, sem migrar páginas ainda.
+Feito: A2 concluiu o shell base em `frontend/src/components/Sidebar.tsx` e `frontend/src/layouts/MainLayout.tsx`, sem migrar páginas.
+Pendente: iniciar A3 para remover pausa do `build_desktop.bat`, se ainda existir.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`
