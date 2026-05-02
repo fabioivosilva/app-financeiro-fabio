@@ -48,6 +48,11 @@ desktop.ini
 # PyInstaller
 *.spec.bak
 
+# Build artifacts — executável gerado pelo build_desktop.bat
+ControleFinanceiro/
+backend/dist/
+backend/build/
+
 # Obsidian (memória local, não versionar)
 # C:\Users\fabio\OneDrive\Documentos\Projetos\app-financeiro-fabio\
 SESSION_STATE.md

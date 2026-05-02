@@ -8,7 +8,12 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(npx tsc *)",
-      "Bash(.venv/Scripts/python.exe -c \"from app.models import Provision, ProvisionOccurrence; from app.schemas import ProvisionOut, ProvisionCreate; from app.routers import provisions; print\\('OK'\\)\")"
+      "Bash(.venv/Scripts/python.exe -c \"from app.models import Provision, ProvisionOccurrence; from app.schemas import ProvisionOut, ProvisionCreate; from app.routers import provisions; print\\('OK'\\)\")",
+      "Bash(build_desktop.bat)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "PowerShell(cmd /c \"c:\\\\Users\\\\fabio\\\\Projects\\\\app-financeiro-fabio\\\\build_desktop.bat\")",
+      "Bash(git rm *)"
     ]
   }
 }

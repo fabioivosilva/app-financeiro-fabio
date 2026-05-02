@@ -51,4 +51,3 @@ echo [4/4] Sucesso!
 echo Executavel para uso/teste: %cd%\ControleFinanceiro\ControleFinanceiro.exe
 echo Banco usado por este executavel: %cd%\data\finance.db
 echo Artefato original tambem permanece em: backend\dist\ControleFinanceiro\
-pause
