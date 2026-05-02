@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '../api/client';
 import type { Rule, Category, Person } from '../types';
 import Modal from '../components/Modal';
@@ -8,6 +8,7 @@ export default function RulesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -100,12 +101,35 @@ export default function RulesPage() {
     }
   };
 
+  const filteredRules = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return rules;
+
+    return rules.filter(rule => {
+      const sourceLabel = rule.source === 'bank_statement'
+        ? 'extrato'
+        : rule.source === 'credit_card'
+          ? 'cartao cartão'
+          : 'ambas';
+      const haystack = [
+        rule.keyword,
+        rule.category_name || '',
+        rule.person_name || '',
+        sourceLabel,
+        String(rule.priority),
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [rules, searchTerm]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="page-title">Regras de Automação</h2>
-          <p className="page-subtitle">{rules.length} regras cadastradas</p>
+          <p className="page-subtitle">
+            {filteredRules.length} de {rules.length} regras cadastradas
+          </p>
         </div>
         <button className="btn-primary" onClick={() => openModal()}>
           <span className="material-symbols-outlined">add</span>
@@ -116,7 +140,22 @@ export default function RulesPage() {
       {loading ? (
         <div className="animate-pulse text-outline">Carregando...</div>
       ) : (
-        <div className="card p-0 overflow-x-auto">
+        <div className="card p-0 overflow-hidden">
+          <div className="p-4 border-b border-gray-100">
+            <div className="relative max-w-md">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">
+                search
+              </span>
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Buscar por palavra, categoria, pessoa ou origem"
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface"
+              />
+            </div>
+          </div>
+          <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
             <thead>
               <tr className="border-b border-gray-100 text-label-md text-outline text-left">
@@ -129,7 +168,7 @@ export default function RulesPage() {
               </tr>
             </thead>
             <tbody>
-              {rules.map(r => (
+              {filteredRules.map(r => (
                 <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors group">
                   <td className="px-6 py-3 text-body-md font-medium">{r.keyword}</td>
                   <td className="px-6 py-3">
@@ -171,8 +210,16 @@ export default function RulesPage() {
                   </td>
                 </tr>
               )}
+              {rules.length > 0 && filteredRules.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-outline">
+                    Nenhuma regra encontrada para essa busca.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
