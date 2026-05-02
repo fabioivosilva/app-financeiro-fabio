@@ -61,7 +61,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
   - Ajustar `frontend/src/layouts/MainLayout.tsx` se necessário
   - **Não tocam nas páginas — só shell**
 
-- [/] `[P]` 🔒 [FABIO] **A3 — Fix build_desktop.bat**
+- [x] `[P]` **A3 — Fix build_desktop.bat**
   - Remover linha `pause` do final do `build_desktop.bat`
   - Testar que o build roda sem travar via PowerShell
   - Commitar — habilita o agente a buildar automaticamente ao fechar itens

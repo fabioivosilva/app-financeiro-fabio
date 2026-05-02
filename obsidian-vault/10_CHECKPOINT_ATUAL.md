@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — A2 Layout Base concluído
+> Última atualização: 2026-05-02 — Trilha A concluída
 
 ---
 
@@ -31,24 +31,25 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**A3 — Fix build_desktop.bat** — remover pausa final do build
+**B1 — Dashboard v2** — primeira tela da migração Etheris Finance
 
 **O que fazer:**
-1. Verificar `build_desktop.bat`
-2. Remover `pause` do final se ainda existir
-3. Testar que o build roda sem travar via PowerShell
+1. Converter o visual de Dashboard para React/TypeScript usando a referência Claude/Stitch
+2. Manter integração com `/api/dashboard/`
+3. Corrigir o gráfico de Fluxo de Caixa Futuro para barras agrupadas simples
+4. Manter KPIs, limites de categoria e alertas
 
-Referência: item A3 em `obsidian-vault/05_PENDENCIAS.md`
+Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 
 ## 📋 Ordem de Execução
 
 ### Trilha A — Fundação (fazer primeiro)
 1. `[M]` A1 — Setup Design System Etheris Finance ✅
 2. `[P]` A2 — Layout Base + Sidebar novo ✅
-3. `[P]` A3 — Fix build_desktop.bat (remover pause) ← **AGORA**
+3. `[P]` A3 — Fix build_desktop.bat (remover pause) ✅
 
 ### Trilha B — Migração das Telas (após A1+A2)
-4. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout)
+4. `[G]` B1 — Dashboard v2 (corrigir gráfico + novo layout) ← **AGORA**
 5. `[M]` B2 — Importar v2
 6. `[M]` B3 — Transações v2
 7. `[M]` B4 — Provisões v2
@@ -72,11 +73,12 @@ Referência: item A3 em `obsidian-vault/05_PENDENCIAS.md`
 | Multi-Metas & Cofrinho | ✅ backend pronto |
 | A1 — Setup Design System Etheris Finance | ✅ tokens Tailwind, Inter e utilitários glass globais |
 | A2 — Layout Base + Sidebar novo | ✅ Sidebar Etheris + layout base com área principal alinhada |
+| A3 — Fix build_desktop.bat | ✅ build validado sem pausa/travamento |
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
 
 ## 💬 Nota da Sessão Anterior
-Feito: A2 concluiu o shell base em `frontend/src/components/Sidebar.tsx` e `frontend/src/layouts/MainLayout.tsx`, sem migrar páginas.
-Pendente: iniciar A3 para remover pausa do `build_desktop.bat`, se ainda existir.
+Feito: Trilha A concluída. A3 confirmou que `build_desktop.bat` já não tinha `pause` e validou execução completa sem travar.
+Pendente: iniciar B1 Dashboard v2, primeira tela da migração visual.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`
