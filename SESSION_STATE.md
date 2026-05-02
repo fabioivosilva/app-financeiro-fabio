@@ -13,7 +13,7 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - URL: https://github.com/fabioivosilva/app-financeiro-fabio
 - Local: C:\Users\fabio\Projects\app-financeiro-fabio
 - Branch: develop
-- Último commit: feat: setup pywebview and PyInstaller for desktop distribution (FASE 9)
+- Último commit: fix(pdf): support Latam Pass dates and fix regex boundaries
 
 ## Stack
 - Backend: FastAPI, SQLAlchemy, SQLite, Uvicorn, Pywebview, PyInstaller
@@ -23,6 +23,7 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - O executável encontra-se em `backend/dist/ControleFinanceiro.exe`.
 - Ele roda um servidor local em background e abre uma janela web nativa no Windows.
 - O banco de dados (`app.db`) será criado/preservado automaticamente na mesma pasta em que o usuário executar o arquivo `.exe`.
+- Foram realizadas correções finais Pós-MVP: inclusão do filtro de Mês no Dashboard e suporte a faturas Itaú Latam Pass (com datas abreviadas).
 
 ## Próximos Passos Pós-MVP (Backlog Futuro)
 - Criar a funcionalidade de backup automático e sincronização em nuvem.
