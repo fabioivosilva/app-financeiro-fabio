@@ -76,8 +76,21 @@ def categorize_transaction(
         create_rule=data.create_rule,
         apply_similar=data.apply_similar,
     )
+
+    # Check for goal sensitization feedback
+    goal_info = {}
+    if t.category and t.category.goal_id:
+        goal = crud.get_goal(db, t.category.goal_id)
+        if goal:
+            goal_info = {
+                "goal_id": goal.id,
+                "goal_name": goal.name,
+                "total_saved": goal.current_amount + getattr(goal, "linked_transactions_sum", 0)
+            }
+
     return schemas.TransactionCategorizeOut(
         transaction=_transaction_out(t),
         rule_id=rule.id if rule else None,
         similar_updated=similar_updated,
+        **goal_info
     )

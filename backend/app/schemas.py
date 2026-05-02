@@ -127,6 +127,9 @@ class TransactionCategorizeOut(BaseModel):
     transaction: TransactionOut
     rule_id: Optional[int] = None
     similar_updated: int = 0
+    goal_id: Optional[int] = None
+    goal_name: Optional[str] = None
+    total_saved: Optional[float] = None
 
 
 # ---------------------------------------------------------------------------

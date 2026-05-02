@@ -157,16 +157,23 @@ def seed_database(db: Session) -> None:
     # -----------------------------------------------------------------------
     # Goal — Reserva de emergência
     # -----------------------------------------------------------------------
-    db.add(Goal(
+    reserva_goal = Goal(
         name="Reserva de emergência",
         target_amount=10000.0,
         current_amount=0.0,
         target_date=None,
-    ))
+    )
+    db.add(reserva_goal)
+    db.flush()
+
+    # Link "Reserva de Emergência" category to this goal
+    reserva_cat = db.query(Category).filter(Category.name == "Reserva de Emergência").first()
+    if reserva_cat:
+        reserva_cat.goal_id = reserva_goal.id
 
     db.commit()
     ensure_accounting_defaults(db)
-    print("[SEED] Database seeded with 56 rules and full category list.")
+    print("[SEED] Database seeded with 56 rules and goal-category links.")
 
 
 def ensure_accounting_defaults(db: Session) -> None:

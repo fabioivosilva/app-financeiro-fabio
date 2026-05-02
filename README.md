@@ -70,4 +70,19 @@ python main.py
 - Sem login, sem Open Finance
 - Sem plano pago ou SaaS
 - SQLite local
-- Executável Windows standalone
+
+---
+
+## 🤖 AI Master Prompt (Para Fabio & Thiago)
+
+Ao iniciar uma nova sessão com qualquer IA (Antigravity, Codex, etc.), copie e cole o prompt abaixo para garantir sincronia total:
+
+> "Estou trabalhando no projeto **App Financeiro Fabio** (Repo: `https://github.com/fabioivosilva/app-financeiro-fabio.git`). Antes de qualquer ação, siga rigorosamente este protocolo de entrada:
+>
+> 1. **Sincronização:** Garanta que você está na branch `develop`. Se houver mudanças remotas, faça o pull.
+> 2. **Cérebro (Obsidian):** Leia o arquivo `obsidian-vault/10_CHECKPOINT_ATUAL.md` e o `obsidian-vault/05_PENDENCIAS.md`. Eles são a fonte da verdade sobre o que deve ser feito.
+> 3. **Design System:** Leia o arquivo `obsidian-vault/07_UX_REFERENCE.md`. O frontend (React/Tailwind) deve seguir o estilo **Stitch Premium**.
+> 4. **Regras de Ouro:** O arquivo `backend/app/seed.py` contém o mapeamento de categorias/regras. Mantenha-o sincronizado com o banco de dados local.
+> 5. **Handoff:** Ao final, atualize o `obsidian-vault/10_CHECKPOINT_ATUAL.md` com o seu progresso.
+>
+> Agora, [INSIRA SUA TAREFA AQUI]."

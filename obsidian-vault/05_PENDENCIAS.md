@@ -25,7 +25,7 @@
 - [x] Definir se o vinculo fica na categoria, na meta, ou em tabela/regra separada.
 - [x] Ajustar backend de metas para calcular progresso por transacoes vinculadas e ajustar frontend para selecionar o vinculo.
 - [x] **Categoria de Metas / Cofrinho:** Criar ou padronizar uma categoria de metas/cofrinho. Quando uma transacao do extrato for categorizada nessa categoria vinculada a uma meta, ela deve aparecer normalmente no extrato/transacoes e alimentar automaticamente o progresso da meta.
-- [ ] **Fluxo de Guarda em Meta:** Ao registrar uma guarda/aporte em uma meta, gerar ou vincular uma transacao correspondente no extrato, para manter rastreabilidade entre dinheiro que saiu da conta e progresso do cofrinho.
+- [/] **Fluxo de Guarda em Meta:** Ao registrar uma guarda/aporte em uma meta, gerar ou vincular uma transação correspondente no extrato, para manter rastreabilidade entre dinheiro que saiu da conta e progresso do cofrinho.
 - [ ] **Preenchimento Automatico pela Categoria:** Ao selecionar a categoria de metas em uma transacao, carregar/aplicar automaticamente a meta vinculada quando houver correspondencia clara.
 
 ### Backlog Pos-MVP - Melhorias de Usabilidade

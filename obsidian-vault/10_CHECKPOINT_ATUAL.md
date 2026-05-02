@@ -31,4 +31,4 @@ Este arquivo serve como o "cérebro" compartilhado entre diferentes instâncias 
 - Leia o arquivo `docs/AI_SESSION_STATE.md` e o `05_PENDENCIAS.md` (se disponível no Obsidian local).
 - Sempre reconstrua o executável usando `build_desktop.bat` após mudanças visuais ou lógicas.
 - Mantenha o estilo visual "Premium/Moderno" (dark mode, glassmorphism, micro-animações).
-- **Não apague este arquivo**, apenas atualize o progresso ao final de cada tarefa.
+- **Trabalhando agora:** Implementando o **Fluxo de Aporte em Meta (Cofrinho)**. O objetivo é que transações do extrato categorizadas como "Reserva" alimentem automaticamente o saldo das metas vinculadas.

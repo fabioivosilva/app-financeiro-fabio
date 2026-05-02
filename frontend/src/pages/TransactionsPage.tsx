@@ -20,6 +20,7 @@ export default function TransactionsPage() {
   const [selectedPerson, setSelectedPerson] = useState<number | ''>(searchParams.get('person_id') ? Number(searchParams.get('person_id')) : '');
   const [selectedSource, setSelectedSource] = useState<string>(searchParams.get('source') || '');
   const [sortMode, setSortMode] = useState<'date' | 'amount_desc'>('date');
+  const [toast, setToast] = useState<{ message: string; sub: string } | null>(null);
 
   const loadData = () => {
     setLoading(true);
@@ -71,17 +72,45 @@ export default function TransactionsPage() {
 
   const updateCategory = async (txnId: number, categoryId: number) => {
     try {
-      await api.post(`/transactions/${txnId}/categorize`, {
+      const res = await api.post(`/transactions/${txnId}/categorize`, {
         category_id: categoryId,
         create_rule: true,
         apply_similar: true,
       });
+      
+      const { transaction, goal_name } = res.data;
+      if (goal_name) {
+        setToast({
+          message: `Mandou bem! Aporte realizado.`,
+          sub: `R$ ${Math.abs(transaction.amount).toLocaleString('pt-BR')} adicionados à meta ${goal_name} 🚀`
+        });
+        setTimeout(() => setToast(null), 5000);
+      }
+      
       loadData();
     } catch (err) { console.error(err); }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-[#820AD1] text-white p-4 rounded-2xl shadow-xl border border-white/20 flex items-center gap-4 min-w-[320px]">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-2xl">savings</span>
+            </div>
+            <div>
+              <p className="font-bold text-body-md leading-tight">{toast.message}</p>
+              <p className="text-white/80 text-xs mt-0.5">{toast.sub}</p>
+            </div>
+            <button onClick={() => setToast(null)} className="ml-auto text-white/50 hover:text-white">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="page-title">Transações</h2>
