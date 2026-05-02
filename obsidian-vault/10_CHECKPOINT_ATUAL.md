@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — Trilha A concluída
+> Última atualização: 2026-05-02 — Frontend antigo removido
 
 ---
 
@@ -31,13 +31,13 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**B1 — Dashboard v2** — primeira tela da migração Etheris Finance
+**B1 — Dashboard v2** — reconectar o Dashboard novo na API real
 
 **O que fazer:**
-1. Converter o visual de Dashboard para React/TypeScript usando a referência Claude/Stitch
-2. Manter integração com `/api/dashboard/`
-3. Corrigir o gráfico de Fluxo de Caixa Futuro para barras agrupadas simples
-4. Manter KPIs, limites de categoria e alertas
+1. Partir da nova base visual carregada de `C:\Users\fabio\Downloads\App-financeiro.zip`
+2. Trocar os dados mockados do Dashboard por `/api/dashboard/`
+3. Manter gráfico de Fluxo de Caixa Futuro em barras agrupadas simples
+4. Manter KPIs, limites de categoria e alertas no visual Etheris
 
 Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 
@@ -74,11 +74,12 @@ Referência: item B1 em `obsidian-vault/05_PENDENCIAS.md`
 | A1 — Setup Design System Etheris Finance | ✅ tokens Tailwind, Inter e utilitários glass globais |
 | A2 — Layout Base + Sidebar novo | ✅ Sidebar Etheris + layout base com área principal alinhada |
 | A3 — Fix build_desktop.bat | ✅ build validado sem pausa/travamento |
+| Reset do frontend antigo | ✅ React Router, páginas antigas e client antigo removidos; base visual do zip assumiu o app |
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
 
 ## 💬 Nota da Sessão Anterior
-Feito: Trilha A concluída. A3 confirmou que `build_desktop.bat` já não tinha `pause` e validou execução completa sem travar.
-Pendente: iniciar B1 Dashboard v2, primeira tela da migração visual.
+Feito: o frontend antigo foi removido do build. `frontend/src/App.tsx` agora usa a base visual do zip novo, `frontend/src/styles/prototype.css` veio do protótipo, e os arquivos antigos de páginas/router/API foram apagados.
+Pendente: iniciar B1 conectando o Dashboard novo na API real e removendo os dados mockados.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`
