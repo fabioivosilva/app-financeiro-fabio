@@ -42,3 +42,10 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - Regra operacional: usar/testar o `.exe` da raiz, pois ele fica junto de `data\finance.db` e preserva as categorias/regras ajustadas pelo usuário.
 - O artefato em `backend\dist` continua sendo gerado pelo PyInstaller, mas não deve ser o executável principal de uso diário quando o banco real está em `data\finance.db`.
 - Validação executada: `build_desktop.bat` concluiu com sucesso e deixou `backend\dist\ControleFinanceiro.exe` e `ControleFinanceiro.exe` com timestamp `2026-05-02 02:31:16` e tamanho `46009438` bytes.
+
+## Atualização de sessão - 2026-05-02T02:42:00-03:00
+- Implementado aprendizado de categoria: ao categorizar manualmente uma transação pendente, o sistema cria uma regra pela descrição normalizada e aplica a categoria em transações iguais ainda não revisadas.
+- Dashboard ajustado para ciclo financeiro 27-26: o mês de maio considera 27/04 a 26/05, cobrindo salário recebido no mês anterior.
+- Frontend do dashboard ganhou botões de mês anterior/próximo e exibe o intervalo real do ciclo financeiro.
+- Build desktop validado e copiado para a raiz: `ControleFinanceiro.exe` e `backend\dist\ControleFinanceiro.exe` ficaram com timestamp `2026-05-02 02:40:35` e tamanho `46013108` bytes.
+- Validações: `python -m unittest test_dashboard_service.py test_transaction_learning.py test_itau_pdf_parser.py`, `python -m py_compile ...`, `npm.cmd run build`, `build_desktop.bat`.

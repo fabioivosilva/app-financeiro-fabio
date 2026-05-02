@@ -57,7 +57,11 @@ export default function TransactionsPage() {
 
   const updateCategory = async (txnId: number, categoryId: number) => {
     try {
-      await api.put(`/transactions/${txnId}`, { category_id: categoryId, is_reviewed: true });
+      await api.post(`/transactions/${txnId}/categorize`, {
+        category_id: categoryId,
+        create_rule: true,
+        apply_similar: true,
+      });
       loadData();
     } catch (err) { console.error(err); }
   };

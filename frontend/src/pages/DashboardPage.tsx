@@ -30,6 +30,23 @@ export default function DashboardPage() {
   const formatCurrency = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+  const formatDate = (d: string) => {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  const formatMonthLabel = (month: string) => {
+    const [year, m] = month.split('-').map(Number);
+    const dt = new Date(year, m - 1, 1);
+    return dt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  };
+
+  const changeMonth = (delta: number) => {
+    const [year, m] = selectedMonth.split('-').map(Number);
+    const dt = new Date(year, m - 1 + delta, 1);
+    setSelectedMonth(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`);
+  };
+
   // Prepare data for BarChart (Person Spending)
   const personChartData = data.spending_by_person.map(p => ({
     name: p.person_name || 'Sem Pessoa',
@@ -49,15 +66,37 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="page-title">Dashboard</h2>
-          <p className="page-subtitle">Resumo financeiro de {data.month}</p>
+          <p className="page-subtitle">
+            Ciclo financeiro de {formatDate(data.period_start)} a {formatDate(data.period_end)}
+          </p>
         </div>
-        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center">
+        <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => changeMonth(-1)}
+            className="w-10 h-10 rounded-lg hover:bg-primary-50 text-outline hover:text-primary-container transition-colors flex items-center justify-center"
+            title="Mês anterior"
+          >
+            <span className="material-symbols-outlined">chevron_left</span>
+          </button>
+          <span className="min-w-40 text-center text-label-md font-semibold text-on-surface capitalize">
+            {formatMonthLabel(selectedMonth)}
+          </span>
           <input
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-4 py-2 rounded-lg border-none text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-transparent font-medium"
+            className="px-2 py-2 w-36 rounded-lg border-none text-label-md focus:outline-none focus:ring-2 focus:ring-primary-container bg-surface cursor-pointer"
+            title="Selecionar mês"
           />
+          <button
+            type="button"
+            onClick={() => changeMonth(1)}
+            className="w-10 h-10 rounded-lg hover:bg-primary-50 text-outline hover:text-primary-container transition-colors flex items-center justify-center"
+            title="Próximo mês"
+          >
+            <span className="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
       </div>
 

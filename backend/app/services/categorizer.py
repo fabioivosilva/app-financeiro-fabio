@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from ..models import Rule
 
 
-def _normalize(text: str) -> str:
+def normalize_text(text: str) -> str:
     """Uppercase, remove accents, collapse whitespace."""
     text = text.upper().strip()
     # Remove accents
@@ -18,6 +18,11 @@ def _normalize(text: str) -> str:
     # Collapse whitespace
     text = re.sub(r"\s+", " ", text)
     return text
+
+
+def build_learning_keyword(description: str) -> str:
+    """Build a conservative rule keyword from a reviewed transaction."""
+    return normalize_text(description)
 
 
 def categorize(
@@ -34,7 +39,7 @@ def categorize(
         - If a rule matches: (rule.category_id, rule.person_id or given, True)
         - If no match: (None, person_id, False)
     """
-    normalized = _normalize(description)
+    normalized = normalize_text(description)
 
     # Get active rules ordered by priority desc
     rules = (
@@ -49,7 +54,7 @@ def categorize(
         if rule.source and source and rule.source != source:
             continue
 
-        keyword = _normalize(rule.keyword)
+        keyword = normalize_text(rule.keyword)
         if keyword in normalized:
             matched_person = rule.person_id if rule.person_id else person_id
             return (rule.category_id, matched_person, True)

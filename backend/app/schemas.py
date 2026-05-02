@@ -96,6 +96,12 @@ class TransactionUpdate(BaseModel):
     is_reviewed: Optional[bool] = None
     description: Optional[str] = None
 
+class TransactionCategorizeRequest(BaseModel):
+    category_id: int
+    person_id: Optional[int] = None
+    create_rule: bool = True
+    apply_similar: bool = True
+
 class TransactionOut(TransactionBase):
     id: int
     category_id: Optional[int] = None
@@ -111,6 +117,11 @@ class TransactionOut(TransactionBase):
     category_name: Optional[str] = None
     person_name: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+
+class TransactionCategorizeOut(BaseModel):
+    transaction: TransactionOut
+    rule_id: Optional[int] = None
+    similar_updated: int = 0
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +228,8 @@ class CategoryLimit(BaseModel):
 
 class DashboardOut(BaseModel):
     month: str
+    period_start: date
+    period_end: date
     total_income: float
     total_expenses: float
     credit_card_total: float

@@ -105,6 +105,8 @@ export interface CategoryLimit {
 
 export interface Dashboard {
   month: string;
+  period_start: string;
+  period_end: string;
   total_income: number;
   total_expenses: number;
   credit_card_total: number;

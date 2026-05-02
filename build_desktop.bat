@@ -40,6 +40,7 @@ echo [3/4] Copiando executavel para a pasta do banco local...
 copy /Y "backend\dist\ControleFinanceiro.exe" "ControleFinanceiro.exe" >nul
 if %errorlevel% neq 0 (
     echo Erro ao copiar o executavel para a raiz do projeto!
+    echo Feche o ControleFinanceiro.exe se ele estiver aberto e rode o build novamente.
     exit /b %errorlevel%
 )
 
