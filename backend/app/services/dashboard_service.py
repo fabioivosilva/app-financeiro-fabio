@@ -5,7 +5,7 @@ Computes monthly summaries from transactions.
 from datetime import date, datetime
 from typing import Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, or_
 from ..models import Transaction, Category, Person, Goal
 from ..schemas import (
     DashboardOut, SpendingByPerson, SpendingByCategory, CategoryLimit,
@@ -27,6 +27,13 @@ def _financial_period(month: str) -> tuple[date, date]:
     )
 
 
+def _countable_transaction_filter():
+    return or_(
+        Transaction.category_id.is_(None),
+        Category.exclude_from_totals == False,
+    )
+
+
 def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut:
     """Build the full dashboard response for a given month."""
     if month:
@@ -45,14 +52,18 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
     # --- Total income ---
     total_income = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
         .filter(month_filter, Transaction.transaction_type == "income")
+        .filter(_countable_transaction_filter())
         .scalar()
     )
 
     # --- Total expenses ---
     total_expenses = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
         .filter(month_filter, Transaction.transaction_type == "expense")
+        .filter(_countable_transaction_filter())
         .scalar()
     )
     total_expenses = abs(total_expenses)
@@ -60,7 +71,9 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
     # --- Credit card total ---
     credit_card_total = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
         .filter(month_filter, Transaction.source == "credit_card", Transaction.transaction_type == "expense")
+        .filter(_countable_transaction_filter())
         .scalar()
     )
     credit_card_total = abs(credit_card_total)
@@ -68,7 +81,9 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
     # --- Bank expenses ---
     bank_expenses_total = (
         db.query(func.coalesce(func.sum(Transaction.amount), 0))
+        .outerjoin(Category, Transaction.category_id == Category.id)
         .filter(month_filter, Transaction.source == "bank_statement", Transaction.transaction_type == "expense")
+        .filter(_countable_transaction_filter())
         .scalar()
     )
     bank_expenses_total = abs(bank_expenses_total)
@@ -88,6 +103,8 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
             month_filter,
             Transaction.transaction_type == "expense",
         ))
+        .outerjoin(Category, Transaction.category_id == Category.id)
+        .filter(or_(Transaction.id.is_(None), _countable_transaction_filter()))
         .group_by(Person.id, Person.name)
         .all()
     )
@@ -113,6 +130,7 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
             Transaction.transaction_type == "expense",
         ))
         .filter(Category.kind.in_(["fixed", "variable"]))
+        .filter(Category.exclude_from_totals == False)
         .group_by(Category.id, Category.name)
         .having(func.sum(Transaction.amount) != 0)
         .all()
@@ -128,6 +146,7 @@ def get_dashboard_data(db: Session, month: Optional[str] = None) -> DashboardOut
     limit_cats = db.query(Category).filter(
         Category.monthly_limit.isnot(None),
         Category.is_active == True,
+        Category.exclude_from_totals == False,
     ).all()
 
     category_limits = []

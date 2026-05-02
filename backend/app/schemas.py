@@ -53,6 +53,7 @@ class CategoryBase(BaseModel):
     monthly_limit: Optional[float] = None
     color: Optional[str] = None
     is_active: bool = True
+    exclude_from_totals: bool = False
 
 class CategoryCreate(CategoryBase):
     pass
@@ -63,6 +64,7 @@ class CategoryUpdate(BaseModel):
     monthly_limit: Optional[float] = None
     color: Optional[str] = None
     is_active: Optional[bool] = None
+    exclude_from_totals: Optional[bool] = None
 
 class CategoryOut(CategoryBase):
     id: int

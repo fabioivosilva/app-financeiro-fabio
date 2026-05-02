@@ -54,6 +54,7 @@ class Category(Base):
     monthly_limit = Column(Float, nullable=True)
     color = Column(String(20), nullable=True)
     is_active = Column(Boolean, default=True)
+    exclude_from_totals = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     transactions = relationship("Transaction", back_populates="category")

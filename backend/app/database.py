@@ -5,6 +5,7 @@ import os
 import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import text
 
 if getattr(sys, 'frozen', False):
     # If the application is run as a bundle, the PyInstaller bootloader
@@ -30,6 +31,19 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+def ensure_database_schema() -> None:
+    """Apply lightweight SQLite migrations for existing local databases."""
+    with engine.begin() as conn:
+        category_columns = {
+            row[1] for row in conn.execute(text("PRAGMA table_info(categories)")).fetchall()
+        }
+        if "exclude_from_totals" not in category_columns:
+            conn.execute(text(
+                "ALTER TABLE categories "
+                "ADD COLUMN exclude_from_totals BOOLEAN NOT NULL DEFAULT 0"
+            ))
 
 
 def get_db():

@@ -19,6 +19,7 @@ export interface Category {
   monthly_limit: number | null;
   color: string | null;
   is_active: boolean;
+  exclude_from_totals: boolean;
   created_at: string;
 }
 

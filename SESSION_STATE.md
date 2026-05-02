@@ -73,3 +73,25 @@ Nenhuma, o MVP (Minimum Viable Product) especificado estÃ¡ 100% finalizado.
 - Processos antigos do `ControleFinanceiro.exe`/backend foram encerrados; porta `8000` deixou de ter listener ativo.
 - Validacoes: `python -m py_compile main_desktop.py app\routers\imports.py app\services\itau_excel_parser.py`, `python -m unittest test_itau_excel_parser.py`, `build_desktop.bat`.
 - Novo executavel para teste: `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`, timestamp `2026-05-02 02:59:28`, tamanho `46022243` bytes.
+
+## Atualizacao de sessao - 2026-05-02T03:13:08-03:00
+- Rebuild do executavel desktop concluido com sucesso via `build_desktop.bat` apos implementacao da regra contabil (exclude_from_totals) iniciada na sessao anterior.
+- Novo executavel gerado e validado em `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`.
+- Proximo passo sugerido pelo Backlog: iniciar funcionalidade de **Metas Inteligentes** (conectar categorias diretamente a metas para calculo automatico de progresso).
+
+
+## Checkpoint de fim de sessao - 2026-05-02T03:28:18-03:00
+- Sessao encerrada a pedido do usuario devido ao horario e pressao de tokens.
+- Aprovada a decisao de extrair apenas o PRIMEIRO NOME do titular do cartao na leitura de Excel Itaú.
+- Tres novos itens foram detalhados e adicionados ao arquivo 05_PENDENCIAS.md:
+  1. Extracao de titular (primeiro nome) do Excel Itaú para popular 'Gastos por Pessoa' no Dashboard.
+  2. Botao de exclusao logica (soft-delete) de Categorias na aba de Configuracoes.
+  3. Botao para ordenacao de valor decrescente (maior para o menor) na aba de Transacoes.
+- Proxima sessao deve iniciar lendo este checkpoint e o arquivo de Pendencias, e implementar essas melhorias antes da funcionalidade de 'Metas Inteligentes'.
+
+
+## Atualizacao de sessao - 2026-05-02T03:31:47-03:00
+- Adicionados itens ao backlog em 05_PENDENCIAS.md conforme pedido: tooltips no grafico de pizza e funcionalidade de multiplas metas.
+- Meta automatica atrelada a categorias ja constava no backlog (Metas Inteligentes).
+- Efetuando commit unificado das mudancas de regra contabil (exclude_from_totals) geradas pelo Codex e da atualizacao de session state.
+

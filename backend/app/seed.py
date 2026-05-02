@@ -6,10 +6,23 @@ from sqlalchemy.orm import Session
 from .models import Person, Category, Rule, Goal
 
 
+ACCOUNTING_INTERNAL_CATEGORY = "Pagamento de Fatura"
+ACCOUNTING_INTERNAL_RULES = [
+    "PAGAMENTO FATURA",
+    "PAGAMENTO DE FATURA",
+    "PAGTO FATURA",
+    "PAGTO CARTAO",
+    "PAGAMENTO CARTAO",
+    "DEBITO AUTOMATICO CARTAO",
+    "DEB AUTOMATICO CARTAO",
+]
+
+
 def seed_database(db: Session) -> None:
     """Populate database with initial data if empty."""
-    # Skip if already seeded
+    # Create the original seed only once, then always ensure accounting defaults.
     if db.query(Person).first():
+        ensure_accounting_defaults(db)
         return
 
     # -----------------------------------------------------------------------
@@ -113,4 +126,52 @@ def seed_database(db: Session) -> None:
     ))
 
     db.commit()
+    ensure_accounting_defaults(db)
     print("[SEED] Database seeded with initial data.")
+
+
+def ensure_accounting_defaults(db: Session) -> None:
+    """Ensure categories/rules that protect dashboard accounting exist."""
+    category = (
+        db.query(Category)
+        .filter(Category.name == ACCOUNTING_INTERNAL_CATEGORY)
+        .first()
+    )
+    if not category:
+        category = Category(
+            name=ACCOUNTING_INTERNAL_CATEGORY,
+            kind="transfer",
+            color="#607D8B",
+            exclude_from_totals=True,
+        )
+        db.add(category)
+        db.flush()
+    else:
+        category.kind = "transfer"
+        category.exclude_from_totals = True
+
+    for keyword in ACCOUNTING_INTERNAL_RULES:
+        existing = (
+            db.query(Rule)
+            .filter(
+                Rule.keyword == keyword,
+                Rule.source == "bank_statement",
+            )
+            .first()
+        )
+        if existing:
+            existing.category_id = category.id
+            existing.priority = max(existing.priority or 0, 100)
+            existing.is_active = True
+            continue
+
+        db.add(Rule(
+            keyword=keyword,
+            category_id=category.id,
+            person_id=None,
+            source="bank_statement",
+            priority=100,
+            is_active=True,
+        ))
+
+    db.commit()

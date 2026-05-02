@@ -8,7 +8,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from .database import engine, Base, SessionLocal
+from .database import engine, Base, SessionLocal, ensure_database_schema
 from .seed import seed_database
 from .routers import (
     dashboard,
@@ -23,6 +23,7 @@ from .routers import (
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+ensure_database_schema()
 
 # Seed initial data
 db = SessionLocal()

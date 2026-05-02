@@ -23,6 +23,7 @@ export default function SettingsPage() {
   const [catKind, setCatKind] = useState('variable');
   const [catLimit, setCatLimit] = useState<number | ''>('');
   const [catColor, setCatColor] = useState('#cccccc');
+  const [catExcludeFromTotals, setCatExcludeFromTotals] = useState(false);
 
   const loadData = () => {
     setLoading(true);
@@ -59,12 +60,14 @@ export default function SettingsPage() {
       setCatKind(c.kind);
       setCatLimit(c.monthly_limit || '');
       setCatColor(c.color || '#cccccc');
+      setCatExcludeFromTotals(c.exclude_from_totals);
     } else {
       setEditingId(null);
       setCatName('');
       setCatKind('variable');
       setCatLimit('');
       setCatColor('#820AD1');
+      setCatExcludeFromTotals(false);
     }
   };
 
@@ -95,7 +98,8 @@ export default function SettingsPage() {
       name: catName,
       kind: catKind,
       monthly_limit: catLimit === '' ? null : Number(catLimit),
-      color: catColor
+      color: catColor,
+      exclude_from_totals: catExcludeFromTotals
     };
     try {
       if (editingId) {
@@ -116,9 +120,10 @@ export default function SettingsPage() {
 
   if (loading) return <div className="animate-pulse text-outline">Carregando...</div>;
 
-  const fixedCats = categories.filter(c => c.kind === 'fixed');
-  const varCats = categories.filter(c => c.kind === 'variable');
-  const incomeCats = categories.filter(c => c.kind === 'income');
+  const fixedCats = categories.filter(c => c.kind === 'fixed' && !c.exclude_from_totals);
+  const varCats = categories.filter(c => c.kind === 'variable' && !c.exclude_from_totals);
+  const incomeCats = categories.filter(c => c.kind === 'income' && !c.exclude_from_totals);
+  const transferCats = categories.filter(c => c.kind === 'transfer' || c.exclude_from_totals);
 
   return (
     <div className="space-y-6">
@@ -192,6 +197,7 @@ export default function SettingsPage() {
           { label: 'Categorias Fixas', items: fixedCats },
           { label: 'Categorias Variáveis', items: varCats },
           { label: 'Receitas', items: incomeCats },
+          { label: 'Movimentações Internas', items: transferCats },
         ].map(group => (
           <div key={group.label} className="mb-6">
             <h4 className="text-label-md text-outline mb-2 uppercase tracking-wider">{group.label}</h4>
@@ -202,6 +208,9 @@ export default function SettingsPage() {
                   <span className="text-body-md flex-1">{cat.name}</span>
                   {cat.monthly_limit && (
                     <span className="text-label-sm text-outline">{formatCurrency(cat.monthly_limit)}</span>
+                  )}
+                  {cat.exclude_from_totals && (
+                    <span className="text-label-sm text-outline">fora dos totais</span>
                   )}
                   <button 
                     onClick={() => openCategoryModal(cat)}
@@ -267,6 +276,7 @@ export default function SettingsPage() {
                 <option value="variable">Variável</option>
                 <option value="fixed">Fixa</option>
                 <option value="income">Receita</option>
+                <option value="transfer">Movimentação interna</option>
               </select>
             </div>
             <div>
@@ -289,6 +299,17 @@ export default function SettingsPage() {
               className="w-full px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
             />
           </div>
+          <label className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+            <input
+              type="checkbox"
+              checked={catExcludeFromTotals}
+              onChange={e => setCatExcludeFromTotals(e.target.checked)}
+              className="mt-1"
+            />
+            <span className="text-body-md">
+              Não contabilizar esta categoria nos gastos, limites e dashboard
+            </span>
+          </label>
           <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
             <button type="button" onClick={closeModal} className="px-4 py-2 text-outline hover:bg-gray-50 rounded-lg font-medium transition-colors">Cancelar</button>
             <button type="submit" className="btn-primary">Salvar Categoria</button>
