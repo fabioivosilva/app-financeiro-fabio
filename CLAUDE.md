@@ -1,30 +1,16 @@
-# App Financeiro — Guia para Agentes de IA
+# App Financeiro — IA: leia só isto
 
-## 🚨 UMA ÚNICA LEITURA OBRIGATÓRIA AO INICIAR
-Ler **apenas** `NORTE.md` na raiz do projeto.
-Ele contém: roadmap, sizing, claims, protocolo de fechamento, stack, design system e comandos.
-Não ler mais nada do vault a menos que NORTE.md direcione.
-
-## Início de Sessão
+## Início obrigatório
 ```bash
-git checkout develop
-git pull origin develop
-# Ler NORTE.md
-# Checar 🔒 claims ativos
-# Apresentar orçamento da sessão ao usuário
+git checkout develop && git pull origin develop
 ```
+Depois: ler **apenas o bloco SNAPSHOT** no topo de `NORTE.md`.
+Pare de ler NORTE.md assim que tiver o contexto. Só role para baixo se precisar do detalhe do item.
 
-## Ao Iniciar uma Tarefa
-```bash
-# Marcar 🔒 [NOME] no item em NORTE.md
-git add NORTE.md && git commit -m "chore(norte): 🔒 [FABIO] inicia TXX" && git push origin develop
-```
+## Arquivos de detalhe (abrir só quando a tarefa pedir)
+- UI/componentes → `obsidian-vault/07_UX_REFERENCE.md`
+- Parsers → `obsidian-vault/08_PARSERS.md`
+- Onboarding Thiago → `obsidian-vault/THIAGO_SETUP.md`
 
-## Ao Fechar uma Tarefa
-```bash
-# Marcar [x] em NORTE.md, remover 🔒
-git add -A
-git commit -m "feat(TXX): descrição"
-# Instruir usuário a rodar build_desktop.bat
-git push origin develop
-```
+## Ao iniciar tarefa → marcar 🔒 e commitar NORTE.md
+## Ao fechar → [x], remover 🔒, commit, build_desktop.bat, push

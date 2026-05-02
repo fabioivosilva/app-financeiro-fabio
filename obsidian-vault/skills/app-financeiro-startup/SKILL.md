@@ -1,39 +1,24 @@
 ---
 name: app-financeiro-startup
 description: >
-  Protocolo obrigatório de início de sessão no projeto App Financeiro Fabio.
-  Use SEMPRE ao iniciar qualquer sessão neste projeto. Ativa ao receber token
-  do GitHub, ao mencionar "app financeiro", "projeto fabio" ou o prompt padrão.
+  Início de sessão no App Financeiro Fabio. Ativa ao mencionar "app financeiro",
+  "projeto fabio", token do GitHub, ou prompt padrão do projeto.
 ---
 
-# Skill: App Financeiro - Startup de Sessao
+# Startup — App Financeiro
 
-## Passo 1 — Atualizar o Repositório
 ```bash
-git checkout develop && git pull origin develop && git log --oneline -3
+git checkout develop && git pull origin develop
 ```
 
-## Passo 2 — Ler APENAS o NORTE.md (1 arquivo, tudo está lá)
-`NORTE.md` na raiz contém: roadmap completo, sizing, claims, protocolo, stack e comandos.
+Ler **só o bloco SNAPSHOT** (primeiras ~15 linhas) de `NORTE.md`.
+Parar de ler assim que tiver: próxima tarefa, claims ativos, capacidade da sessão.
 
-## Passo 3 — Apresentar ao usuário
+Apresentar ao usuário:
 ```
-## 🧠 Estado Atual
-Últimos commits: [git log --oneline -3]
-
-## 🔒 Claims Ativos
-[listar itens com 🔒 em NORTE.md — ou "nenhum"]
-
-## 💰 Orçamento da Sessão
-Capacidade: 1G · ou · 2-3M · ou · 4-6P
-
-Próximos disponíveis (sem claim):
-  [ ] [G] T0.1 — Setup Backend Base   ← próxima tarefa
-  [ ] [G] T0.2 — Setup Frontend Base  ← pode ser paralelo
-  ...
-
-Sugestão para hoje: [o que cabe na sessão]
+🔒 Claims ativos: [listar ou "nenhum"]
+⚡ Próxima tarefa: [do SNAPSHOT]
+💰 Sessão: [1G · 2-3M · 4-6P] — sugestão: [o que cabe hoje]
 ```
 
-## Passo 4 — Ao Iniciar Tarefa
-Marcar `🔒 [NOME]` no item em NORTE.md e commitar imediatamente.
+Só rolar NORTE.md além do SNAPSHOT se o usuário confirmar a tarefa e precisar do detalhe.
