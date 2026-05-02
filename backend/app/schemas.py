@@ -269,3 +269,17 @@ class ImportResult(BaseModel):
     duplicates_skipped: int
     pending_review: int
     auto_categorized: int
+
+# ---------------------------------------------------------------------------
+# Settings
+# ---------------------------------------------------------------------------
+class SettingSchema(BaseModel):
+    key: str
+    value: str
+
+    class Config:
+        from_attributes = True
+
+class SettingUpdate(BaseModel):
+    value: str
+

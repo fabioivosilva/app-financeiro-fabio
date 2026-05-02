@@ -26,6 +26,10 @@ export default function SettingsPage() {
   const [catColor, setCatColor] = useState('#cccccc');
   const [catExcludeFromTotals, setCatExcludeFromTotals] = useState(false);
   const [catGoalId, setCatGoalId] = useState<number | ''>('');
+  
+  // System Form State
+  const [importPath, setImportPath] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const loadData = () => {
     setLoading(true);
@@ -42,7 +46,36 @@ export default function SettingsPage() {
 
   useEffect(() => {
     loadData();
+    api.get('/settings/import_path')
+      .then(res => setImportPath(res.data.value))
+      .catch(console.error);
   }, []);
+
+  const saveSystemSettings = async () => {
+    setSavingSettings(true);
+    try {
+      await api.post('/settings/', { key: 'import_path', value: importPath });
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar configurações');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const resetSystem = async () => {
+    if (window.prompt('AVISO: Isso apagará todas as transações e faturas. Digite APAGAR para confirmar.') !== 'APAGAR') {
+      return;
+    }
+    try {
+      await api.delete('/settings/reset-system');
+      alert('Sistema resetado com sucesso!');
+      loadData();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao resetar sistema');
+    }
+  };
 
   const openPersonModal = (p?: Person) => {
     setModalType('person');
@@ -255,6 +288,45 @@ export default function SettingsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* System Settings */}
+      <div className="card">
+        <h3 className="text-body-lg font-semibold mb-4">Sistema</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-label-md mb-1">Pasta de Importação Padrão</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={importPath}
+                onChange={e => setImportPath(e.target.value)}
+                placeholder="Ex: C:\Users\fabio\Downloads"
+                className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-body-md focus:outline-none focus:ring-2 focus:ring-primary-container"
+              />
+              <button 
+                onClick={saveSystemSettings}
+                disabled={savingSettings}
+                className="btn-primary shrink-0"
+              >
+                {savingSettings ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+            <p className="text-label-sm text-outline mt-1">Defina a pasta onde você costuma baixar suas faturas e extratos.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="card border-error/20 bg-error/5">
+        <h3 className="text-body-lg font-semibold text-error mb-2">Zona de Perigo</h3>
+        <p className="text-label-md text-outline mb-4">Ações irreversíveis. Tenha cuidado!</p>
+        <button 
+          onClick={resetSystem}
+          className="px-4 py-2 border border-error text-error hover:bg-error hover:text-white rounded-lg font-medium transition-colors"
+        >
+          Limpar Todas as Transações e Faturas
+        </button>
       </div>
 
       {/* Modals */}
