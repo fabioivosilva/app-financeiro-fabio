@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import api from '../api/client';
 import type { Card, Transaction } from '../types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function CardPage() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -47,11 +46,22 @@ export default function CardPage() {
       personMap.set(name, (personMap.get(name) || 0) + t.amount);
     });
     
-    return Array.from(personMap.entries()).map(([name, total]) => ({
-      name,
-      total: Math.abs(total),
-      fill: name === 'Fernanda' ? '#f97316' : '#820AD1'
-    }));
+    return Array.from(personMap.entries())
+      .map(([name, total]) => ({
+        name,
+        total: Math.abs(total),
+        fill: name === 'Fernanda' ? '#f97316' : name === 'Sem Pessoa' ? '#64748b' : '#820AD1'
+      }))
+      .filter(item => item.total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [filteredTransactions]);
+
+  const personTotal = useMemo(() => {
+    return personChartData.reduce((acc, item) => acc + item.total, 0);
+  }, [personChartData]);
+
+  const unassignedTransactions = useMemo(() => {
+    return filteredTransactions.filter(t => !t.person_id).length;
   }, [filteredTransactions]);
 
   const formatCurrency = (v: number) =>
@@ -132,27 +142,51 @@ export default function CardPage() {
           </div>
 
           {activeTab === 'resumo' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="card flex flex-col">
                 <h3 className="text-body-lg font-semibold mb-4">Gasto por Pessoa no Cartão</h3>
                 {personChartData.length > 0 ? (
-                  <div className="h-64 w-full flex-1">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={personChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="name" />
-                        <YAxis tickFormatter={(value) => `R$ ${value}`} />
-                        <RechartsTooltip formatter={(value: any) => formatCurrency(Number(value))} />
-                        <Bar dataKey="total" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                          {personChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                  <div className="space-y-4">
+                    {personChartData.map(item => {
+                      const percentage = personTotal > 0 ? (item.total / personTotal) * 100 : 0;
+                      return (
+                        <div key={item.name}>
+                          <div className="flex items-center justify-between gap-3 mb-1">
+                            <div className="min-w-0">
+                              <p className="text-body-md font-medium text-on-surface truncate">{item.name}</p>
+                              <p className="text-label-sm text-outline">{percentage.toFixed(1).replace('.', ',')}% da fatura</p>
+                            </div>
+                            <p className="text-body-md font-semibold text-on-surface shrink-0">
+                              {formatCurrency(item.total)}
+                            </p>
+                          </div>
+                          <div className="progress-bar">
+                            <div
+                              className="progress-bar-fill"
+                              style={{
+                                width: `${Math.min(percentage, 100)}%`,
+                                backgroundColor: item.fill,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {unassignedTransactions > 0 && (
+                      <p className="text-label-sm text-outline pt-2 border-t border-gray-100">
+                        {unassignedTransactions} transações sem pessoa vinculada neste filtro.
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <p className="text-label-md text-outline flex-1 flex items-center justify-center">Sem dados suficientes.</p>
+                  <div className="text-center py-8">
+                    <p className="text-label-md text-outline">Sem dados por pessoa neste filtro.</p>
+                    {filteredTransactions.length > 0 && (
+                      <p className="text-label-sm text-outline mt-1">
+                        Existem transações no período, mas nenhuma possui pessoa vinculada.
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
