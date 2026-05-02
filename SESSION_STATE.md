@@ -59,3 +59,17 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - Validacoes: `python -m unittest test_itau_excel_parser.py test_itau_pdf_parser.py test_transaction_learning.py test_dashboard_service.py`, `python -m py_compile app\routers\imports.py app\services\itau_excel_parser.py`, `npm.cmd run build`, `build_desktop.bat`.
 - Novo executavel para teste: `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`, timestamp `2026-05-02 02:52:31`, tamanho `46022907` bytes. Usar esse da raiz porque fica junto de `data\finance.db`.
 - Proximo passo: testar no app da raiz importando o arquivo Excel da fatura em vez do PDF.
+
+## Checkpoint de contexto - 2026-05-02T03:00:00-03:00
+- Nova feature colocada no backlog: conectar categorias a metas automaticamente.
+- Exemplo desejado: se existir uma meta `Reserva de emergencia` e uma categoria `Reserva`, toda transacao categorizada como `Reserva` deve somar automaticamente no progresso da meta, sem edicao manual na aba Metas.
+- Escopo provavel para proxima sessao: modelar vinculo `Category -> Goal` ou regra por categoria, ajustar backend de metas para calcular progresso a partir de transacoes vinculadas, e ajustar frontend para permitir selecionar/editar esse vinculo na categoria ou na meta.
+- Como a sessao esta perto do limite de contexto, parar antes de implementar. Proxima sessao deve ler Obsidian, revisar modelos `Category`, `Goal`, `Transaction`, router/tela de metas e decidir o desenho minimo.
+
+## Atualizacao de sessao - 2026-05-02T03:00:00-03:00
+- Corrigido erro `Method Not Allowed` ao importar Excel no executavel: havia processos antigos usando a porta fixa `8000`, entao a janela nova podia conversar com um backend velho sem a rota `/imports/credit-card-excel`.
+- `backend/main_desktop.py` agora escolhe uma porta livre a cada abertura e passa essa porta para o Uvicorn e para a janela PyWebView, evitando conflito com sessoes antigas.
+- Confirmado no codigo atual que as rotas de importacao existem: `GET /api/imports/`, `POST /api/imports/bank-statement-ofx`, `POST /api/imports/credit-card-pdf`, `POST /api/imports/credit-card-excel`.
+- Processos antigos do `ControleFinanceiro.exe`/backend foram encerrados; porta `8000` deixou de ter listener ativo.
+- Validacoes: `python -m py_compile main_desktop.py app\routers\imports.py app\services\itau_excel_parser.py`, `python -m unittest test_itau_excel_parser.py`, `build_desktop.bat`.
+- Novo executavel para teste: `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`, timestamp `2026-05-02 02:59:28`, tamanho `46022243` bytes.

@@ -6,23 +6,22 @@ import socket
 
 from app.main import app
 
+
 def find_free_port():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 0))
-    port = s.getsockname()[1]
-    s.close()
-    return port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
 
-# Fixed port to ensure ease of setup, could use find_free_port if desired
-PORT = 8000
 
-def start_server():
+def start_server(port):
     # run uvicorn server in the thread
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="error")
+    uvicorn.run(app, host="127.0.0.1", port=port, log_level="error")
 
 if __name__ == '__main__':
+    port = find_free_port()
+
     # Start the FastAPI server in a background thread
-    server_thread = threading.Thread(target=start_server, daemon=True)
+    server_thread = threading.Thread(target=start_server, args=(port,), daemon=True)
     server_thread.start()
     
     # Wait a moment for the server to actually start
@@ -31,7 +30,7 @@ if __name__ == '__main__':
     # Start the desktop window
     window = webview.create_window(
         'Controle Financeiro', 
-        f'http://127.0.0.1:{PORT}', 
+        f'http://127.0.0.1:{port}',
         width=1200, 
         height=800,
         min_size=(800, 600)
