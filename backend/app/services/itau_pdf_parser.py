@@ -15,7 +15,7 @@ import pdfplumber
 
 
 # Regex patterns for Itaú PDF format
-_DATE_PATTERN = re.compile(r"^(\d{2}/\d{2})\s+")
+_DATE_PATTERN = re.compile(r"^(\d{2})\s*/\s*([a-zA-Z]{3}|\d{2})\s+")
 _AMOUNT_PATTERN = re.compile(r"([\d.,]+)\s*$")
 _INSTALLMENT_PATTERN = re.compile(r"(\d{2})/(\d{2})\s*$")
 _CARD_SECTION_PATTERN = re.compile(
@@ -27,13 +27,13 @@ _TOTAL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 _SKIP_PATTERNS = [
-    re.compile(r"^pagamento\s+m[ií]nimo", re.IGNORECASE),
-    re.compile(r"^cr[eé]dito\s+anterior", re.IGNORECASE),
-    re.compile(r"^encargos", re.IGNORECASE),
-    re.compile(r"^IOF", re.IGNORECASE),
-    re.compile(r"^saldo\s+anterior", re.IGNORECASE),
-    re.compile(r"^pagamento\s+efetuado", re.IGNORECASE),
-    re.compile(r"^anuidade", re.IGNORECASE),
+    re.compile(r"pagamento\s+m[ií]nimo", re.IGNORECASE),
+    re.compile(r"cr[eé]dito\s+anterior", re.IGNORECASE),
+    re.compile(r"encargos", re.IGNORECASE),
+    re.compile(r"IOF", re.IGNORECASE),
+    re.compile(r"saldo\s+anterior", re.IGNORECASE),
+    re.compile(r"pagamento\s+efetuado", re.IGNORECASE),
+    re.compile(r"anuidade", re.IGNORECASE),
 ]
 
 
@@ -60,15 +60,30 @@ def _parse_amount(text: str) -> Optional[float]:
 
 def _parse_date(text: str, reference_year: int, reference_month: int) -> Optional[date]:
     """
-    Parse DD/MM from transaction line.
+    Parse DD/MM or DD / MMM from transaction line.
     Uses reference year from statement. Handles Dec→Jan transition.
     """
     match = _DATE_PATTERN.search(text)
     if not match:
         return None
-    day_month = match.group(1)
+    
+    day_str = match.group(1)
+    month_str = match.group(2).lower()
+    
+    months_pt = {
+        "jan": 1, "fev": 2, "mar": 3, "abr": 4, "mai": 5, "jun": 6,
+        "jul": 7, "ago": 8, "set": 9, "out": 10, "nov": 11, "dez": 12,
+    }
+
     try:
-        day, month = map(int, day_month.split("/"))
+        day = int(day_str)
+        if month_str.isdigit():
+            month = int(month_str)
+        else:
+            month = months_pt.get(month_str)
+            if not month:
+                return None
+                
         year = reference_year
         # If statement is Jan but transaction is Dec, use previous year
         if reference_month <= 2 and month >= 11:
@@ -194,6 +209,9 @@ def parse_itau_pdf(file_content: bytes) -> List[Dict[str, Any]]:
                 desc_start = _DATE_PATTERN.search(line).end()
                 desc_end = _AMOUNT_PATTERN.search(line).start()
                 description = line[desc_start:desc_end].strip()
+                
+                # Remove trailing R$ or - R$
+                description = re.sub(r"[-\s]*R\$?$", "", description, flags=re.IGNORECASE).strip()
 
                 if not description:
                     continue
