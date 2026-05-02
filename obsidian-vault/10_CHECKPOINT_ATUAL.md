@@ -1,6 +1,6 @@
 # CHECKPOINT ATUAL — App Financeiro Fabio
 > **Arquivo canônico de handoff entre IAs.** Atualizar ao fechar qualquer item.
-> Última atualização: 2026-05-02 — Início da migração v2.0
+> Última atualização: 2026-05-02 — A1 Design System concluído
 
 ---
 
@@ -14,21 +14,21 @@ Backend mantido integralmente — só o React/Tailwind muda.
 - Executável atual: `ControleFinanceiro\ControleFinanceiro.exe` (raiz) — v0.1.0 ainda
 
 ## 🔴 Próxima Tarefa (Iniciar Aqui)
-**A1 — Setup Design System Etheris Finance** — fundação de tudo
+**A2 — Layout Base + Sidebar novo** — shell visual do Etheris Finance
 
 **O que fazer:**
-1. Atualizar `frontend/tailwind.config.ts` com tokens de cor do DESIGN.md
-2. Criar utilitários CSS: `.glass-card`, `.glass-modal`, `.btn-primary` com glow, `.btn-ghost`
-3. Instalar fonte Inter
-4. **Não tocar em páginas ainda** — só a fundação
+1. Reescrever `frontend/src/components/Sidebar.tsx` seguindo o design Claude/Stitch
+2. Ajustar `frontend/src/layouts/MainLayout.tsx` se necessário
+3. Manter itens: Dashboard, Importar, Transações, Provisões, Metas, Regras, Configurações
+4. **Não tocar nas páginas ainda** — só layout/shell
 
-Referência de cores em `C:\Users\fabio\Downloads\stitch_preview\stitch_instant_finance_tracker\etheris_finance\DESIGN.md`
+Referência visual: `design/App-financeiro-claude-design.zip`, componente `components/shell.jsx`
 
 ## 📋 Ordem de Execução
 
 ### Trilha A — Fundação (fazer primeiro)
-1. `[M]` A1 — Setup Design System Etheris Finance ← **AGORA**
-2. `[P]` A2 — Layout Base + Sidebar novo
+1. `[M]` A1 — Setup Design System Etheris Finance ✅
+2. `[P]` A2 — Layout Base + Sidebar novo ← **AGORA**
 3. `[P]` A3 — Fix build_desktop.bat (remover pause)
 
 ### Trilha B — Migração das Telas (após A1+A2)
@@ -54,7 +54,12 @@ Referência de cores em `C:\Users\fabio\Downloads\stitch_preview\stitch_instant_
 | Backend completo (models + CRUD + routers) | ✅ mantido na v2.0 |
 | Provisões — Modelo Base (Trilha 3 Item 1) | ✅ backend pronto |
 | Multi-Metas & Cofrinho | ✅ backend pronto |
+| A1 — Setup Design System Etheris Finance | ✅ tokens Tailwind, Inter e utilitários glass globais |
 | Dashboard, Importar, Transações, Cartão, Regras, Metas, Configurações | ✅ v0.1.0 (descartado visualmente) |
+
+## 💬 Nota da Sessão Anterior
+Feito: A1 concluiu a fundação visual do Etheris Finance em `frontend/tailwind.config.js`, `frontend/src/styles/globals.css`, `frontend/src/main.tsx` e `frontend/index.html`.
+Pendente: iniciar A2 com o novo Sidebar/Layout, sem migrar páginas ainda.
 
 ## ⚠️ Protocolo Obrigatório ao Fechar Item
 1. Marcar `[x]` em `05_PENDENCIAS.md`

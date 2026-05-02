@@ -40,7 +40,7 @@ com o design system **Etheris Finance** (gerado pelo Stitch).
 ## 🔴 Trilha A — Fundação do Novo Frontend
 > Fazer ANTES de qualquer tela. Tudo depende disso.
 
-- [/] `[M]` 🔒 [FABIO] **A1 — Setup Design System Etheris Finance**
+- [x] `[M]` **A1 — Setup Design System Etheris Finance**
   - Atualizar `frontend/tailwind.config.ts` com todos os tokens de cor do DESIGN.md
   - Instalar fonte Inter via `@fontsource/inter` ou importar do Google Fonts no index.html
   - Criar `frontend/src/styles/globals.css` com utilitários de glassmorphism:
