@@ -7,6 +7,13 @@
 | `[M]` Médio — 1 endpoint + 1 componente UI | ~8–20k | 2–3 itens M |
 | `[G]` Grande — novo modelo + backend + UI | ~20k+ | 1 item G |
 
+## Convenção de Tarefas em Andamento
+> Antes de começar uma tarefa, marque com `🔒 [SEU_NOME]` no item e faça commit.
+> Isso avisa a outra pessoa (e a IA dela) que aquele item está sendo trabalhado.
+>
+> **Como marcar:** `- [/] `[M]` 🔒 [FABIO] Nome da tarefa...`
+> **Como liberar:** remover o 🔒 ao fechar o item (virar `[x]`).
+
 > **Capacidade de uma sessão:** 1G · ou · 2-3M · ou · 4-6P
 
 ---

@@ -11,8 +11,9 @@ description: >
 # Skill: App Financeiro — Startup de Sessão
 
 ## Por que esta skill existe
-Este projeto é desenvolvido em duo (Fabio + Thiago) com múltiplos agentes de IA alternando sessões.
-Cada IA deve partir do estado mais recente do repositório e do Vault antes de qualquer código.
+Projeto desenvolvido em duo (Fabio + Thiago) com múltiplos agentes de IA alternando sessões.
+Cada IA deve partir do estado mais recente do repositório e checar se há tarefas já em andamento
+pelo outro desenvolvedor antes de sugerir qualquer trabalho.
 
 ---
 
@@ -21,6 +22,7 @@ Cada IA deve partir do estado mais recente do repositório e do Vault antes de q
 ```bash
 git checkout develop
 git pull origin develop
+git log --oneline -3   # mostrar os últimos commits ao usuário
 ```
 
 Se ainda não clonado:
@@ -34,37 +36,61 @@ cd app-financeiro-fabio && git checkout develop
 ## Passo 2 — Ler o Vault (nesta ordem, mínimo de tokens)
 
 1. `obsidian-vault/10_CHECKPOINT_ATUAL.md` — último estado + próxima tarefa
-2. `obsidian-vault/05_PENDENCIAS.md` — backlog com sizing P/M/G
+2. `obsidian-vault/05_PENDENCIAS.md` — backlog com sizing P/M/G e claims 🔒
 
 Não ler outros arquivos a menos que a tarefa exija (ver `obsidian-vault/00_INDEX.md`).
 
 ---
 
-## Passo 3 — Gerar Orçamento de Sessão
+## Passo 3 — Checar Tarefas em Andamento (🔒 Claims)
 
-Após ler o backlog, apresentar ao usuário:
+Ao ler o backlog, verificar se há itens marcados com 🔒:
+- `🔒 [FABIO]` — Fabio está trabalhando nisso
+- `🔒 [THIAGO]` — Thiago está trabalhando nisso
+
+Se houver claim ativo do **outro desenvolvedor**, avisar claramente e não sugerir aquele item.
+Se o claim for do **próprio usuário** desta sessão, perguntar se quer continuar ou liberar.
+
+---
+
+## Passo 4 — Gerar Orçamento de Sessão
+
+Apresentar ao usuário:
 
 ```
 ## 🧠 Estado Atual
 Último trabalho: [extraído do checkpoint]
-Commit: [git log --oneline -1]
+Últimos commits: [git log --oneline -3]
+
+## 🔒 Tarefas em Andamento
+[listar itens com 🔒 e por quem — ou "nenhuma" se limpo]
 
 ## 💰 Orçamento da Sessão
 Capacidade: 1G  ·  ou  ·  2-3M  ·  ou  ·  4-6P
 
-Itens disponíveis (por prioridade):
-  [/] [M] Fluxo de Aporte em Meta ............ ← recomendado agora
-  [ ] [P] Preenchimento Automático Categoria . ← dá pra encaixar junto
-  [ ] [G] Previsão de Gastos Futuros ......... ← sessão própria
-  ...
+Próximos itens disponíveis (sem claim):
+  [/] [M] 🔒 [FABIO] Aporte Manual em Meta .... em andamento por Fabio
+  [ ] [P] Preenchimento Automático Categoria .. disponível
+  [ ] [G] Parsers Plugáveis ................... disponível (sessão própria)
 
-Sugestão para hoje: [listar o que cabe — ex: "1M + 1P = ~80% da sessão"]
-
-## 🎯 Próxima Tarefa Recomendada
-[descrever o item mais prioritário com escopo claro]
+Sugestão para hoje: [o que cabe, excluindo itens com claim de outro dev]
 ```
 
-Só então perguntar ao usuário se confirma o plano ou quer ajustar.
+---
+
+## Passo 5 — Ao Iniciar uma Tarefa
+
+Antes de começar a codar, marcar o item no backlog com o claim:
+```markdown
+- [/] `[M]` 🔒 [FABIO] Nome da tarefa...
+```
+Fazer commit imediato do backlog atualizado:
+```bash
+git add obsidian-vault/05_PENDENCIAS.md
+git commit -m "chore(backlog): 🔒 [FABIO] inicia tarefa Nome Da Tarefa"
+git push origin develop
+```
+Isso avisa o Thiago (e a IA dele) que o item está sendo trabalhado.
 
 ---
 
