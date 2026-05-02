@@ -34,7 +34,9 @@ export default function ImportPage() {
       const ext = file.name.toLowerCase();
       const endpoint = ext.endsWith('.ofx')
         ? '/imports/bank-statement-ofx'
-        : '/imports/credit-card-pdf';
+        : ext.endsWith('.xls') || ext.endsWith('.xlsx')
+          ? '/imports/credit-card-excel'
+          : '/imports/credit-card-pdf';
 
       try {
         const res = await api.post(endpoint, formData, {
@@ -66,7 +68,7 @@ export default function ImportPage() {
   return (
     <div className="space-y-6">
       <h2 className="page-title">Importar Dados</h2>
-      <p className="page-subtitle">Arraste seus arquivos PDF ou OFX para importar</p>
+      <p className="page-subtitle">Arraste seus arquivos PDF, Excel ou OFX para importar</p>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Drop zone */}
@@ -85,12 +87,12 @@ export default function ImportPage() {
             </span>
             <p className="text-body-lg font-medium">Arraste arquivos aqui</p>
             <p className="text-label-md text-outline mt-1">ou clique para selecionar</p>
-            <p className="text-label-sm text-outline mt-2">Aceita: PDF (Itaú) e OFX (Extrato)</p>
+            <p className="text-label-sm text-outline mt-2">Aceita: PDF/Excel (Itaú) e OFX (Extrato)</p>
             <input
               id="file-input"
               type="file"
               multiple
-              accept=".pdf,.ofx"
+              accept=".pdf,.xls,.xlsx,.ofx"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -105,9 +107,9 @@ export default function ImportPage() {
                   <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className={`material-symbols-outlined ${
-                        f.name.endsWith('.pdf') ? 'text-error' : 'text-success'
+                        f.name.toLowerCase().endsWith('.pdf') ? 'text-error' : 'text-success'
                       }`}>
-                        {f.name.endsWith('.pdf') ? 'picture_as_pdf' : 'description'}
+                        {f.name.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'description'}
                       </span>
                       <span className="text-body-md">{f.name}</span>
                     </div>

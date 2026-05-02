@@ -49,3 +49,13 @@ Nenhuma, o MVP (Minimum Viable Product) especificado está 100% finalizado.
 - Frontend do dashboard ganhou botões de mês anterior/próximo e exibe o intervalo real do ciclo financeiro.
 - Build desktop validado e copiado para a raiz: `ControleFinanceiro.exe` e `backend\dist\ControleFinanceiro.exe` ficaram com timestamp `2026-05-02 02:40:35` e tamanho `46013108` bytes.
 - Validações: `python -m unittest test_dashboard_service.py test_transaction_learning.py test_itau_pdf_parser.py`, `python -m py_compile ...`, `npm.cmd run build`, `build_desktop.bat`.
+
+## Atualizacao de sessao - 2026-05-02T02:53:00-03:00
+- Como o bug do PDF continuou no uso real, adicionada importacao de fatura Itau por Excel (`.xls`/`.xlsx`) como caminho principal para cartao.
+- Novo parser `backend/app/services/itau_excel_parser.py` le o `.xls` binario do Itau sem dependencia nova, extrai secoes por final de cartao, datas, descricoes, parcelas, compras e creditos/estornos.
+- Backend ganhou endpoint `POST /imports/credit-card-excel` e reaproveita o mesmo fluxo de cartao para deduplicacao, criacao de cartao, categorizacao e pendencias.
+- Frontend da tela de importacao aceita `.xls`/`.xlsx` e envia Excel para o endpoint novo, mantendo PDF e OFX.
+- Validacao local com `C:\Users\fabio\Downloads\Fatura-Excel.xls`: parser encontrou 174 lancamentos, incluindo finais 1609, 8069, 5007, 5761, 4346 e uma taxa sem cartao.
+- Validacoes: `python -m unittest test_itau_excel_parser.py test_itau_pdf_parser.py test_transaction_learning.py test_dashboard_service.py`, `python -m py_compile app\routers\imports.py app\services\itau_excel_parser.py`, `npm.cmd run build`, `build_desktop.bat`.
+- Novo executavel para teste: `C:\Users\fabio\Projects\app-financeiro-fabio\ControleFinanceiro.exe`, timestamp `2026-05-02 02:52:31`, tamanho `46022907` bytes. Usar esse da raiz porque fica junto de `data\finance.db`.
+- Proximo passo: testar no app da raiz importando o arquivo Excel da fatura em vez do PDF.
