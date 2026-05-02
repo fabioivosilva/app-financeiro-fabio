@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Em andamento. T0.2a iniciado (frontend shell).
+STATUS     : T0.2a concluído. Frontend shell navegável no ar.
 BRANCH     : develop
-PRÓXIMA    : T0.1 — Setup Backend Base [G]
-CLAIMS     : 🔒 [FABIO] T0.2a — Frontend Shell (scaffold + layout + router + API client)
+PRÓXIMA    : T0.1 — Backend Base [G] · T0.2b — Design System [M]
+CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
@@ -49,7 +49,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-🔒 **[FABIO]** — T0.2a Frontend Shell (scaffold + layout + router + API client tipado)
+*Nenhum claim ativo no momento.*
 
 ---
 
@@ -61,9 +61,12 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
   Modelos SQLAlchemy (Transaction, Category, Rule, Person, Card, Goal, Settings) · CRUD · FastAPI com routers por domínio · seed.py com regras · migrations via database.py
   **Saída:** `localhost:8000` com dados de seed funcionando
 
-- [ ] `[G]` **T0.2 — Frontend Base** · *qualquer um · paralelo com T0.1*
-  Vite + React 19 + TS + Tailwind · Layout shell (sidebar + conteúdo + MonthSelector) · Design system (tokens, Button, Card, Modal, Badge) · react-router · API client tipado
-  **Saída:** shell navegável com design system visível
+- [x] `[G]` **T0.2a — Frontend Shell** · *Fabio · CONCLUÍDO*
+  Vite + React 19 + TS + Tailwind · AppShell + Sidebar + MonthSelector · react-router · API client tipado · 6 pages placeholder
+
+- [ ] `[M]` **T0.2b — Design System** · *qualquer um · paralelo com T0.1*
+  Button, Card, Modal, Badge · tokens completos · fontes Inter
+  **Saída:** componentes reutilizáveis com visual glassmorphism
 
 - [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · depende T0.1+T0.2*
   `rodar.bat` sobe backend + abre browser · `auto_sync.ps1` só faz git pull + notificação (sem rebuild exe)
