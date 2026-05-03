@@ -50,7 +50,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*Nenhum claim ativo no momento.*
+🔒 [FABIO] BUG.1 — Auditoria UI/API de todos os menus
 
 ---
 
