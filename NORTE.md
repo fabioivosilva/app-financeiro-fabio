@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T2.1a concluído. Tela de Transações com lista + filtros + API conectada.
+STATUS     : T2.1a concluído. Iniciando T2.1b — inline edit + regra automática.
 BRANCH     : develop
-PRÓXIMA    : T2.1b — Inline edit categoria + regra automática [M]
-CLAIMS     : nenhum
+PRÓXIMA    : T2.2 — Tela de Regras [M]
+CLAIMS     : 🔒 [FABIO] T2.1b — CategoryPopover + RuleModal
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
