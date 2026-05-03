@@ -7,7 +7,7 @@
 ```
 STATUS     : Projeto zerado. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
-PRÓXIMA    : C3-fluxo — transações importadas somem (suspeita: filtro ciclo dia27→26; testar mudando MonthSelector)
+PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -229,6 +229,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Configurações"
 
 ---
+
+- [x] `[P]` **T6.2 — Seção Bancos em Configurações** · *Claude.ai 2026-05-03*
+  Cards selecionáveis por banco (Itaú, C6, Nubank, Inter, Bradesco, Santander, Mercado Pago).
+  Toggle ativo/inativo com check visual. Formatos suportados por banco como chips.
+  Persiste em localStorage. Nav lateral atualizado. CSS seguindo design system.
 
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 

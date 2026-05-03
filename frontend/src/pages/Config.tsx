@@ -28,8 +28,30 @@ export function Config() {
 
   const refPessoas = useRef<HTMLElement>(null)
   const refCategorias = useRef<HTMLElement>(null)
+  const refBancos = useRef<HTMLElement>(null)
   const refSistema = useRef<HTMLElement>(null)
   const refPerigo = useRef<HTMLElement>(null)
+
+  const BANCOS_DISPONIVEIS = [
+    { id: 'itau',         label: 'Itaú',        logo: '🟠', formatos: ['Excel (.xls)', 'PDF', 'OFX'] },
+    { id: 'c6',           label: 'C6 Bank',      logo: '⚫', formatos: ['CSV'] },
+    { id: 'nubank',       label: 'Nubank',       logo: '🟣', formatos: ['CSV'] },
+    { id: 'inter',        label: 'Banco Inter',  logo: '🟠', formatos: ['CSV'] },
+    { id: 'bradesco',     label: 'Bradesco',     logo: '🔴', formatos: ['OFX'] },
+    { id: 'santander',    label: 'Santander',    logo: '🔴', formatos: ['OFX'] },
+    { id: 'mercado_pago', label: 'Mercado Pago', logo: '🔵', formatos: ['CSV'] },
+  ]
+  const STORAGE_KEY = 'cfg_bancos_ativos'
+  const [bancosAtivos, setBancosAtivos] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '["itau"]') } catch { return ['itau'] }
+  })
+  function toggleBanco(id: string) {
+    setBancosAtivos(prev => {
+      const next = prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      return next
+    })
+  }
 
   const [personModal, setPersonModal] = useState<{ open: boolean; editing?: Person }>({ open: false })
   const [cardModal, setCardModal] = useState<{ open: boolean; editing?: Card }>({ open: false })
@@ -52,7 +74,7 @@ export function Config() {
   function goTo(id: string) {
     setSecao(id)
     const map: Record<string, React.RefObject<HTMLElement | null>> = {
-      pessoas: refPessoas, categorias: refCategorias, sistema: refSistema, perigo: refPerigo,
+      pessoas: refPessoas, categorias: refCategorias, bancos: refBancos, sistema: refSistema, perigo: refPerigo,
     }
     map[id]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -78,6 +100,7 @@ export function Config() {
   const navItems = [
     { id: 'pessoas',    label: 'Pessoas & Cartões', icon: 'group' },
     { id: 'categorias', label: 'Categorias',        icon: 'label' },
+    { id: 'bancos',     label: 'Bancos',            icon: 'account_balance' },
     { id: 'sistema',    label: 'Sistema',           icon: 'tune' },
     { id: 'perigo',     label: 'Zona de Perigo',    icon: 'warning', danger: true },
   ]
@@ -203,6 +226,36 @@ export function Config() {
                 onAdd={() => setCatModal({ open: true })}
                 onAddSub={parentId => setCatModal({ open: true, parentId })}
               />
+            </section>
+
+            {/* Bancos */}
+            <section ref={refBancos} className="cfg-section">
+              <SectionHeader title="Bancos" subtitle="Selecione os bancos que você utiliza. Apenas os formatos de importação destes bancos serão exibidos." icon="account_balance" />
+              <div className="cfg-bancos-grid">
+                {BANCOS_DISPONIVEIS.map(banco => {
+                  const ativo = bancosAtivos.includes(banco.id)
+                  return (
+                    <button
+                      key={banco.id}
+                      onClick={() => toggleBanco(banco.id)}
+                      className={`cfg-banco-card${ativo ? ' cfg-banco-card-on' : ''}`}
+                    >
+                      <div className="cfg-banco-top">
+                        <span className="cfg-banco-logo">{banco.logo}</span>
+                        <span className={`cfg-banco-check${ativo ? ' cfg-banco-check-on' : ''}`}>
+                          <span className="material-symbols-rounded">{ativo ? 'check_circle' : 'radio_button_unchecked'}</span>
+                        </span>
+                      </div>
+                      <p className="cfg-banco-nome">{banco.label}</p>
+                      <div className="cfg-banco-formatos">
+                        {banco.formatos.map(f => (
+                          <span key={f} className="cfg-banco-chip">{f}</span>
+                        ))}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </section>
 
             {/* Sistema */}

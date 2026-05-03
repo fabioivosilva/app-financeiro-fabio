@@ -866,3 +866,47 @@ body::before {
 }
 .stub-title { font-size: 20px; font-weight: 600; }
 .stub-sub { font-size: 13px; color: var(--text-muted); max-width: 360px; }
+
+/* ── Bancos ────────────────────────────────────────────────── */
+.cfg-bancos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.cfg-banco-card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 16px;
+  background: rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(192,132,252,0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(var(--glass-blur));
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.cfg-banco-card:hover {
+  border-color: rgba(130,10,209,0.25);
+  background: rgba(130,10,209,0.04);
+}
+.cfg-banco-card-on {
+  border-color: var(--primary-2);
+  background: rgba(130,10,209,0.07);
+  box-shadow: 0 0 0 3px rgba(130,10,209,0.10);
+}
+.cfg-banco-top { display: flex; justify-content: space-between; align-items: center; }
+.cfg-banco-logo { font-size: 26px; line-height: 1; }
+.cfg-banco-check { color: rgba(130,10,209,0.25); font-size: 20px; display: grid; place-items: center; }
+.cfg-banco-check-on { color: var(--primary-2); }
+.cfg-banco-nome { font-size: 14px; font-weight: 600; color: var(--text); }
+.cfg-banco-formatos { display: flex; flex-wrap: wrap; gap: 4px; }
+.cfg-banco-chip {
+  font-size: 11px; font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(192,132,252,0.12);
+  color: var(--primary);
+}
+.cfg-banco-card-on .cfg-banco-chip {
+  background: rgba(130,10,209,0.15);
+  color: var(--primary-2);
+}
