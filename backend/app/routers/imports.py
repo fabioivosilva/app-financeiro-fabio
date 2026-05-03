@@ -2,9 +2,10 @@ from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
-from app.models import Transaction, Card
+from app.models import Transaction, Card, Rule
 from app.parsers import PARSER_REGISTRY
 from app.parsers.dedup import deduplicate
+from app.routers.rules import apply_rules_to
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
@@ -67,6 +68,11 @@ async def upload_file(
             )
             db.add(db_tx)
             criadas.append(db_tx)
+
+        # Aplica regras existentes nas transações recém-importadas
+        if criadas:
+            rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
+            apply_rules_to(criadas, rules)
 
         db.commit()
 

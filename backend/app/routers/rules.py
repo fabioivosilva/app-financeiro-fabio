@@ -61,29 +61,30 @@ def _normalize(text: str) -> str:
     return unicodedata.normalize("NFD", text).encode("ascii", "ignore").decode().lower()
 
 
-@router.post("/apply", summary="Aplica regras a transações pendentes sem categoria")
-def apply_rules(db: Session = Depends(get_db)):
-    """Percorre todas as transações pendentes sem categoria e aplica a primeira regra
-    cujo keyword esteja contido na descrição. Retorna quantas foram atualizadas."""
-    rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
-    if not rules:
-        return {"updated": 0}
-
-    pending = db.query(Transaction).filter(
-        Transaction.category_id.is_(None),
-    ).all()
-
+def apply_rules_to(transactions: list, rules: list) -> int:
+    """Aplica regras a uma lista de transações sem categoria. Retorna quantas foram atualizadas."""
     updated = 0
-    for tx in pending:
+    for tx in transactions:
+        if tx.category_id is not None:
+            continue
         desc = _normalize(tx.description)
         for rule in rules:
-            if _normalize(rule.keyword) in desc:
+            if rule.category_id and _normalize(rule.keyword) in desc:
                 tx.category_id = rule.category_id
                 if rule.person_id:
                     tx.person_id = rule.person_id
                 tx.status = "confirmado"
                 updated += 1
                 break
+    return updated
 
+
+@router.post("/apply", summary="Aplica regras a todas as transações sem categoria")
+def apply_rules(db: Session = Depends(get_db)):
+    rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
+    if not rules:
+        return {"updated": 0}
+    pending = db.query(Transaction).filter(Transaction.category_id.is_(None)).all()
+    updated = apply_rules_to(pending, rules)
     db.commit()
     return {"updated": updated}
