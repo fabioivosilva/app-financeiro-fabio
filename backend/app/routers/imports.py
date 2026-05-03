@@ -18,7 +18,7 @@ async def upload_file(
     db: Session = Depends(get_db),
 ):
     content = await file.read()
-    active_ids = active_bank_ids.split(",") if active_bank_ids else None
+    active_ids = [id.strip() for id in active_bank_ids.split(",") if id.strip()] if active_bank_ids else None
     try:
         result = PARSER_REGISTRY.parse(filename, content, password=password, active_bank_ids=active_ids)
 

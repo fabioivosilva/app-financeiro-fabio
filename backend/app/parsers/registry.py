@@ -17,9 +17,9 @@ class ParserRegistry:
         best_parser = None
         best_score = 0.0
         for parser in self._parsers:
-            # Se fornecido, ignora parsers de bancos que não estão ativos
+            # Se fornecido e NÃO vazio, ignora parsers de bancos que não estão ativos
             # Parsers "generic" sempre são testados como fallback
-            if active_bank_ids is not None:
+            if active_bank_ids:
                 if parser.bank_id != "generic" and parser.bank_id not in active_bank_ids:
                     continue
             
