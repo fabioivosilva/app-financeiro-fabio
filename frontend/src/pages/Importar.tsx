@@ -117,7 +117,6 @@ export function Importar() {
         }
 
         const result = await res.json() as UploadResult
-        const detectedBanco = detectBankForFile(file.name, bancosAtivos)
         const item: ImportItem = {
           id: `${file.name}-${Date.now()}`,
           nome: file.name,
