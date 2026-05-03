@@ -1,8 +1,14 @@
-const apiHost = typeof window === 'undefined' ? 'localhost' : window.location.hostname
-const BASE_URL = `http://${apiHost}:8000`
+const apiHost = (() => {
+  if (typeof window === 'undefined') return '127.0.0.1'
+  const host = window.location.hostname
+  if (!host || host === 'localhost' || host === '::1') return '127.0.0.1'
+  return host
+})()
+
+export const API_BASE_URL = `http://${apiHost}:8000`
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   })

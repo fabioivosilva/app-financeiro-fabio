@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Codex investigando BUG.6 fetch error no importador Itaú. T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : BUG.6 concluído por Codex; Importar usa URL central da API e evita fetch em localhost/IPv6 errado. T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
-CLAIMS     : BUG.6 Codex
+CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -56,7 +56,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*BUG.6 — Codex em andamento.*
+*Nenhum claim ativo no momento.*
 
 ---
 
@@ -85,9 +85,9 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [x] `[P]` **BUG.5 — Script dev confiável** · *Codex · CONCLUÍDO 2026-05-03*
   `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, usa Python da venv para `uvicorn`, fixa backend em `127.0.0.1`, sobe Vite em `localhost` e retorna exit code 0. Validado com portas ocupadas: `/docs`, `/categories/`, `/` e `/config` responderam 200; Fabio autorizou baixa.
 
-- [ ] `[P]` **BUG.6 — Fetch error no importador Itaú** · *🔒 Codex · 2026-05-03*
-  Ao testar importação de arquivo Itaú, o frontend retorna `fetch error`. Investigar primeiro se é chamada para host/porta errada, CORS, backend fora do ar ou exceção no endpoint `/imports/upload`.
-  Se for problema simples de conexão/tratamento de erro, corrigir nesta sessão. Se envolver parser ou formato real mais complexo, documentar achado e deixar para Claude/Thiago continuar.
+- [x] `[P]` **BUG.6 — Fetch error no importador Itaú** · *Codex · CONCLUÍDO 2026-05-03*
+  Corrigido o caminho de fetch da tela Importar: upload agora usa a URL central da API (`API_BASE_URL`), normaliza `localhost`/`::1` para `127.0.0.1:8000`, mostra erro claro quando a API não responde e o CORS aceita portas Vite locais `517x`.
+  Observação: se o arquivo real do Itaú retornar erro de parser/formato depois da conexão, abrir item separado com o modelo do arquivo.
 
 #### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
 

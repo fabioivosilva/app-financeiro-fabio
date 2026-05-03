@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
+import { API_BASE_URL } from '../api/client'
 import { bancosVisiveis, detectBankForFile, loadBancosAtivos } from '../config/banks'
 
 interface ImportItem {
@@ -91,8 +92,7 @@ export function Importar() {
         form.append('file', file)
         if (password) form.append('password', password)
 
-        const host = window.location.hostname
-        const res = await fetch(`http://${host}:8000/imports/upload`, { method: 'POST', body: form })
+        const res = await fetch(`${API_BASE_URL}/imports/upload`, { method: 'POST', body: form })
 
         if (!res.ok) {
           const body = await res.json() as ApiError
@@ -131,7 +131,7 @@ export function Importar() {
       setNovo(newItems[0]?.id ?? null)
       window.setTimeout(() => setNovo(null), 1800)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao importar arquivo')
+      setError(importErrorMessage(e))
     } finally {
       setUploading(false)
     }
@@ -148,9 +148,8 @@ export function Importar() {
     form.append('file', file)
     form.append('password', pdfPassword.trim())
 
-    const host = window.location.hostname
     try {
-      const res = await fetch(`http://${host}:8000/imports/upload`, { method: 'POST', body: form })
+      const res = await fetch(`${API_BASE_URL}/imports/upload`, { method: 'POST', body: form })
       if (!res.ok) {
         const body = await res.json() as ApiError
         const detail = body.detail
@@ -183,7 +182,7 @@ export function Importar() {
       setNovo(item.id)
       window.setTimeout(() => setNovo(null), 1800)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao importar arquivo')
+      setError(importErrorMessage(e))
       setPendingPdfFiles(null)
     } finally {
       setUploading(false)
@@ -347,6 +346,13 @@ export function Importar() {
       </Glass>
     </div>
   )
+}
+
+function importErrorMessage(error: unknown) {
+  if (error instanceof TypeError) {
+    return `Não consegui conectar ao backend em ${API_BASE_URL}. Abra pelo rodar.bat e confirme que a API está ativa.`
+  }
+  return error instanceof Error ? error.message : 'Erro ao importar arquivo'
 }
 
 function detectType(filename: string, fallback?: string) {
