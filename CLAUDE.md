@@ -1,16 +1,33 @@
-# App Financeiro — IA: leia só isto
+# App Financeiro - IA: leia so isto
 
-## Início obrigatório
+## Skill correta
+
+Use primeiro a skill unica do projeto:
+
+`obsidian-vault/skills/app-financeiro/SKILL.md`
+
+As skills antigas separadas foram removidas. Nao procurar `app-financeiro-startup`,
+`app-financeiro-ui-reference` ou `app-financeiro-close-item`.
+
+## Inicio obrigatorio
+
 ```bash
-git checkout develop && git pull origin develop
+git checkout develop
+git pull origin develop
 ```
-Depois: ler **apenas o bloco SNAPSHOT** no topo de `NORTE.md`.
-Pare de ler NORTE.md assim que tiver o contexto. Só role para baixo se precisar do detalhe do item.
 
-## Arquivos de detalhe (abrir só quando a tarefa pedir)
-- UI/componentes → `obsidian-vault/07_UX_REFERENCE.md`
-- Parsers → `obsidian-vault/08_PARSERS.md`
-- Onboarding Thiago → `obsidian-vault/THIAGO_SETUP.md`
+Depois, ler apenas o bloco `SNAPSHOT` no topo de `NORTE.md`.
+Pare de ler `NORTE.md` assim que tiver claims, proxima tarefa e tamanho de sessao.
+Role mais abaixo so se precisar do detalhe do item escolhido.
 
-## Ao iniciar tarefa → marcar 🔒 e commitar NORTE.md
-## Ao fechar → [x], remover 🔒, commit, build_desktop.bat, push
+## Arquivos de detalhe
+
+- UI/componentes: abrir primeiro `C:\Users\fabio\Downloads\App-financeiro`
+- Resumo UI: `obsidian-vault/07_UX_REFERENCE.md`
+- Parsers: `obsidian-vault/08_PARSERS.md`
+- Onboarding Thiago: `obsidian-vault/THIAGO_SETUP.md`
+
+## Fechamento
+
+Ao fechar item: validar, atualizar `NORTE.md`, remover claim, marcar `[x]`,
+conferir `git status`, commitar so o escopo correto e push somente quando autorizado.

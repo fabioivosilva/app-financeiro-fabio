@@ -1,4 +1,0 @@
-interface:
-  display_name: "App Financeiro UI Reference"
-  short_description: "Follow the downloaded App-financeiro frontend reference exactly."
-  default_prompt: "Use this skill before changing any App Financeiro frontend screen; read the downloaded reference component and CSS first."

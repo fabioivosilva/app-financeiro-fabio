@@ -1,0 +1,4 @@
+interface:
+  display_name: "App Financeiro"
+  short_description: "Single startup, UI reference, backlog, and closeout workflow for App Financeiro."
+  default_prompt: "Use this skill first for App Financeiro work: read the NORTE.md snapshot, follow the downloaded UI reference before frontend edits, and close roadmap items through NORTE.md."
