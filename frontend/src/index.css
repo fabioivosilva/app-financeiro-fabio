@@ -365,6 +365,49 @@ body::before {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 
+/* ===== Regras / listas ===== */
+.lista-prov-head, .lista-prov-row {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 0.6fr 1fr 0.4fr;
+  align-items: center; gap: 14px;
+  padding: 10px 16px;
+}
+.lista-prov-head {
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(192,132,252,0.06);
+  font-size: 11px; color: var(--text-muted);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.lista-prov-row { border-bottom: 1px solid rgba(192,132,252,0.04); }
+.lista-prov-row:last-child { border-bottom: none; }
+.lista-prov-row:hover { background: rgba(192,132,252,0.03); }
+.lista-regras-grid { grid-template-columns: 2fr 1.5fr 1fr 0.5fr; }
+.inbox-cat-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px;
+}
+.inbox-cat {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(192,132,252,0.08);
+  color: var(--text); font: inherit; font-size: 13px;
+  cursor: pointer; text-align: left;
+}
+.inbox-cat:hover { background: rgba(192,132,252,0.06); border-color: rgba(192,132,252,0.18); }
+.inbox-cat-suggest {
+  background: rgba(130, 10, 209, 0.16);
+  border-color: rgba(192,132,252,0.35);
+  box-shadow: 0 0 0 1px rgba(192,132,252,0.08) inset;
+}
+.inbox-person {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 10px; border-radius: 999px;
+  background: rgba(192,132,252,0.06);
+  border: 1px solid rgba(192,132,252,0.1);
+  color: var(--text-muted); font: inherit; font-size: 12px; cursor: pointer;
+}
+.inbox-person:hover { background: rgba(192,132,252,0.08); color: var(--text); }
+
 /* ===== Metas page ===== */
 .meta-card {
   display: flex; flex-direction: column; gap: 4px; align-items: start;

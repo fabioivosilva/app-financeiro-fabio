@@ -7,18 +7,11 @@ import { CategoryChip } from '../components/ui/Badge'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import { useRegras } from '../hooks/useRegras'
-import { useCards } from '../hooks/useCards'
 
 export function Regras() {
   const { rules, categories, persons, loading, error, refetch, deleteRule } = useRegras()
-  const { cards, updateCard } = useCards()
-  const [busca, setBusca] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
-
-  const filtered = rules.filter(r =>
-    r.keyword.toLowerCase().includes(busca.toLowerCase())
-  )
 
   async function handleDelete(id: number) {
     setDeleting(id)
@@ -27,66 +20,17 @@ export function Regras() {
   }
 
   return (
-    <div className="page">
+    <div className="page page-regras">
       <PageHeader
-        title="Regras"
-        subtitle={`${rules.length} regras · ${cards.length} cartões vinculados`}
+        title="Regras de categorização"
+        subtitle="Quando uma transação contém o keyword, ela é auto-categorizada"
         right={
           <Button variant="primary" iconLeft="add" onClick={() => setShowNew(true)}>
-            Nova Regra
+            Nova regra
           </Button>
         }
       />
 
-      {/* Vínculo cartão → pessoa */}
-      {cards.length > 0 && (
-        <Glass>
-          <div className="section-header" style={{ marginBottom: 12 }}>
-            <div className="section-title">Vínculo de Cartões</div>
-            <span className="t-xs t-muted">Cartão → Titular</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {cards.map(card => (
-                <div key={card.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                    <Icon name="credit_card" size={16} style={{ color: 'var(--primary-2)' }} />
-                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}>
-                      {card.name}{card.last4 && <span style={{ color: 'var(--text-muted)' }}> ···· {card.last4}</span>}
-                    </span>
-                  </div>
-                  <Icon name="arrow_forward" size={14} style={{ color: 'var(--text-muted-2)' }} />
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {persons.map(p => (
-                      <button
-                        key={p.id}
-                        className={`inbox-person ${card.person_id === p.id ? 'inbox-cat-suggest' : ''}`}
-                        onClick={() => updateCard(card.id, p.id)}
-                      >
-                        {p.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-            ))}
-          </div>
-        </Glass>
-      )}
-
-      {/* Busca */}
-      <Glass padded={false}>
-        <div style={{ padding: '10px 12px' }}>
-          <div className="search-wrap">
-            <Icon name="search" size={18} className="t-muted" />
-            <input
-              placeholder="Buscar por palavra-chave..."
-              value={busca}
-              onChange={e => setBusca(e.target.value)}
-            />
-          </div>
-        </div>
-      </Glass>
-
-      {/* Tabela */}
       {loading && (
         <Glass>
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -103,59 +47,49 @@ export function Regras() {
 
       {!loading && !error && (
         <Glass padded={false}>
-          {/* Header */}
-          <div style={headerRowStyle}>
-            <span style={{ flex: 2, fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Palavra-chave</span>
-            <span style={{ flex: 2, fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Categoria</span>
-            <span style={{ flex: 1, fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Pessoa</span>
-            <span style={{ width: 60 }} />
-          </div>
-
-          {filtered.length === 0 && (
-            <div className="empty-state-mini">
-              <Icon name="rule" size={40} style={{ color: 'var(--text-muted-2)' }} />
-              <div style={{ fontSize: 14, fontWeight: 500 }}>Nenhuma regra encontrada</div>
-              <div className="t-sm t-muted">Crie uma regra para categorizar transações automaticamente</div>
+          <div className="lista-prov">
+            <div className="lista-prov-head lista-regras-grid">
+              <div>Quando descrição contém</div>
+              <div>Categorizar como</div>
+              <div>Aplicada em</div>
+              <div />
             </div>
-          )}
 
-          {filtered.map(rule => {
-            const cat = categories.find(c => c.id === rule.category_id)
-            const person = persons.find(p => p.id === rule.person_id)
-            return (
-              <div key={rule.id} style={ruleRowStyle}>
-                {/* Keyword */}
-                <span style={{ flex: 2 }}>
-                  <span style={keywordStyle}>{rule.keyword}</span>
-                </span>
-
-                {/* Categoria */}
-                <span style={{ flex: 2 }}>
-                  {cat
-                    ? <CategoryChip label={cat.name} color={cat.color} />
-                    : <span className="t-xs t-muted">—</span>
-                  }
-                </span>
-
-                {/* Pessoa */}
-                <span style={{ flex: 1, fontSize: 13, color: 'var(--text-muted)' }}>
-                  {person?.name ?? '—'}
-                </span>
-
-                {/* Ações */}
-                <span style={{ width: 60, display: 'flex', justifyContent: 'flex-end' }}>
-                  <button
-                    className="btn-icon"
-                    onClick={() => handleDelete(rule.id)}
-                    disabled={deleting === rule.id}
-                    title="Excluir regra"
-                  >
-                    <Icon name="delete" size={16} style={{ color: deleting === rule.id ? 'var(--text-muted-2)' : '#F87171' }} />
-                  </button>
-                </span>
+            {rules.length === 0 && (
+              <div className="empty-state-mini">
+                <Icon name="rule" size={40} style={{ color: 'var(--text-muted-2)' }} />
+                <div style={{ fontSize: 14, fontWeight: 500 }}>Nenhuma regra encontrada</div>
+                <div className="t-sm t-muted">Crie uma regra para categorizar transações automaticamente</div>
               </div>
-            )
-          })}
+            )}
+
+            {rules.map(rule => {
+              const cat = categories.find(c => c.id === rule.category_id)
+              const person = persons.find(p => p.id === rule.person_id)
+              return (
+                <div key={rule.id} className="lista-prov-row lista-regras-grid">
+                  <div className="t-sm" style={{ fontFamily: 'ui-monospace, monospace' }}>"{rule.keyword}"</div>
+                  <div>
+                    {cat
+                      ? <CategoryChip label={cat.name} color={cat.color} />
+                      : <CategoryChip label="" empty />
+                    }
+                  </div>
+                  <div className="t-xs t-muted">{person?.name ?? 'Todas'}</div>
+                  <div>
+                    <button
+                      className="btn-icon"
+                      onClick={() => handleDelete(rule.id)}
+                      disabled={deleting === rule.id}
+                      title="Excluir regra"
+                    >
+                      <Icon name={deleting === rule.id ? 'hourglass_empty' : 'more_vert'} size={16} />
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </Glass>
       )}
 
@@ -228,7 +162,7 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label style={labelStyle}>Categoria</label>
-        <div className="modal-cat-grid">
+        <div className="inbox-cat-grid">
           {categories.map(cat => (
             <button
               key={cat.id}
@@ -260,32 +194,6 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
       {err && <div style={{ fontSize: 12, color: '#F87171' }}>{err}</div>}
     </Modal>
   )
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const headerRowStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12,
-  padding: '10px 16px',
-  background: 'rgba(0,0,0,0.2)',
-  borderBottom: '1px solid rgba(192,132,252,0.06)',
-}
-
-const ruleRowStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 12,
-  padding: '12px 16px',
-  borderBottom: '1px solid rgba(192,132,252,0.04)',
-  transition: 'background 0.15s',
-}
-
-const keywordStyle: React.CSSProperties = {
-  fontFamily: 'ui-monospace, monospace',
-  fontSize: 13,
-  padding: '2px 8px',
-  borderRadius: 6,
-  background: 'rgba(192,132,252,0.08)',
-  border: '1px solid rgba(192,132,252,0.12)',
-  color: 'var(--primary-2)',
 }
 
 const labelStyle: React.CSSProperties = {
