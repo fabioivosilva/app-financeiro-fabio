@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { CycleProgress } from '../components/layout/CycleProgress'
@@ -352,43 +352,77 @@ function ProjectionChart({ meses }: { meses: Array<{ label: string; saldo: numbe
 
 // ---------- Donut ----------
 function CategoryDonut({ data, total }: { data: any[]; total: number }) {
-  const R = 70,
-    r = 52,
-    cx = 90,
-    cy = 90
+  const [hovered, setHovered] = useState<number | null>(null)
+  const R = 70, r = 52, cx = 90, cy = 90
+
   let acc = 0
-  const slices = data.map(d => {
+  const slices = data.map((d, i) => {
     const start = acc / total
     acc += d.valor
     const end = acc / total
+    const pct = (end - start) * 100
+    const mid = (start + end) / 2
     const a1 = start * Math.PI * 2 - Math.PI / 2
     const a2 = end * Math.PI * 2 - Math.PI / 2
+    const aMid = mid * Math.PI * 2 - Math.PI / 2
     const large = end - start > 0.5 ? 1 : 0
-    const x1 = cx + R * Math.cos(a1),
-      y1 = cy + R * Math.sin(a1)
-    const x2 = cx + R * Math.cos(a2),
-      y2 = cy + R * Math.sin(a2)
-    const x3 = cx + r * Math.cos(a2),
-      y3 = cy + r * Math.sin(a2)
-    const x4 = cx + r * Math.cos(a1),
-      y4 = cy + r * Math.sin(a1)
+    const x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1)
+    const x2 = cx + R * Math.cos(a2), y2 = cy + R * Math.sin(a2)
+    const x3 = cx + r * Math.cos(a2), y3 = cy + r * Math.sin(a2)
+    const x4 = cx + r * Math.cos(a1), y4 = cy + r * Math.sin(a1)
+    // label position: midpoint of arc at radius between r and R
+    const Rlabel = (R + r) / 2 + (hovered === i ? 6 : 0)
+    const lx = cx + Rlabel * Math.cos(aMid)
+    const ly = cy + Rlabel * Math.sin(aMid)
+    // hover: push slice outward from center
+    const dx = hovered === i ? Math.cos(aMid) * 5 : 0
+    const dy = hovered === i ? Math.sin(aMid) * 5 : 0
     return {
-      d: `M ${x1} ${y1} A ${R} ${R} 0 ${large} 1 ${x2} ${y2} L ${x3} ${y3} A ${r} ${r} 0 ${large} 0 ${x4} ${y4} Z`,
-      color: d.color,
+      path: `M ${x1+dx} ${y1+dy} A ${R} ${R} 0 ${large} 1 ${x2+dx} ${y2+dy} L ${x3+dx} ${y3+dy} A ${r} ${r} 0 ${large} 0 ${x4+dx} ${y4+dy} Z`,
+      color: d.color, pct, lx, ly, label: d.label,
     }
   })
 
+  const hov = hovered !== null ? slices[hovered] : null
+
   return (
     <div className="donut-wrap">
-      <svg viewBox="0 0 180 180" className="donut">
+      <svg viewBox="0 0 180 180" className="donut" style={{ overflow: 'visible' }}>
         {slices.map((s, i) => (
-          <path key={i} d={s.d} fill={s.color} />
+          <path
+            key={i} d={s.path} fill={s.color}
+            style={{ cursor: 'pointer', transition: 'all 0.15s', opacity: hovered !== null && hovered !== i ? 0.45 : 1 }}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          />
         ))}
         <circle cx={cx} cy={cy} r={r - 1} fill="rgba(20,15,35,0.6)" />
+        {/* % labels on slices > 5% */}
+        {slices.map((s, i) => s.pct >= 5 && (
+          <text
+            key={i} x={s.lx} y={s.ly}
+            textAnchor="middle" dominantBaseline="middle"
+            fontSize={hovered === i ? '11' : '9'}
+            fontWeight={hovered === i ? '700' : '500'}
+            fill="#fff"
+            style={{ pointerEvents: 'none', transition: 'all 0.15s', opacity: hovered !== null && hovered !== i ? 0 : 1 }}
+          >
+            {Math.round(s.pct)}%
+          </text>
+        ))}
       </svg>
-      <div className="donut-center">
-        <div className="t-xs t-muted">TOTAL CICLO</div>
-        <div className="donut-total">{brl(total)}</div>
+      <div className="donut-center" style={{ pointerEvents: 'none' }}>
+        {hov ? (
+          <>
+            <div className="t-xs" style={{ color: hov.color, fontWeight: 600, maxWidth: 70, textAlign: 'center', lineHeight: 1.2 }}>{hov.label}</div>
+            <div className="donut-total" style={{ color: hov.color }}>{Math.round(hov.pct)}%</div>
+          </>
+        ) : (
+          <>
+            <div className="t-xs t-muted">TOTAL CICLO</div>
+            <div className="donut-total">{brl(total)}</div>
+          </>
+        )}
       </div>
     </div>
   )
