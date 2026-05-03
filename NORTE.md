@@ -58,7 +58,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ## 🔴 BUGS BLOQUEANTES — LER ANTES DAS TRILHAS
 
-As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas features** enquanto a auditoria UI/API não passar. O trabalho de amanhã começa em BUG.1.
+Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**. O trabalho de amanhã começa em BUG.1.
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
@@ -103,8 +103,8 @@ As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas f
   - [ ] Backlog v2: switch light/dark mode (tokens já preparados no index.css)
   **NOTA:** design light mode em elaboração com designer (Claude.ai) — sessão estourou tokens antes de concluir. Arquivo incompleto. Retomar quando designer tiver nova sessão.
 
-- [x] `[P]` **T0.3 — Script de Execução** · *Fabio · CONCLUÍDO COM VALIDAÇÃO BUG.5*
-  `rodar.bat` existe e sobe backend + Vite + abre browser. **Pendente BUG.5:** validar fluxo dev confiável ponta a ponta e ajustar se necessário.
+- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · PARCIAL/BLOQUEADO BUG.5*
+  `rodar.bat` existe, mas ainda precisa validação ponta a ponta como fluxo dev confiável antes de marcar concluído.
   **Saída:** app abrindo no browser via rodar.bat
 
 ---
@@ -115,8 +115,8 @@ As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas f
   Interface `BaseParser` · `PARSER_REGISTRY` · parsers OFX, Itaú Excel e Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada.
   **Detalhe técnico:** `08_PARSERS.md`
 
-- [x] `[M]` **T1.2 — Tela de Importação** · *Fabio · CONCLUÍDO COM PENDÊNCIA BUG.4*
-  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico visual. **Pendente BUG.4:** histórico inicial ainda usa amostra visual/mock.
+- [ ] `[M]` **T1.2 — Tela de Importação** · *Fabio · PARCIAL/BLOQUEADO BUG.4*
+  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico visual existem, mas histórico inicial ainda usa amostra visual/mock. Não marcar concluído até BUG.4 fechar.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
@@ -126,12 +126,12 @@ As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas f
 
 ### TRILHA 2 — Transações & Regras *(depende T0+T1)*
 
-- [x] `[M]` **T2.1 — Tela de Transações** · *Fabio · CONCLUÍDO COM REAUDITORIA BUG.2/BUG.3*
-  Lista agrupada por data · filtros pill conforme referência · aba pendentes · sem categoria conta como pendente · inline edit categoria · botão `Revisar N pendentes` abre inbox one-by-one · categoriza e cria regra automática.
+- [ ] `[M]` **T2.1 — Tela de Transações** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
+  Lista agrupada por data · filtros pill conforme referência · aba pendentes · sem categoria conta como pendente · inline edit categoria · botão `Revisar N pendentes` abre inbox one-by-one · categoriza e cria regra automática. Não marcar concluído até reauditoria visual/API passar.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Transações"
 
-- [x] `[M]` **T2.2 — Tela de Regras** · *Fabio · CONCLUÍDO COM REAUDITORIA BUG.2/BUG.3*
-  CRUD regras keyword→categoria+pessoa · nova regra em modal · exclusão · lista no padrão visual de referência. **Pendente:** vínculo cartão→pessoa/paginação ficam para auditoria BUG.1 se ainda forem necessários.
+- [ ] `[M]` **T2.2 — Tela de Regras** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
+  CRUD regras keyword→categoria+pessoa · nova regra em modal · exclusão · lista no padrão visual de referência existem, mas ainda precisam reauditoria visual/API. Vínculo cartão→pessoa/paginação ficam para BUG.1 se ainda forem necessários.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Regras"
 
 - [ ] `[P]` **T2.3 — Cofrinho por Keyword** · *qualquer um · depende T2.2+T3.1*
@@ -141,8 +141,8 @@ As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas f
 
 ### TRILHA 3 — Metas & Cofrinho *(depende T0+T2)*
 
-- [x] `[M]` **T3.1 — Tela de Metas** · *Fabio · CONCLUÍDO*
-  Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria
+- [ ] `[M]` **T3.1 — Tela de Metas** · *Fabio · PARCIAL/BLOQUEADO BUG.2*
+  Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria existem, mas ainda precisam reauditoria 100% contra a referência antes de marcar concluído.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Metas"
 
 - [ ] `[M]` **T3.2 — Aporte Manual** · *qualquer um · depende T3.1*
