@@ -5,10 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T1.1a concluído. Iniciando T1.1b — PDF Itaú parser.
+STATUS     : T1.1 completo. OFX + Excel + PDF Itaú funcionando com arquivos reais.
+             174 txs do PDF, 173 do Excel, 106 do OFX — dedup em todos.
 BRANCH     : develop
-PRÓXIMA    : T2.1 — Tela de Transações [M]
-CLAIMS     : 🔒 [FABIO] T1.1b — ItauPDFParser
+PRÓXIMA    : T2.1 — Tela de Transações [M]  ← próxima prioridade
+CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:

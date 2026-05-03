@@ -41,6 +41,8 @@ def setup_registry() -> None:
     """Registra todos os parsers disponíveis. Chamado no startup."""
     from app.parsers.ofx import OFXParser
     from app.parsers.itau_excel import ItauExcelParser
+    from app.parsers.itau_pdf import ItauPDFParser
 
     PARSER_REGISTRY.register(OFXParser())
     PARSER_REGISTRY.register(ItauExcelParser())
+    PARSER_REGISTRY.register(ItauPDFParser())
