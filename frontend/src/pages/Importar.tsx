@@ -74,11 +74,11 @@ export function Importar() {
     }
 
     const blockedFile = fileList.find(file => {
-      const banco = detectBankForFile(file.name)
+      const banco = detectBankForFile(file.name, bancosAtivos)
       return banco && !bancosAtivos.includes(banco.id)
     })
     if (blockedFile) {
-      const banco = detectBankForFile(blockedFile.name)
+      const banco = detectBankForFile(blockedFile.name, bancosAtivos)
       setError(`${banco?.label ?? 'Banco'} não está ativo em Configurações > Bancos para importar ${blockedFile.name}.`)
       return
     }
@@ -113,11 +113,12 @@ export function Importar() {
         }
 
         const result = await res.json() as UploadResult
+        const detectedBanco = detectBankForFile(file.name, bancosAtivos)
         const item: ImportItem = {
           id: `${file.name}-${Date.now()}`,
           nome: file.name,
           tipo: detectType(file.name, result.format),
-          fonte: `${result.bank ?? 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
+          fonte: `${result.bank || detectedBanco?.label || 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
           transacoes: result.total_found ?? 0,
           novas: result.imported ?? 0,
           dup: result.duplicates ?? 0,

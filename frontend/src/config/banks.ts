@@ -32,16 +32,28 @@ export function bancosVisiveis(ids: string[]) {
   return BANCOS_DISPONIVEIS.filter(banco => ids.includes(banco.id))
 }
 
-export function detectBankForFile(filename: string) {
+export function detectBankForFile(filename: string, activeIds: string[] = []) {
   const lower = filename.toLowerCase()
+  
+  // 1. Tenta por keyword (mais específico)
   const byKeyword = BANCOS_DISPONIVEIS.find(banco =>
     banco.keywords.some(keyword => lower.includes(keyword))
   )
   if (byKeyword) return byKeyword
 
+  // 2. Tenta por extensão
   const ext = lower.match(/\.[^.]+$/)?.[0]
   if (!ext) return undefined
 
   const possible = BANCOS_DISPONIVEIS.filter(banco => banco.extensions.includes(ext))
-  return possible.length === 1 ? possible[0] : undefined
+  
+  if (possible.length === 1) return possible[0]
+  
+  // 3. Se houver ambiguidade (ex: .ofx), checa se apenas um dos possíveis está ativo
+  if (activeIds.length > 0) {
+    const possibleActive = possible.filter(banco => activeIds.includes(banco.id))
+    if (possibleActive.length === 1) return possibleActive[0]
+  }
+
+  return undefined
 }
