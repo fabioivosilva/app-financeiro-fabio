@@ -370,16 +370,17 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
     const x2 = cx + R * Math.cos(a2), y2 = cy + R * Math.sin(a2)
     const x3 = cx + r * Math.cos(a2), y3 = cy + r * Math.sin(a2)
     const x4 = cx + r * Math.cos(a1), y4 = cy + r * Math.sin(a1)
-    // label position: midpoint of arc at radius between r and R
-    const Rlabel = (R + r) / 2 + (hovered === i ? 6 : 0)
-    const lx = cx + Rlabel * Math.cos(aMid)
-    const ly = cy + Rlabel * Math.sin(aMid)
-    // hover: push slice outward from center
+    // hover: push slice outward
     const dx = hovered === i ? Math.cos(aMid) * 5 : 0
     const dy = hovered === i ? Math.sin(aMid) * 5 : 0
+    // label outside ring: line from R+2 to R+14, text at R+18
+    const Rline0 = R + 3, Rline1 = R + 13, Rtext = R + 18
+    const lx0 = cx + Rline0 * Math.cos(aMid), ly0 = cy + Rline0 * Math.sin(aMid)
+    const lx1 = cx + Rline1 * Math.cos(aMid), ly1 = cy + Rline1 * Math.sin(aMid)
+    const lx  = cx + Rtext  * Math.cos(aMid), ly  = cy + Rtext  * Math.sin(aMid)
     return {
       path: `M ${x1+dx} ${y1+dy} A ${R} ${R} 0 ${large} 1 ${x2+dx} ${y2+dy} L ${x3+dx} ${y3+dy} A ${r} ${r} 0 ${large} 0 ${x4+dx} ${y4+dy} Z`,
-      color: d.color, pct, lx, ly, label: d.label,
+      color: d.color, pct, lx, ly, lx0, ly0, lx1, ly1, label: d.label, aMid,
     }
   })
 
@@ -387,7 +388,7 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
 
   return (
     <div className="donut-wrap">
-      <svg viewBox="0 0 180 180" className="donut" style={{ overflow: 'visible' }}>
+      <svg viewBox="-20 -20 220 220" className="donut" style={{ overflow: 'visible' }}>
         {slices.map((s, i) => (
           <path
             key={i} d={s.path} fill={s.color}
@@ -397,22 +398,26 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
           />
         ))}
         <circle cx={cx} cy={cy} r={r - 1} fill="rgba(20,15,35,0.6)" />
-        {/* % labels on slices > 5% */}
+        {/* % labels outside ring */}
         {slices.map((s, i) => {
-          if (s.pct < 5) return null
+          if (s.pct < 7) return null
           const isHov = hovered === i
           const txt = Math.round(s.pct) + '%'
-          const fs = isHov ? 10.5 : 8.5
-          const pw = txt.length * fs * 0.62 + 8
-          const ph = fs + 7
-          const op = hovered !== null && !isHov ? 0 : 1
+          const fs = isHov ? 10 : 9
+          const pw = txt.length * fs * 0.62 + 7
+          const ph = fs + 6
+          const op = hovered !== null && !isHov ? 0.25 : 1
+          const lxAdj = s.lx + (Math.cos(s.aMid) > 0 ? pw/2 : -pw/2)
           return (
             <g key={i} style={{ pointerEvents: 'none', transition: 'opacity 0.15s', opacity: op }}>
-              <rect x={s.lx - pw/2} y={s.ly - ph/2} width={pw} height={ph} rx={ph/2}
-                fill="rgba(0,0,0,0.55)" />
-              <text x={s.lx} y={s.ly} textAnchor="middle" dominantBaseline="middle"
+              <line x1={s.lx0} y1={s.ly0} x2={s.lx1} y2={s.ly1}
+                stroke={s.color} strokeWidth="1.2" strokeOpacity="0.7" />
+              <rect x={lxAdj - pw/2} y={s.ly - ph/2} width={pw} height={ph} rx={ph/2}
+                fill={isHov ? s.color : 'rgba(10,6,20,0.85)'}
+                stroke={s.color} strokeWidth="0.8" strokeOpacity="0.6" />
+              <text x={lxAdj} y={s.ly} textAnchor="middle" dominantBaseline="middle"
                 fontSize={fs} fontWeight={isHov ? 700 : 600} fill="#fff"
-                fontFamily="ui-monospace,monospace" letterSpacing="-0.3"
+                fontFamily="ui-monospace,monospace"
               >{txt}</text>
             </g>
           )
