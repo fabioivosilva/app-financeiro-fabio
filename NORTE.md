@@ -5,11 +5,17 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : PAUSA PARA BUGFIX — auditar UI 100% referência + integração front↔back antes de novas features.
+STATUS     : BUGFIX EM ANDAMENTO — BUG.1 ✅ BUG.4 ✅ T6.1 ✅ · próximo: BUG.2 ou BUG.3
 BRANCH     : develop
-PRÓXIMA    : BUG.1 — Auditoria UI/API de todos os menus [G]
+PRÓXIMA    : BUG.2 — Conformidade 100% referência visual [G]  OU  BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
+
+REGRA UX ABSOLUTA (ler antes de qualquer tela):
+  Abrir C:\Users\fabio\Downloads\App-financeiro ANTES de escrever qualquer JSX.
+  Copiar estrutura, classes CSS, ordem dos elementos, labels e comportamento do
+  componente de referência. Adaptar SOMENTE os dados/API depois. "Parecido" nao passa.
+  Nunca inventar layout, classes ou UX — o codigo de referencia já existe, use-o.
 
 QUANDO LER MAIS:
   UI / componentes visuais  →  obsidian-vault/07_UX_REFERENCE.md
@@ -77,6 +83,21 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 - [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um*
   Ajustar/validar `rodar.bat` para subir backend + Vite no modelo atual. Não usar `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller enquanto não existirem no repo novo.
+
+#### HANDOFF CLAUDE — 2026-05-03 sessão 2 (Fabio + Claude Code)
+
+- **Entregues nesta sessão:**
+  - BUG.1 ✅ auditoria completa UI/API (Thiago fez junto)
+  - BUG.4 ✅ Importar sem mock — localStorage (Thiago)
+  - T1.2 ✅ desbloqueada (BUG.4 fechado)
+  - fix b7: filtro "Ciclo atual" dia 27→26 em Transações
+  - fix b8: suggestCategory usa regras reais do backend (não hardcoded)
+  - T6.1 ✅ Configurações completa: Pessoas+Cartões CRUD, Categorias com subcategorias, Sistema, Zona de Perigo
+  - Backend: `parent_id` em Category com migration automática no startup
+  - CORS liberado para porta 5174
+- **REGRA CRÍTICA aprendida:** SEMPRE abrir `C:\Users\fabio\Downloads\App-financeiro` antes de qualquer JSX. Copiar o código de referência, não reinventar. Subcategorias, modais, grids — tudo tem código pronto.
+- **Próximo:** BUG.2 (conformidade visual Dashboard/Cartão/Provisões) ou BUG.3 (modais/popovers). Não iniciar T3.2/T4/T5 antes de fechar BUG.2+BUG.3.
+- **Backend rodando:** `uvicorn app.main:app --port 8000 --reload` dentro de `backend/` com `.venv` ativado.
 
 #### HANDOFF CLAUDE — 2026-05-03 noite
 
