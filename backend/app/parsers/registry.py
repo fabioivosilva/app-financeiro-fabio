@@ -12,11 +12,17 @@ class ParserRegistry:
     def register(self, parser: BaseParser) -> None:
         self._parsers.append(parser)
 
-    def detect(self, filename: str, content: bytes) -> BaseParser | None:
+    def detect(self, filename: str, content: bytes, active_bank_ids: list[str] | None = None) -> BaseParser | None:
         """Retorna o parser com maior score para o arquivo."""
         best_parser = None
         best_score = 0.0
         for parser in self._parsers:
+            # Se fornecido, ignora parsers de bancos que não estão ativos
+            # Parsers "generic" sempre são testados como fallback
+            if active_bank_ids is not None:
+                if parser.bank_id != "generic" and parser.bank_id not in active_bank_ids:
+                    continue
+            
             try:
                 score = parser.can_parse(filename, content)
                 if score > best_score:
@@ -26,8 +32,8 @@ class ParserRegistry:
                 pass
         return best_parser if best_score > 0.1 else None
 
-    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult | None:
-        parser = self.detect(filename, content)
+    def parse(self, filename: str, content: bytes, password: str | None = None, active_bank_ids: list[str] | None = None) -> ImportResult | None:
+        parser = self.detect(filename, content, active_bank_ids=active_bank_ids)
         if not parser:
             return None
         return parser.parse(filename, content, password=password)

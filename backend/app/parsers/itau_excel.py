@@ -30,6 +30,7 @@ def _parse_installment(desc: str) -> tuple[str, int | None, int | None]:
 
 
 class ItauExcelParser(BaseParser):
+    bank_id = "itau"
 
     def can_parse(self, filename: str, content: bytes) -> float:
         fname = filename.lower()

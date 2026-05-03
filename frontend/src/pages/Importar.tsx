@@ -90,6 +90,7 @@ export function Importar() {
       for (const file of fileList) {
         const form = new FormData()
         form.append('file', file)
+        form.append('active_bank_ids', bancosAtivos.join(','))
         if (password) form.append('password', password)
         
         const detectedBanco = detectBankForFile(file.name, bancosAtivos)

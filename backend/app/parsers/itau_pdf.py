@@ -68,6 +68,7 @@ def _infer_year(month_num: int, fatura_month: int, fatura_year: int) -> int:
 
 
 class ItauPDFParser(BaseParser):
+    bank_id = "itau"
 
     def can_parse(self, filename: str, content: bytes) -> float:
         if not filename.lower().endswith(".pdf"):

@@ -10,16 +10,16 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 
 
 @router.post("/upload")
-async def upload_file(
     file: UploadFile = File(...),
     password: Optional[str] = Form(None),
     bank_hint: Optional[str] = Form(None),
+    active_bank_ids: Optional[str] = Form(None),  # String separada por vírgula "itau,nubank"
     db: Session = Depends(get_db),
 ):
     content = await file.read()
-    filename = file.filename or "upload"
+    active_ids = active_bank_ids.split(",") if active_bank_ids else None
     try:
-        result = PARSER_REGISTRY.parse(filename, content, password=password)
+        result = PARSER_REGISTRY.parse(filename, content, password=password, active_bank_ids=active_ids)
 
         if result is None:
             raise HTTPException(

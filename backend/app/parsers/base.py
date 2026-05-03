@@ -40,6 +40,7 @@ class ImportResult:
 
 class BaseParser(ABC):
     """Interface que todo parser deve implementar."""
+    bank_id: str = "generic"
 
     @abstractmethod
     def can_parse(self, filename: str, content: bytes) -> float:
