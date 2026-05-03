@@ -532,7 +532,19 @@ function SistemaSection() {
 function ZonaPerigoSection() {
   const [confirmando, setConfirmando] = useState(false)
   const [texto, setTexto] = useState('')
+  const [clearing, setClearing] = useState(false)
   const PALAVRA = 'LIMPAR TUDO'
+
+  async function handleClear() {
+    setClearing(true)
+    try {
+      await api.delete('/transactions/')
+      setConfirmando(false)
+      setTexto('')
+    } finally {
+      setClearing(false)
+    }
+  }
 
   return (
     <>
@@ -569,10 +581,10 @@ function ZonaPerigoSection() {
                 <button className="btn-ghost" style={{ fontSize: 13 }} onClick={() => { setConfirmando(false); setTexto('') }}>Cancelar</button>
                 <button
                   className="btn-danger"
-                  disabled={texto !== PALAVRA}
-                  title="Endpoint não implementado ainda"
+                  disabled={texto !== PALAVRA || clearing}
+                  onClick={handleClear}
                 >
-                  <Icon name="delete_forever" size={14} /> Confirmar exclusão
+                  <Icon name="delete_forever" size={14} /> {clearing ? 'Limpando...' : 'Confirmar exclusão'}
                 </button>
               </div>
             </div>

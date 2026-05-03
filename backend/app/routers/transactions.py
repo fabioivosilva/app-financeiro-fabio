@@ -81,3 +81,11 @@ def delete_transaction(id: int, db: Session = Depends(get_db)):
         raise HTTPException(404)
     db.delete(t)
     db.commit()
+
+
+@router.delete("/", status_code=200)
+def clear_all_transactions(db: Session = Depends(get_db)):
+    """Remove todas as transações. Preserva pessoas, cartões, categorias e regras."""
+    deleted = db.query(Transaction).delete()
+    db.commit()
+    return {"deleted": deleted}
