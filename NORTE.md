@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T1.2b em andamento por Codex; conectar bancos ativos à tela Importar sem backend. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : T1.2b concluído por Codex; Importar respeita bancos ativos configurados. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
-PRÓXIMA    : T1.2b — Importar deve respeitar bancos ativos configurados
-CLAIMS     : 🔒 [CODEX] T1.2b
+PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
+CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -164,7 +164,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico via localStorage (loadHistory/saveHistory) · começa vazio · empty state adicionado. BUG.4 fechado.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
-- [ ] `🔒 [CODEX]` `[P]` **T1.2b — Conectar Bancos Ativos → Tela de Importar** · *Codex · depende T6.2*
+- [x] `[P]` **T1.2b — Conectar Bancos Ativos → Tela de Importar** · *Codex · CONCLUÍDO 2026-05-03*
   Hoje a tela de Importar aceita qualquer arquivo e não sabe quais bancos o usuário usa.
   Após T6.2, a seleção de bancos existe em `localStorage` com a chave `cfg_bancos_ativos`.
 
@@ -201,6 +201,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
   **Não mexer:** lógica de upload, endpoint `POST /imports/upload`, `localStorage` do histórico.
   **CSS reutilizar:** `.cfg-banco-chip` já existe em `index.css`.
+  **Resultado Codex:** `Config.tsx` e `Importar.tsx` usam mapa compartilhado `frontend/src/config/banks.ts`; Importar mostra chips dos bancos ativos e bloqueia arquivo de banco reconhecido quando esse banco está desativado.
 
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
   Pasta padrão configurável · lista arquivos não importados · 1 clique para importar

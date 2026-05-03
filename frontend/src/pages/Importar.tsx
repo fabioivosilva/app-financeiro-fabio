@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
+import { bancosVisiveis, detectBankForFile, loadBancosAtivos } from '../config/banks'
 
 interface ImportItem {
   id: string
@@ -59,10 +60,27 @@ export function Importar() {
 
   const totalNovas = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.novas, 0), [importados])
   const totalDup = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.dup, 0), [importados])
+  const bancosAtivos = useMemo(loadBancosAtivos, [])
+  const bancosSelecionados = useMemo(() => bancosVisiveis(bancosAtivos), [bancosAtivos])
 
   async function handleFiles(files: FileList | File[], password?: string) {
     const fileList = Array.from(files)
     if (fileList.length === 0) return
+
+    if (bancosSelecionados.length === 0) {
+      setError('Nenhum banco ativo. Ative pelo menos um banco em Configurações > Bancos antes de importar.')
+      return
+    }
+
+    const blockedFile = fileList.find(file => {
+      const banco = detectBankForFile(file.name)
+      return banco && !bancosAtivos.includes(banco.id)
+    })
+    if (blockedFile) {
+      const banco = detectBankForFile(blockedFile.name)
+      setError(`${banco?.label ?? 'Banco'} não está ativo em Configurações > Bancos para importar ${blockedFile.name}.`)
+      return
+    }
 
     setUploading(true)
     setError(null)
@@ -203,7 +221,23 @@ export function Importar() {
             <Icon name={uploading ? 'hourglass_empty' : 'upload_file'} size={36} />
           </div>
           <div className="dropzone-title">{uploading ? 'Processando arquivos...' : 'Arraste arquivos ou clique para selecionar'}</div>
-          <div className="dropzone-sub">Suporta OFX (qualquer banco), CSV (Nubank, Inter e outros), Excel e PDF (Itaú). Múltiplos arquivos.</div>
+          <div className="dropzone-sub">
+            {bancosSelecionados.length > 0
+              ? 'A importação está limitada aos bancos ativos em Configurações.'
+              : 'Nenhum banco ativo para importação.'}
+          </div>
+          {bancosSelecionados.length > 0 ? (
+            <div className="import-bancos-ativos">
+              {bancosSelecionados.map(banco => (
+                <span key={banco.id} className="cfg-banco-chip">
+                  <img src={banco.icon} alt="" aria-hidden="true" />
+                  {banco.label}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <a className="import-config-link" href="/config">Configure em Configurações &gt; Bancos</a>
+          )}
           <div className="dropzone-tags">
             <span className="tag"><Icon name="description" size={14} />OFX</span>
             <span className="tag"><Icon name="grid_on" size={14} />XLSX</span>

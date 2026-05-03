@@ -264,6 +264,22 @@ body::before {
 .dropzone-title { font-size: 17px; font-weight: 500; }
 .dropzone-sub { font-size: 13px; color: var(--text-muted); }
 .dropzone-tags { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.import-bancos-ativos {
+  display: flex; justify-content: center; flex-wrap: wrap;
+  gap: 6px; margin-top: 4px;
+}
+.import-bancos-ativos .cfg-banco-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.import-bancos-ativos .cfg-banco-chip img {
+  width: 16px; height: 16px; border-radius: 4px;
+}
+.import-config-link {
+  color: var(--primary-2);
+  font-size: 13px;
+  text-decoration: none;
+}
+.import-config-link:hover { text-decoration: underline; }
 .stat-card { display: flex; flex-direction: column; gap: 6px; }
 .stat-label { font-size: 11px; letter-spacing: 0.06em; color: var(--text-muted); }
 .stat-val { font-size: 28px; font-weight: 600; font-feature-settings: "tnum"; letter-spacing: -0.02em; }

@@ -7,6 +7,7 @@ import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import type { Card, Category, Person, Rule } from '../api/types'
 import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
+import { BANCOS_DISPONIVEIS, BANKS_STORAGE_KEY, loadBancosAtivos } from '../config/banks'
 
 const PERSON_COLORS = ['#820AD1', '#06B6D4', '#C084FC', '#22C55E', '#F59E0B', '#F472B6']
 function personColor(id: number) { return PERSON_COLORS[id % PERSON_COLORS.length] }
@@ -32,23 +33,11 @@ export function Config() {
   const refSistema = useRef<HTMLElement>(null)
   const refPerigo = useRef<HTMLElement>(null)
 
-  const BANCOS_DISPONIVEIS = [
-    { id: 'itau',         label: 'Itaú',         icon: '/banks/itau.svg',        formatos: ['Fatura Excel', 'Fatura PDF', 'Extrato OFX'] },
-    { id: 'c6',           label: 'C6 Bank',      icon: '/banks/c6.svg',          formatos: ['Fatura CSV'] },
-    { id: 'nubank',       label: 'Nubank',       icon: '/banks/nubank.svg',      formatos: ['Fatura CSV'] },
-    { id: 'inter',        label: 'Banco Inter',  icon: '/banks/inter.svg',       formatos: ['Extrato CSV'] },
-    { id: 'bradesco',     label: 'Bradesco',     icon: '/banks/bradesco.svg',    formatos: ['Extrato OFX'] },
-    { id: 'santander',    label: 'Santander',    icon: '/banks/santander.svg',   formatos: ['Extrato OFX'] },
-    { id: 'mercado_pago', label: 'Mercado Pago', icon: '/banks/mercadopago.svg', formatos: ['Extrato CSV'] },
-  ]
-  const STORAGE_KEY = 'cfg_bancos_ativos'
-  const [bancosAtivos, setBancosAtivos] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '["itau"]') } catch { return ['itau'] }
-  })
+  const [bancosAtivos, setBancosAtivos] = useState<string[]>(loadBancosAtivos)
   function toggleBanco(id: string) {
     setBancosAtivos(prev => {
       const next = prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      localStorage.setItem(BANKS_STORAGE_KEY, JSON.stringify(next))
       return next
     })
   }
