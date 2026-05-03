@@ -4,8 +4,9 @@ export interface Category {
   color?: string
   limit?: number
   limit_value?: number
-  type?: 'fixa' | 'variavel'
+  type?: 'fixa' | 'variavel' | 'receita' | 'interna'
   parent_id?: number | null
+  exclude_totals?: boolean
 }
 
 export interface Person {

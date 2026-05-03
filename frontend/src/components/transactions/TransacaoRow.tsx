@@ -15,16 +15,32 @@ interface Props {
 }
 
 export const CATEGORY_ICONS: Record<string, string> = {
+  // Fixas
+  'Moradia': 'home', 'Casa': 'home',
+  'Aluguel': 'home_work', 'Condomínio': 'apartment', 'Luz': 'bolt', 'Internet/TV': 'wifi',
+  'Saúde': 'favorite',
+  'Plano de saúde': 'medical_services', 'Academia': 'fitness_center',
+  'Educação': 'school', 'Cursos online': 'menu_book',
+  'Assinaturas': 'subscriptions',
+  'Streaming': 'movie', 'Música': 'music_note', 'Software': 'code',
+  // Variáveis
   'Alimentação': 'restaurant',
+  'Restaurante': 'restaurant_menu', 'Delivery': 'delivery_dining', 'Café/Lanche': 'local_cafe',
   'iFood': 'delivery_dining',
   'Mercado': 'shopping_cart',
+  'Supermercado': 'shopping_cart', 'Feira': 'eco', 'Padaria': 'bakery_dining',
   'Farmácia': 'local_pharmacy',
   'Transporte': 'directions_car',
-  'Moradia': 'home',
-  'Saúde': 'favorite',
-  'Educação': 'school',
+  'Apps': 'local_taxi', 'Combustível': 'local_gas_station', 'Estacionamento': 'local_parking',
   'Lazer': 'sports_esports',
+  'Cinema/Teatro': 'theaters', 'Viagem': 'flight', 'Hobbies': 'palette',
   'Outros': 'category',
+  // Receitas
+  'Salário': 'payments', 'CLT': 'badge', '13°/Bônus': 'redeem',
+  'Freelance': 'engineering', 'Projetos': 'work',
+  'Receitas': 'payments',
+  // Internas
+  'Transferência': 'swap_horiz', 'Entre contas': 'swap_horiz', 'Cofrinho': 'savings',
 }
 
 export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {

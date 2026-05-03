@@ -14,6 +14,7 @@ class CategoryIn(BaseModel):
     limit_value: Optional[float] = None
     type: Optional[str] = "variavel"
     parent_id: Optional[int] = None
+    exclude_totals: Optional[bool] = False
 
 
 class CategoryOut(CategoryIn):

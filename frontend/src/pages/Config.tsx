@@ -15,8 +15,10 @@ function initials(name: string) { return name.split(/\s+/).map(p => p[0]).join('
 function fmtCurrency(v: number) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v) }
 
 const GRUPOS = [
-  { id: 'fixa',     label: 'Fixas',     icon: 'lock',        color: '#6366F1' },
-  { id: 'variavel', label: 'Variáveis', icon: 'trending_up', color: '#EC4899' },
+  { id: 'fixa',     label: 'Fixas',                  icon: 'lock',        color: '#6366F1' },
+  { id: 'variavel', label: 'Variáveis',              icon: 'trending_up', color: '#EC4899' },
+  { id: 'receita',  label: 'Receitas',               icon: 'payments',    color: '#22C55E' },
+  { id: 'interna',  label: 'Movimentações internas', icon: 'swap_horiz',  color: '#94A3B8' },
 ]
 
 export function Config() {
@@ -428,9 +430,14 @@ function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
         </div>
       </div>
       <div className="cfg-cat-card-badges">
-        {cat.limit_value
-          ? <span className="cfg-badge"><Icon name="speed" size={12} /> {fmtCurrency(cat.limit_value)}/mês</span>
-          : <span className="t-xs t-muted">Sem limite</span>}
+        {cat.exclude_totals
+          ? <span className="cfg-badge" style={{ color: '#F59E0B', borderColor: 'rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.1)' }}>
+              <Icon name="visibility_off" size={12} /> Fora dos totais
+            </span>
+          : cat.limit_value
+            ? <span className="cfg-badge"><Icon name="speed" size={12} /> {fmtCurrency(cat.limit_value)}/mês</span>
+            : <span className="t-xs t-muted">Sem regras especiais</span>
+        }
       </div>
       <button className="cfg-sub-toggle" onClick={() => setOpen(o => !o)}>
         <Icon name={open ? 'expand_less' : 'expand_more'} size={16} />

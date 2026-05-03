@@ -37,6 +37,21 @@ def _migrate():
                 conn.execute(text("ALTER TABLE categories ADD COLUMN parent_id INTEGER"))
                 conn.commit()
 
+    # Adiciona exclude_totals em categories se não existir
+    if 'categories' in inspector.get_table_names():
+        cat_cols = [c['name'] for c in inspector.get_columns('categories')]
+        if 'exclude_totals' not in cat_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN exclude_totals BOOLEAN DEFAULT 0"))
+                conn.commit()
+        _seed_missing_categories()
+
+    # Corrige tipo das categorias existentes (SAEnum → String permite novos tipos)
+    with engine.connect() as conn:
+        conn.execute(text("UPDATE categories SET type='receita' WHERE name IN ('Receitas','Salário','Freelance','CLT','13°/Bônus','Projetos')"))
+        conn.execute(text("UPDATE categories SET type='interna', exclude_totals=1 WHERE name IN ('Transferência','Entre contas','Cofrinho')"))
+        conn.commit()
+
     # Torna person_id nullable em cards (recria tabela se necessário)
     if 'cards' in inspector.get_table_names():
         col_info = {c['name']: c for c in inspector.get_columns('cards')}
@@ -55,3 +70,64 @@ def _migrate():
                 conn.execute(text("DROP TABLE cards"))
                 conn.execute(text("ALTER TABLE cards_new RENAME TO cards"))
                 conn.commit()
+
+
+def _seed_missing_categories():
+    """Insere categorias faltantes (Receitas, Internas e subcategorias) sem duplicar."""
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        existing = {row[0] for row in conn.execute(text("SELECT name FROM categories")).fetchall()}
+
+        def add(name, color, type_, limit=None, parent_name=None, exclude=False):
+            if name in existing:
+                return
+            parent_id = None
+            if parent_name:
+                row = conn.execute(text("SELECT id FROM categories WHERE name=:n"), {"n": parent_name}).fetchone()
+                if row:
+                    parent_id = row[0]
+            conn.execute(text(
+                "INSERT INTO categories (name, color, type, limit_value, parent_id, exclude_totals) "
+                "VALUES (:name, :color, :type, :limit, :parent, :excl)"
+            ), {"name": name, "color": color, "type": type_, "limit": limit, "parent": parent_id, "excl": 1 if exclude else 0})
+            existing.add(name)
+
+        # ── Receitas ──────────────────────────────────────────────────────────
+        add("Salário",     "#22c55e", "receita")
+        add("Freelance",   "#10b981", "receita")
+        add("CLT",           "#22c55e", "receita", parent_name="Salário")
+        add("13°/Bônus",     "#22c55e", "receita", parent_name="Salário")
+        add("Projetos",      "#10b981", "receita", parent_name="Freelance")
+
+        # ── Internas ──────────────────────────────────────────────────────────
+        add("Transferência", "#94a3b8", "interna", exclude=True)
+        add("Entre contas",  "#94a3b8", "interna", parent_name="Transferência", exclude=True)
+        add("Cofrinho",      "#94a3b8", "interna", parent_name="Transferência", exclude=True)
+
+        # ── Subcategorias Fixas ───────────────────────────────────────────────
+        add("Aluguel",       "#6366f1", "fixa", parent_name="Moradia")
+        add("Condomínio",    "#6366f1", "fixa", parent_name="Moradia")
+        add("Luz",           "#6366f1", "fixa", parent_name="Moradia")
+        add("Internet/TV",   "#6366f1", "fixa", parent_name="Moradia")
+        add("Plano de saúde","#ec4899", "fixa", parent_name="Saúde")
+        add("Academia",      "#ec4899", "fixa", parent_name="Saúde")
+        add("Cursos online", "#14b8a6", "fixa", parent_name="Educação")
+        add("Assinaturas",   "#f59e0b", "fixa", limit=150)
+        add("Streaming",     "#f59e0b", "fixa", parent_name="Assinaturas")
+        add("Música",        "#f59e0b", "fixa", parent_name="Assinaturas")
+        add("Software",      "#f59e0b", "fixa", parent_name="Assinaturas")
+
+        # ── Subcategorias Variáveis ───────────────────────────────────────────
+        add("Restaurante",   "#f97316", "variavel", limit=600)
+        add("Delivery",      "#ef4444", "variavel", parent_name="Restaurante")
+        add("Café/Lanche",   "#f97316", "variavel", parent_name="Restaurante")
+        add("Supermercado",  "#22c55e", "variavel", parent_name="Mercado")
+        add("Feira",         "#22c55e", "variavel", parent_name="Mercado")
+        add("Padaria",       "#22c55e", "variavel", parent_name="Mercado")
+        add("Apps",          "#8b5cf6", "variavel", parent_name="Transporte")
+        add("Combustível",   "#8b5cf6", "variavel", parent_name="Transporte")
+        add("Cinema/Teatro", "#a855f7", "variavel", parent_name="Lazer")
+        add("Viagem",        "#a855f7", "variavel", parent_name="Lazer")
+        add("Hobbies",       "#a855f7", "variavel", parent_name="Lazer")
+
+        conn.commit()
