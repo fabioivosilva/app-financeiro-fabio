@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 from app.database import get_db
-from app.models import Goal, Transaction, TransactionStatus
+from app.models import Goal, Transaction
+from app.models.transaction import TransactionStatus
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
