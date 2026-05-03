@@ -5,10 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T0.2a concluído. Iniciando T0.1 Backend Base.
+STATUS     : T0.1 + T0.2a concluídos. Backend (8000) + Frontend (5173) prontos.
+             Seed com Fabio/Fernanda, 10 categorias, regras, meta e transações de exemplo.
 BRANCH     : develop
-PRÓXIMA    : T0.2b — Design System [M] ← paralelo
-CLAIMS     : 🔒 [FABIO] T0.1 — Backend Base (FastAPI + SQLAlchemy + seed)
+PRÓXIMA    : T0.2b — Design System [M] · T1.1 — Parsers Plugáveis [G]
+CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
@@ -57,9 +58,9 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 0 — Fundação *(nenhum código existe ainda — começar aqui)*
 
-- [ ] `[G]` **T0.1 — Backend Base** · *qualquer um*
-  Modelos SQLAlchemy (Transaction, Category, Rule, Person, Card, Goal, Settings) · CRUD · FastAPI com routers por domínio · seed.py com regras · migrations via database.py
-  **Saída:** `localhost:8000` com dados de seed funcionando
+- [x] `[G]` **T0.1 — Backend Base** · *Fabio · CONCLUÍDO*
+  FastAPI + SQLAlchemy + SQLite · 7 modelos · 8 routers CRUD · seed com Fabio/Fernanda/cartões/10 cats/regras/meta/transações
+  **Saída:** `localhost:8000` funcionando com dados de seed
 
 - [x] `[G]` **T0.2a — Frontend Shell** · *Fabio · CONCLUÍDO*
   Vite + React 19 + TS + Tailwind · AppShell + Sidebar + MonthSelector · react-router · API client tipado · 6 pages placeholder
