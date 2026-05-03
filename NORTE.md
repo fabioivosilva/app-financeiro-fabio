@@ -5,11 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T1.1 completo. OFX + Excel + PDF Itaú funcionando com arquivos reais.
-             174 txs do PDF, 173 do Excel, 106 do OFX — dedup em todos.
+STATUS     : T1.1 completo. Iniciando T2.1a — Tela de Transações.
 BRANCH     : develop
-PRÓXIMA    : T2.1 — Tela de Transações [M]  ← próxima prioridade
-CLAIMS     : nenhum
+PRÓXIMA    : T2.1b — Inline edit + regra automática [M]
+CLAIMS     : 🔒 [FABIO] T2.1a — Tela Transações (lista + filtros + API)
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
