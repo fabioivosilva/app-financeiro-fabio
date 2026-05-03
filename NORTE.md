@@ -307,6 +307,12 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [x] `[P]` **T6.3 — Status de disponibilidade dos bancos** · *CONCLUÍDO 2026-05-03*
   Campo `available` adicionado em BankConfig. Bradesco, Santander e Mercado Pago marcados como `available: false`. Card desabilitado (opacidade + pointer-events), ícone `construction`, chip laranja "Em construção". Toggle bloqueado para bancos indisponíveis.
 
+- [ ] `[M]` **T6.4 — Seção Sistema funcional** · *qualquer um*
+  Três problemas identificados em Configurações > Sistema:
+  1. **Botão Salvar sempre ativo** — falta dirty-state: botão deve ficar desabilitado até o usuário alterar pasta ou dia de ciclo.
+  2. **Pasta de importação não conectada** — valor salva em localStorage mas nenhuma tela usa essa pasta ainda (T1.3 depende disso). Em webapp puro não é possível abrir seletor de pasta nativo; solução possível: input de texto + botão que abre `<input type="file" webkitdirectory>` para leitura.
+  3. **Dia de ciclo não conectado ao backend** — `Settings.cycle_start_day` existe no banco mas falta `PUT /settings/` e o filtro de transações usa mês calendário, não o ciclo configurado. Conectar ao backend e usar `cycle_start_day` no cálculo do período atual em Transações e Dashboard.
+
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 
 - [ ] `[G]` **T7.1 — Aba Insights** · *qualquer um*
