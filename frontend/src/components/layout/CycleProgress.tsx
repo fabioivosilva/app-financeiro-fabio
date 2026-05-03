@@ -1,35 +1,43 @@
-// Ciclo financeiro: dia 27 ao dia 26
-function getCycleInfo() {
+import { useState, useEffect } from 'react'
+
+export function getCycleInfo(cycleStart?: number) {
+  const diaInicio = cycleStart ?? Number(localStorage.getItem('cycleDayStart') ?? '27')
   const hoje = new Date()
   const dia = hoje.getDate()
 
   let inicioMes = hoje.getMonth()
   let inicioAno = hoje.getFullYear()
 
-  // Se hoje >= 27, o ciclo começou no dia 27 deste mês
-  // Se hoje < 27, o ciclo começou no dia 27 do mês anterior
-  if (dia < 27) {
+  if (dia < diaInicio) {
     inicioMes -= 1
     if (inicioMes < 0) { inicioMes = 11; inicioAno -= 1 }
   }
 
-  const inicio = new Date(inicioAno, inicioMes, 27)
+  const diaFim = diaInicio - 1 === 0 ? 28 : diaInicio - 1
+  const inicio = new Date(inicioAno, inicioMes, diaInicio)
   const fimMes = inicioMes + 1 > 11 ? 0 : inicioMes + 1
   const fimAno = inicioMes + 1 > 11 ? inicioAno + 1 : inicioAno
-  const fim = new Date(fimAno, fimMes, 26)
+  const fim = new Date(fimAno, fimMes, diaFim)
 
   const total = Math.round((fim.getTime() - inicio.getTime()) / 86400000) + 1
-  const passados = Math.round((hoje.getTime() - inicio.getTime()) / 86400000) + 1
+  const passados = Math.max(1, Math.round((hoje.getTime() - inicio.getTime()) / 86400000) + 1)
   const pct = Math.min(100, (passados / total) * 100)
 
   const fmtData = (d: Date) =>
     d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
 
-  return { total, passados, pct, inicio, fim, fmtData }
+  return { total, passados, pct, inicio, fim, fmtData, diaInicio, diaFim }
 }
 
 export function CycleProgress({ compact = false }: { compact?: boolean }) {
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const handler = () => setTick(t => t + 1)
+    window.addEventListener('storage', handler)
+    return () => window.removeEventListener('storage', handler)
+  }, [])
   const { total, passados, pct, inicio, fim, fmtData } = getCycleInfo()
+  const restantes = Math.max(0, total - passados)
 
   return (
     <div className="cycle">
@@ -44,7 +52,7 @@ export function CycleProgress({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="cycle-meta">
           <span className="t-xs t-muted">Dia {passados} de {total}</span>
-          <span className="t-xs t-muted">{total - passados} dias restantes</span>
+          <span className="t-xs t-muted">{restantes} dia{restantes !== 1 ? 's' : ''} restante{restantes !== 1 ? 's' : ''}</span>
         </div>
       )}
     </div>

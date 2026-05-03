@@ -515,7 +515,9 @@ function SistemaSection() {
 
   function handleSave() {
     localStorage.setItem('importFolder', pasta)
-    localStorage.setItem('cycleDayStart', String(Math.min(28, Math.max(1, diaCiclo))))
+    const day = String(Math.min(28, Math.max(1, diaCiclo)))
+    localStorage.setItem('cycleDayStart', day)
+    window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: day }))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
