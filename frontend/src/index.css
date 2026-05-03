@@ -834,6 +834,72 @@ body::before {
 .cfg-cat-card-actions { display: flex; gap: 0; opacity: 0; transition: opacity 0.15s; }
 .cfg-cat-card:hover .cfg-cat-card-actions { opacity: 1; }
 .cfg-cat-card-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* Subcategorias */
+.cfg-cat-card-open { background: rgba(28,20,50,0.7); border-color: var(--cat-color, rgba(192,132,252,0.25)); }
+.cfg-sub-toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 2px; padding: 6px 8px;
+  border-radius: 6px;
+  background: transparent; border: none;
+  color: var(--text-muted); font: inherit; font-size: 12px;
+  cursor: pointer; text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.cfg-sub-toggle:hover { background: rgba(192,132,252,0.06); color: var(--text); }
+.cfg-sub-preview { display: flex; align-items: center; gap: 3px; margin-left: auto; }
+.cfg-sub-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: grid; place-items: center;
+}
+.cfg-sub-more {
+  font-size: 10px; color: var(--text-muted-2);
+  padding: 0 4px;
+}
+.cfg-sub-list {
+  display: flex; flex-direction: column; gap: 1px;
+  margin-top: 2px;
+  border-top: 1px dashed rgba(192,132,252,0.1);
+  padding-top: 8px;
+}
+.cfg-sub-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto auto;
+  align-items: center; gap: 8px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.cfg-sub-row:hover { background: rgba(192,132,252,0.05); }
+.cfg-sub-icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  display: grid; place-items: center;
+}
+.cfg-sub-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px; color: var(--text);
+}
+.cfg-sub-meta { display: flex; gap: 8px; }
+.cfg-sub-meta-item {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; color: var(--text-muted-2);
+  font-variant-numeric: tabular-nums;
+}
+.btn-icon-sm { padding: 3px; }
+.cfg-sub-add {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 4px; padding: 6px;
+  background: transparent;
+  border: 1px dashed rgba(192,132,252,0.2);
+  border-radius: 6px;
+  color: var(--text-muted); font: inherit; font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cfg-sub-add:hover { color: #C084FC; border-color: rgba(192,132,252,0.4); border-style: solid; }
 /* Sistema form */
 .cfg-form { display: flex; flex-direction: column; gap: 24px; }
 .cfg-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }

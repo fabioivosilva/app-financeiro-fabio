@@ -230,7 +230,7 @@ export function Config() {
 
             {/* Bancos */}
             <section ref={refBancos} className="cfg-section">
-              <SectionHeader title="Bancos" subtitle="Selecione os bancos que você utiliza. Apenas os formatos de importação destes bancos serão exibidos." icon="account_balance" />
+              <SectionHeader title="Bancos" hint="Selecione os bancos que você utiliza. Apenas os formatos de importação destes bancos serão exibidos." />
               <div className="cfg-bancos-grid">
                 {BANCOS_DISPONIVEIS.map(banco => {
                   const ativo = bancosAtivos.includes(banco.id)
@@ -289,6 +289,7 @@ export function Config() {
         open={catModal.open}
         editing={catModal.editing}
         parentId={catModal.parentId}
+        parent={catModal.parentId ? categories.find(c => c.id === catModal.parentId) : undefined}
         onClose={() => setCatModal({ open: false })}
         onSaved={load}
       />
@@ -686,7 +687,7 @@ function CardModal({ open, editing, persons, onClose, onSaved }: { open: boolean
   )
 }
 
-function CategoryModal({ open, editing, parentId, onClose, onSaved }: { open: boolean; editing?: Category; parentId?: number; onClose: () => void; onSaved: () => void }) {
+function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { open: boolean; editing?: Category; parentId?: number; parent?: Category; onClose: () => void; onSaved: () => void }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('#820AD1')
   const [type, setType] = useState<'fixa' | 'variavel'>('variavel')
@@ -696,17 +697,23 @@ function CategoryModal({ open, editing, parentId, onClose, onSaved }: { open: bo
   useEffect(() => {
     if (open) {
       setName(editing?.name ?? '')
-      setColor(editing?.color ?? '#820AD1')
-      setType((editing?.type as 'fixa' | 'variavel') ?? 'variavel')
+      setColor(editing?.color ?? parent?.color ?? '#820AD1')
+      setType((editing?.type as 'fixa' | 'variavel') ?? (parent?.type as 'fixa' | 'variavel') ?? 'variavel')
       setLimitValue(editing?.limit_value ? String(editing.limit_value) : '')
     }
-  }, [open, editing])
+  }, [open, editing, parent])
 
   async function handleSave() {
     if (!name.trim()) return
     setSaving(true)
     try {
-      const payload = { name: name.trim(), color, type, limit_value: limitValue ? Number(limitValue) : null, parent_id: parentId ?? null }
+      const payload = {
+        name: name.trim(),
+        color,
+        type,
+        limit_value: limitValue ? Number(limitValue) : null,
+        parent_id: parentId ?? editing?.parent_id ?? null,
+      }
       if (editing) await api.put(`/categories/${editing.id}`, payload)
       else await api.post('/categories/', payload)
       onSaved(); onClose()
@@ -714,7 +721,7 @@ function CategoryModal({ open, editing, parentId, onClose, onSaved }: { open: bo
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? 'Editar categoria' : 'Nova categoria'}
+    <Modal open={open} onClose={onClose} title={editing ? 'Editar categoria' : parentId ? 'Nova subcategoria' : 'Nova categoria'}
       footer={<>
         <Button variant="ghost" onClick={onClose}>Cancelar</Button>
         <Button variant="primary" onClick={handleSave} disabled={saving || !name.trim()}>{saving ? 'Salvando...' : editing ? 'Salvar' : 'Criar'}</Button>
