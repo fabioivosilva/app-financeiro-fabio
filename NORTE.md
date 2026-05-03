@@ -5,11 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T1.1a concluído. Parser Engine no ar.
-             OFX: 106 txs reais importadas. Excel Itaú: 173 txs + dedup funcionando.
+STATUS     : T1.1a concluído. Iniciando T1.1b — PDF Itaú parser.
 BRANCH     : develop
-PRÓXIMA    : T1.1b — PDF Itaú [M] · T2.1 — Tela de Transações [M]
-CLAIMS     : nenhum
+PRÓXIMA    : T2.1 — Tela de Transações [M]
+CLAIMS     : 🔒 [FABIO] T1.1b — ItauPDFParser
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
