@@ -409,6 +409,9 @@ body::before {
 .filters-bar {
   display: flex; flex-direction: column; gap: 8px;
   padding: 10px 12px;
+  position: relative;
+  z-index: 20;
+  overflow: visible;
 }
 .filters-row {
   display: flex; align-items: center; gap: 12px;
@@ -467,8 +470,9 @@ body::before {
 }
 .chip-clear:hover { color: var(--text); border-color: var(--primary-2); border-style: solid; }
 .filter-dd { position: relative; }
+.filter-dd-open { z-index: 1000; }
 .filter-dd-menu {
-  position: absolute; top: calc(100% + 6px); left: 0; z-index: 50;
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 1000;
   min-width: 220px;
   background: rgba(28, 20, 50, 0.98);
   backdrop-filter: blur(40px);

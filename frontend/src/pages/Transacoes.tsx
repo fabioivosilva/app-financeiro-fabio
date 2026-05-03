@@ -265,7 +265,7 @@ function FilterDropdown<T>({ icon, label, value, options, onChange, dismissable 
   }
 
   return (
-    <div className="filter-dd" ref={ref}>
+    <div className={`filter-dd ${open ? 'filter-dd-open' : ''}`} ref={ref}>
       <button className={`chip-filter ${value ? 'chip-filter-on' : ''}`} onClick={handleClick}>
         <Icon name={icon} size={14} />
         <span>{selected ? selected.l : label}</span>
