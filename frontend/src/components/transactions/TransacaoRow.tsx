@@ -3,7 +3,7 @@ import { Icon } from '../ui/Icon'
 import { CategoryChip } from '../ui/Badge'
 import { CategoryPopover } from './CategoryPopover'
 import { RuleModal } from './RuleModal'
-import { formatCurrency } from '../../hooks/useTransacoes'
+import { formatCurrency, isTransactionPending } from '../../hooks/useTransacoes'
 import { api } from '../../api/client'
 import type { Transaction, Category, Person } from '../../api/types'
 
@@ -34,7 +34,7 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
 
   const cat = categories.find(c => c.id === tx.category_id)
   const person = persons.find(p => p.id === tx.person_id)
-  const isPending = tx.status === 'pendente'
+  const isPending = isTransactionPending(tx)
   const isPositive = tx.amount > 0
 
   const iconName = cat ? (CATEGORY_ICONS[cat.name] ?? 'category') : 'help_outline'

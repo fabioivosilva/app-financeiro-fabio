@@ -3,7 +3,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
 import { TransacaoRow } from '../components/transactions/TransacaoRow'
-import { useTransacoes, groupByDate, formatDate, formatCurrency } from '../hooks/useTransacoes'
+import { useTransacoes, groupByDate, formatDate, formatCurrency, isTransactionPending } from '../hooks/useTransacoes'
 
 type Tab = 'todas' | 'pendentes'
 type Ordem = 'data-desc' | 'data-asc' | 'valor-desc' | 'valor-asc'
@@ -32,14 +32,14 @@ export function Transacoes() {
 
   const filtered = useMemo(() => {
     let list = [...transactions]
-    if (tab === 'pendentes') list = list.filter(t => t.status === 'pendente')
+    if (tab === 'pendentes') list = list.filter(isTransactionPending)
     if (filtroCat) list = list.filter(t => t.category_id === filtroCat)
     if (filtroPessoa) list = list.filter(t => t.person_id === filtroPessoa)
     if (filtroValor === 'entradas') list = list.filter(t => t.amount > 0)
     if (filtroValor === 'saidas') list = list.filter(t => t.amount < 0)
     if (filtroValor === 'grandes') list = list.filter(t => Math.abs(t.amount) >= 200)
     if (filtroStatus === 'categorizada') list = list.filter(t => t.category_id && t.status !== 'pendente')
-    if (filtroStatus === 'pendente') list = list.filter(t => t.status === 'pendente')
+    if (filtroStatus === 'pendente') list = list.filter(isTransactionPending)
     if (filtroStatus === 'vinculada') list = list.filter(t => t.goal_id)
     if (filtroData === 'hoje') list = list.filter(t => t.date === toISODate(new Date()))
     if (filtroData === '7d') {
@@ -58,7 +58,7 @@ export function Transacoes() {
   const grupos = useMemo(() => (
     ordem.startsWith('data') ? groupByDate(filtered) : [['__flat', filtered] as [string, typeof filtered]]
   ), [filtered, ordem])
-  const pendentes = transactions.filter(t => t.status === 'pendente').length
+  const pendentes = transactions.filter(isTransactionPending).length
   const totalGastos = filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
   const filtrosAtivos = [filtroCat, filtroPessoa, filtroValor, filtroData, filtroStatus].filter(Boolean).length
 

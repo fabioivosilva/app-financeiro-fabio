@@ -74,6 +74,10 @@ export function groupByDate(transactions: Transaction[]): [string, Transaction[]
   return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]))
 }
 
+export function isTransactionPending(tx: Transaction): boolean {
+  return tx.status === 'pendente' || !tx.category_id
+}
+
 export function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number)
   const d = new Date(year, month - 1, day)
