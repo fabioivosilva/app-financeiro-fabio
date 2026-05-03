@@ -5,12 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T0.1 + T0.2a + T0.2b concluídos. Fundação completa.
-             Backend (8000) + Frontend (5173) + Design System prontos.
+STATUS     : Fundação completa. Iniciando T1.1a — Parser Engine.
 BRANCH     : develop
-PRÓXIMA    : T1.1 — Parsers Plugáveis [G]  ← desbloqueia importação
-             T2.1 — Tela de Transações [M] ← paralelo
-CLAIMS     : nenhum
+PRÓXIMA    : T1.1b — PDF parser [M] · T2.1 — Tela de Transações [M]
+CLAIMS     : 🔒 [FABIO] T1.1a — Parser Engine (BaseParser + OFX + Excel + dedup + endpoint)
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
