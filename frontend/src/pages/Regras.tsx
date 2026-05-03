@@ -12,11 +12,25 @@ export function Regras() {
   const { rules, categories, persons, loading, error, refetch, deleteRule } = useRegras()
   const [showNew, setShowNew] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [applying, setApplying] = useState(false)
+  const [applyResult, setApplyResult] = useState<number | null>(null)
 
   async function handleDelete(id: number) {
     setDeleting(id)
     try { await deleteRule(id) }
     finally { setDeleting(null) }
+  }
+
+  async function handleApply() {
+    setApplying(true)
+    setApplyResult(null)
+    try {
+      const res = await api.post<{ updated: number }>('/rules/apply', {})
+      setApplyResult(res.updated)
+      refetch()
+    } finally {
+      setApplying(false)
+    }
   }
 
   return (
@@ -25,9 +39,20 @@ export function Regras() {
         title="Regras de categorização"
         subtitle="Quando uma transação contém o keyword, ela é auto-categorizada"
         right={
-          <Button variant="primary" iconLeft="add" onClick={() => setShowNew(true)}>
-            Nova regra
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {applyResult !== null && (
+              <span className="t-xs t-muted">
+                <Icon name="check_circle" size={13} style={{ color: '#22C55E', verticalAlign: 'middle' }} />
+                {' '}{applyResult} categorizadas
+              </span>
+            )}
+            <Button variant="ghost" iconLeft="rule" onClick={handleApply} disabled={applying}>
+              {applying ? 'Aplicando...' : 'Aplicar regras'}
+            </Button>
+            <Button variant="primary" iconLeft="add" onClick={() => setShowNew(true)}>
+              Nova regra
+            </Button>
+          </div>
         }
       />
 
