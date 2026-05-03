@@ -444,6 +444,7 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
           origin: null,
           goal_id: null,
         })
+        await api.post('/rules/apply', {})
       }
       next()
       onUpdated()

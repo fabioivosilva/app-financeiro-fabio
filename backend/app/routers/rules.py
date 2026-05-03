@@ -1,9 +1,10 @@
+import unicodedata
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
-from app.models import Rule
+from app.models import Rule, Transaction
 
 router = APIRouter(prefix="/rules", tags=["rules"])
 
@@ -54,3 +55,36 @@ def delete_rule(id: int, db: Session = Depends(get_db)):
         raise HTTPException(404)
     db.delete(rule)
     db.commit()
+
+
+def _normalize(text: str) -> str:
+    return unicodedata.normalize("NFD", text).encode("ascii", "ignore").decode().lower()
+
+
+@router.post("/apply", summary="Aplica regras a transações pendentes sem categoria")
+def apply_rules(db: Session = Depends(get_db)):
+    """Percorre todas as transações pendentes sem categoria e aplica a primeira regra
+    cujo keyword esteja contido na descrição. Retorna quantas foram atualizadas."""
+    rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
+    if not rules:
+        return {"updated": 0}
+
+    pending = db.query(Transaction).filter(
+        Transaction.category_id.is_(None),
+        Transaction.status == "pendente",
+    ).all()
+
+    updated = 0
+    for tx in pending:
+        desc = _normalize(tx.description)
+        for rule in rules:
+            if _normalize(rule.keyword) in desc:
+                tx.category_id = rule.category_id
+                if rule.person_id:
+                    tx.person_id = rule.person_id
+                tx.status = "confirmado"
+                updated += 1
+                break
+
+    db.commit()
+    return {"updated": updated}
