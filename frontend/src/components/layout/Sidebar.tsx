@@ -1,4 +1,10 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { api } from '../../api/client'
+
+interface ImportHistory {
+  total: number
+}
 
 const NAV = [
   { to: '/',           label: 'Dashboard',      icon: 'dashboard' },
@@ -12,6 +18,21 @@ const NAV = [
 ]
 
 export function Sidebar() {
+  const [localStatus, setLocalStatus] = useState('Sincronizando...')
+
+  useEffect(() => {
+    let active = true
+    api.get<ImportHistory>('/imports/history')
+      .then(history => {
+        if (!active) return
+        setLocalStatus(history.total > 0 ? 'Última importação · disponível' : 'Sem importações ainda')
+      })
+      .catch(() => {
+        if (active) setLocalStatus('Histórico local indisponível')
+      })
+    return () => { active = false }
+  }, [])
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -43,7 +64,7 @@ export function Sidebar() {
           <div className="local-dot" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="t-xs t-muted">DADOS LOCAIS</div>
-            <div className="t-xs">SQLite · privado</div>
+            <div className="t-xs">{localStatus}</div>
           </div>
           <span className="material-symbols-outlined t-muted-2" style={{ fontSize: 14 }}>lock</span>
         </div>
