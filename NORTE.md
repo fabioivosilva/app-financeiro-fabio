@@ -5,13 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T0.2a + T0.3 parcial concluídos. Frontend shell no ar (localhost:5173).
-             auto_sync.ps1 instalado no Task Scheduler (login automático).
-             rodar.bat sobe frontend+backend. .gitattributes CRLF corrigido.
+STATUS     : T0.2a concluído. Iniciando T0.1 Backend Base.
 BRANCH     : develop
-PRÓXIMA    : T0.1 — Backend Base [G]  ← PRIORIDADE (desbloqueia tudo)
-             T0.2b — Design System [M] ← paralelo com T0.1
-CLAIMS     : nenhum
+PRÓXIMA    : T0.2b — Design System [M] ← paralelo
+CLAIMS     : 🔒 [FABIO] T0.1 — Backend Base (FastAPI + SQLAlchemy + seed)
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
