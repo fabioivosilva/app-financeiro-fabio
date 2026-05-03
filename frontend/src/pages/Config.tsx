@@ -62,31 +62,35 @@ export function Config() {
 
   useEffect(() => { load() }, [])
 
+  const scrollingRef = useRef(false)
+
   // Atualiza item ativo conforme o usuário rola
   useEffect(() => {
-    const refs: [string, React.RefObject<HTMLElement | null>][] = [
+    const sectionRefs: [string, React.RefObject<HTMLElement | null>][] = [
       ['pessoas', refPessoas], ['categorias', refCategorias],
       ['bancos', refBancos], ['sistema', refSistema], ['perigo', refPerigo],
     ]
     const observer = new IntersectionObserver(
       entries => {
-        // Pega a seção mais próxima do topo que está visível
+        if (scrollingRef.current) return
         const visible = entries
           .filter(e => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         if (visible.length > 0) {
-          const found = refs.find(([, ref]) => ref.current === visible[0].target)
+          const found = sectionRefs.find(([, ref]) => ref.current === visible[0].target)
           if (found) setSecao(found[0])
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0, rootMargin: '0px 0px -55% 0px' }
     )
-    refs.forEach(([, ref]) => { if (ref.current) observer.observe(ref.current) })
+    sectionRefs.forEach(([, ref]) => { if (ref.current) observer.observe(ref.current) })
     return () => observer.disconnect()
   }, [loading])
 
   function goTo(id: string) {
     setSecao(id)
+    scrollingRef.current = true
+    setTimeout(() => { scrollingRef.current = false }, 900)
     const map: Record<string, React.RefObject<HTMLElement | null>> = {
       pessoas: refPessoas, categorias: refCategorias, bancos: refBancos, sistema: refSistema, perigo: refPerigo,
     }
