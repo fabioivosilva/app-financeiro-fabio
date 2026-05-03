@@ -11,9 +11,9 @@ import { Config } from '../../pages/Config'
 
 export function AppShell() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', height: '100svh', maxWidth: 1600, margin: '0 auto', width: '100%' }}>
+    <div className="app">
       <Sidebar />
-      <main style={mainStyle}>
+      <main className="app-main">
         <Routes>
           <Route path="/"           element={<Dashboard />} />
           <Route path="/importar"   element={<Importar />} />
@@ -27,12 +27,4 @@ export function AppShell() {
       </main>
     </div>
   )
-}
-
-const mainStyle: React.CSSProperties = {
-  overflowY: 'auto',
-  padding: '32px 40px 60px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 18,
 }

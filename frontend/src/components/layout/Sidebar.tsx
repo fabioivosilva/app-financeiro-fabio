@@ -13,125 +13,41 @@ const NAV = [
 
 export function Sidebar() {
   return (
-    <aside style={sidebarStyle}>
-      {/* Brand */}
-      <div style={brandStyle}>
-        <div style={brandMarkStyle}>
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brand-mark">
           <span className="material-symbols-outlined" style={{ fontSize: 20 }}>account_balance_wallet</span>
         </div>
         <div>
-          <div style={{ fontWeight: 600, fontSize: 15, letterSpacing: '-0.01em' }}>Fabio</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Financeiro</div>
+          <div className="brand-name">Fabio</div>
+          <div className="brand-sub">Financeiro</div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+      <nav className="nav">
         {NAV.map(({ to, label, icon }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
-            style={({ isActive }) => ({
-              ...linkStyle,
-              background: isActive
-                ? 'linear-gradient(90deg, rgba(130,10,209,0.2), rgba(130,10,209,0.06))'
-                : 'transparent',
-              color: isActive ? 'var(--text)' : 'var(--text-muted)',
-              boxShadow: isActive ? 'inset 0 0 0 1px rgba(192,132,252,0.18)' : 'none',
-            })}
+            className={({ isActive }) => `nav-item ${isActive ? 'nav-item-active' : ''}`}
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 20, color: 'inherit' }}
-            >
-              {icon}
-            </span>
-            <span style={{ flex: 1, fontSize: 14 }}>{label}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{icon}</span>
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* Footer */}
-      <div style={footerStyle}>
-        <div style={localChipStyle}>
-          <div style={localDotStyle} />
+      <div className="sidebar-foot">
+        <div className="local-chip">
+          <div className="local-dot" />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>DADOS LOCAIS</div>
-            <div style={{ fontSize: 11 }}>SQLite · privado</div>
+            <div className="t-xs t-muted">DADOS LOCAIS</div>
+            <div className="t-xs">SQLite · privado</div>
           </div>
-          <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--text-muted-2)' }}>lock</span>
+          <span className="material-symbols-outlined t-muted-2" style={{ fontSize: 14 }}>lock</span>
         </div>
       </div>
     </aside>
   )
-}
-
-const sidebarStyle: React.CSSProperties = {
-  width: 240,
-  minWidth: 240,
-  height: '100svh',
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '24px 14px',
-  background: 'rgba(10, 6, 18, 0.4)',
-  backdropFilter: 'blur(20px)',
-  borderRight: '1px solid rgba(192, 132, 252, 0.07)',
-  position: 'sticky',
-  top: 0,
-}
-
-const brandStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 12,
-  padding: '6px 10px 22px',
-}
-
-const brandMarkStyle: React.CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: 10,
-  background: 'linear-gradient(135deg, #820AD1, #C084FC)',
-  display: 'grid',
-  placeItems: 'center',
-  color: 'white',
-  boxShadow: '0 8px 24px -8px rgba(130, 10, 209, 0.6)',
-  flexShrink: 0,
-}
-
-const linkStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 12,
-  padding: '10px 12px',
-  borderRadius: 10,
-  textDecoration: 'none',
-  transition: 'background 0.15s, color 0.15s',
-  cursor: 'pointer',
-  border: 'none',
-}
-
-const footerStyle: React.CSSProperties = {
-  paddingTop: 16,
-  borderTop: '1px solid rgba(192, 132, 252, 0.08)',
-}
-
-const localChipStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  padding: '10px 12px',
-  borderRadius: 10,
-  background: 'rgba(0,0,0,0.2)',
-  border: '1px solid rgba(192, 132, 252, 0.06)',
-}
-
-const localDotStyle: React.CSSProperties = {
-  width: 8,
-  height: 8,
-  borderRadius: '50%',
-  background: '#22C55E',
-  boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)',
-  flexShrink: 0,
 }
