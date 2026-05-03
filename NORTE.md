@@ -180,8 +180,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### TRILHA 6 — Configurações *(paralelo com T1-T3)*
 
-- [ ] `[M]` **T6.1 — Tela de Configurações** · *qualquer um*
-  Grid 2col: Pessoas (avatar iniciais) + Cartões (final→pessoa+limite) + Categorias full-width (cor, nome, limite, soft-delete, separadores Fixas/Variáveis) + Sistema (pasta import + reset com confirmação)
+- [x] `[M]` **T6.1 — Tela de Configurações** · *Fabio · CONCLUÍDO 2026-05-03*
+  Sidebar nav + Pessoas (CRUD, avatar com cores) + Cartões (CRUD, mini-card) + Categorias (CRUD, grid por tipo, search/filtro) + Sistema (pasta import via localStorage) + Zona de Perigo (confirmação com digitação).
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Configurações"
 
 ---

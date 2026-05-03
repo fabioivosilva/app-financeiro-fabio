@@ -752,6 +752,111 @@ body::before {
 }
 .cfg-input:focus { border-color: rgba(192,132,252,0.35); }
 .cfg-input option { background: #1a0e2e; color: var(--text); }
+/* ===== Configurações ===== */
+.cfg-layout { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start; }
+.cfg-side { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 2px; }
+.cfg-side-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  background: transparent; border: none; color: var(--text-muted);
+  font: inherit; font-size: 13px; cursor: pointer; text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.cfg-side-item:hover { background: rgba(192,132,252,0.06); color: var(--text); }
+.cfg-side-item-on { background: rgba(192,132,252,0.12); color: var(--text); box-shadow: inset 0 0 0 1px rgba(192,132,252,0.18); }
+.cfg-side-item-danger { color: rgba(244,114,128,0.7); }
+.cfg-side-item-danger:hover { background: rgba(239,68,68,0.08); color: #F87171; }
+.cfg-content { display: flex; flex-direction: column; gap: 36px; }
+.cfg-section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 14px; }
+.cfg-section-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+.cfg-danger-title { color: #F87171; }
+/* Pessoas */
+.pessoa-grid { display: flex; flex-direction: column; gap: 8px; }
+.pessoa-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px;
+  background: rgba(0,0,0,0.15); border: 1px solid rgba(192,132,252,0.06);
+  transition: border-color 0.15s, background 0.15s;
+}
+.pessoa-card:hover { border-color: rgba(192,132,252,0.2); background: rgba(192,132,252,0.04); }
+.pessoa-card-avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 16px; color: white;
+  flex-shrink: 0; box-shadow: 0 4px 12px -4px rgba(0,0,0,0.4);
+}
+.pessoa-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.pessoa-card:hover .pessoa-actions { opacity: 1; }
+/* Cartões mini */
+.cartao-mini-grid { display: flex; flex-direction: column; gap: 10px; }
+.cartao-mini {
+  padding: 14px 16px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(76,29,149,0.4), rgba(130,10,209,0.25));
+  border: 1px solid rgba(192,132,252,0.18);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cartao-mini-bandeira { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.7); align-self: end; }
+.cartao-mini-num { font-family: ui-monospace, monospace; font-size: 16px; letter-spacing: 0.1em; }
+.cartao-mini-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+.cartao-mini-nome { font-size: 12px; color: var(--text-muted); }
+.cartao-mini-pessoa { display: flex; align-items: center; gap: 6px; }
+/* Categorias */
+.cfg-cat-toolbar { display: flex; gap: 12px; align-items: center; padding: 10px 12px; flex-wrap: wrap; }
+.cfg-grupo-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.cfg-grupo {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 999px;
+  background: rgba(192,132,252,0.06); color: var(--text);
+  border: 1px solid rgba(192,132,252,0.1);
+  font: inherit; font-size: 12px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cfg-grupo-on { background: rgba(130,10,209,0.18); border-color: var(--primary-2); }
+.cfg-cat-group { display: flex; flex-direction: column; gap: 12px; }
+.cfg-cat-group-head { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
+.cfg-cat-group-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; }
+.cfg-cat-group-title { font-size: 14px; font-weight: 600; flex: 1; }
+.cfg-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.cfg-cat-card {
+  position: relative; overflow: hidden;
+  padding: 14px;
+  background: rgba(28,20,50,0.45);
+  border: 1px solid rgba(192,132,252,0.08);
+  border-radius: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cfg-cat-card:hover { border-color: var(--cat-color, rgba(192,132,252,0.3)); background: rgba(28,20,50,0.7); }
+.cfg-cat-card-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--cat-color, transparent); }
+.cfg-cat-card-head { display: flex; align-items: center; gap: 10px; }
+.cfg-cat-card-icon { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; }
+.cfg-cat-card-name { flex: 1; font-size: 13px; font-weight: 500; }
+.cfg-cat-card-actions { display: flex; gap: 0; opacity: 0; transition: opacity 0.15s; }
+.cfg-cat-card:hover .cfg-cat-card-actions { opacity: 1; }
+.cfg-cat-card-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+/* Sistema form */
+.cfg-form { display: flex; flex-direction: column; gap: 24px; }
+.cfg-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.cfg-input-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cfg-input-num { flex: 0 0 80px !important; min-width: 0 !important; text-align: center; font-family: inherit !important; }
+.cfg-input-danger:focus { border-color: #EF4444 !important; }
+.cfg-form-foot { display: flex; justify-content: end; padding-top: 8px; border-top: 1px solid rgba(192,132,252,0.06); }
+/* Zona de Perigo */
+.cfg-danger-card {
+  display: flex; align-items: start; gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02));
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(var(--glass-blur));
+}
+.cfg-danger-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(239,68,68,0.15); color: #F87171; display: grid; place-items: center; flex-shrink: 0; }
+.cfg-danger-h { font-size: 15px; font-weight: 600; color: #F87171; margin-bottom: 4px; }
+.cfg-danger-p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+.cfg-danger-p strong { color: var(--text); font-weight: 500; }
+.cfg-danger-p code { font-family: ui-monospace, monospace; font-size: 12px; padding: 1px 6px; border-radius: 4px; background: rgba(239,68,68,0.15); color: #F87171; }
+.cfg-danger-confirm { display: flex; flex-direction: column; gap: 8px; }
+
 .stub-card { padding: 60px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .stub-icon {
   width: 80px; height: 80px; border-radius: 20px;
