@@ -1,7 +1,7 @@
 """
 Parser para extratos do Nubank.
 Suporta dois formatos exportados pelo app:
-  - Cartão de crédito: date,description,amount (ISO date, amount negativo = gasto)
+  - Cartão de crédito: date,title,amount  (algumas versões usam 'description' no lugar de 'title')
   - Conta corrente:    Data,Valor,Identificador,Descrição (pt-BR, dd/mm/yyyy)
 """
 import csv
@@ -9,12 +9,13 @@ import io
 from datetime import date, datetime
 from app.parsers.base import BaseParser, ImportResult, ParsedTransaction
 
-_CREDIT_HEADERS = {"date", "description", "amount"}
+# Nubank crédito: obrigatórios date + amount; desc pode ser 'title' ou 'description'
+_CREDIT_REQUIRED = {"date", "amount"}
+_CREDIT_DESC_COLS = ["title", "description"]
 _ACCOUNT_HEADERS = {"data", "valor", "identificador"}
 
 
 def _decode(content: bytes) -> str:
-    """utf-8-sig strip BOM automaticamente; fallback latin-1 para bancos legados."""
     try:
         return content.decode("utf-8-sig")
     except (UnicodeDecodeError, ValueError):
@@ -24,15 +25,15 @@ def _decode(content: bytes) -> str:
 class NubankCSVParser(BaseParser):
 
     def can_parse(self, filename: str, content: bytes) -> float:
-        fname = filename.lower()
-        if not fname.endswith(".csv"):
+        if not filename.lower().endswith(".csv"):
             return 0.0
-        if "nubank" in fname:
+        if "nubank" in filename.lower():
             return 0.95
         try:
             text = _decode(content[:2048])
             first = {h.strip().strip('"').lower() for h in text.split("\n")[0].split(",")}
-            if _CREDIT_HEADERS.issubset(first):
+            # crédito: date + amount + (title ou description)
+            if _CREDIT_REQUIRED.issubset(first) and (first & set(_CREDIT_DESC_COLS)):
                 return 0.85
             if _ACCOUNT_HEADERS.issubset(first):
                 return 0.80
@@ -47,8 +48,8 @@ class NubankCSVParser(BaseParser):
         try:
             reader = csv.DictReader(io.StringIO(text))
             headers = {h.lower().strip() for h in (reader.fieldnames or [])}
-            if _CREDIT_HEADERS.issubset(headers):
-                self._parse_credit(result, reader)
+            if _CREDIT_REQUIRED.issubset(headers):
+                self._parse_credit(result, reader, headers)
             elif _ACCOUNT_HEADERS.issubset(headers):
                 self._parse_account(result, reader)
             else:
@@ -60,12 +61,13 @@ class NubankCSVParser(BaseParser):
             result.warnings.append("Nenhuma transação encontrada.")
         return result
 
-    def _parse_credit(self, result: ImportResult, reader: csv.DictReader) -> None:
+    def _parse_credit(self, result: ImportResult, reader: csv.DictReader, headers: set) -> None:
+        desc_col = next((c for c in _CREDIT_DESC_COLS if c in headers), None)
         for row in reader:
             try:
                 row_n = {k.lower().strip(): v.strip() for k, v in row.items() if k}
                 tx_date = datetime.strptime(row_n["date"], "%Y-%m-%d").date()
-                desc = row_n["description"]
+                desc = row_n.get(desc_col or "", "") if desc_col else ""
                 amount = float(row_n["amount"])
                 result.transactions.append(ParsedTransaction(
                     date=tx_date,

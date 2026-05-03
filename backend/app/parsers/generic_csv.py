@@ -9,11 +9,28 @@ import re
 from datetime import date, datetime
 from app.parsers.base import BaseParser, ImportResult, ParsedTransaction
 
-_DATE_KEYS = {"data", "date", "dt", "data lancamento", "data lançamento", "data pagamento", "data movimento"}
-_DESC_KEYS = {"descrição", "descricao", "description", "histórico", "historico",
-              "memo", "estabelecimento", "titulo", "título", "detalhe"}
-_AMOUNT_KEYS = {"valor", "value", "amount", "quantia", "montante", "debito",
-                "crédito", "credito", "entrada/saída", "entrada/saida"}
+_DATE_KEYS = {
+    "data", "date", "dt",
+    "data lancamento", "data lançamento",
+    "data pagamento", "data movimento",
+    "data de compra", "data transacao", "data transação",
+}
+_DESC_KEYS = {
+    "descrição", "descricao", "description",
+    "histórico", "historico",
+    "memo", "estabelecimento",
+    "titulo", "título", "title",
+    "detalhe", "lancamento", "lançamento",
+}
+_AMOUNT_KEYS = {
+    "valor", "value", "amount",
+    "quantia", "montante",
+    "debito", "débito",
+    "crédito", "credito",
+    "entrada/saída", "entrada/saida",
+    "valor (em r$)", "valor (em brl)", "valor em r$",
+    "valor reais",
+}
 
 _DATE_FMTS = ["%Y-%m-%d", "%d/%m/%Y", "%d/%m/%y", "%m/%d/%Y"]
 
