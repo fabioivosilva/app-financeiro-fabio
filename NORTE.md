@@ -163,6 +163,44 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico via localStorage (loadHistory/saveHistory) · começa vazio · empty state adicionado. BUG.4 fechado.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
+- [ ] `[P]` **T1.2b — Conectar Bancos Ativos → Tela de Importar** · *Thiago ou Codex · depende T6.2*
+  Hoje a tela de Importar aceita qualquer arquivo e não sabe quais bancos o usuário usa.
+  Após T6.2, a seleção de bancos existe em `localStorage` com a chave `cfg_bancos_ativos`.
+
+  **O que fazer (tudo no frontend — sem tocar no backend):**
+
+  1. Em `frontend/src/pages/Importar.tsx`, adicionar no topo da função `Importar()`:
+  ```ts
+  const bancosAtivos: string[] = JSON.parse(localStorage.getItem('cfg_bancos_ativos') || '[]')
+  ```
+
+  2. Logo abaixo, definir o mapa de bancos (copiar de Config.tsx — `BANCOS_DISPONIVEIS`).
+  Filtrar pelo que está ativo:
+  ```ts
+  const bancosVisiveis = BANCOS_DISPONIVEIS.filter(b => bancosAtivos.includes(b.id))
+  ```
+
+  3. No JSX, substituir o texto estático da dropzone:
+  ```
+  "Suporta OFX (qualquer banco), CSV (Nubank, Inter e outros)..."
+  ```
+  Por chips dinâmicos dos bancos ativos + seus formatos. Ex:
+  ```tsx
+  <div className="import-bancos-ativos">
+    {bancosVisiveis.map(b => (
+      <span key={b.id} className="cfg-banco-chip">{b.logo} {b.label}</span>
+    ))}
+  </div>
+  ```
+
+  4. Se `bancosAtivos` estiver vazio → mostrar aviso:
+  ```tsx
+  <p>Nenhum banco configurado. <a href="/config">Configure em Configurações → Bancos</a></p>
+  ```
+
+  **Não mexer:** lógica de upload, endpoint `POST /imports/upload`, `localStorage` do histórico.
+  **CSS reutilizar:** `.cfg-banco-chip` já existe em `index.css`.
+
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
   Pasta padrão configurável · lista arquivos não importados · 1 clique para importar
 
