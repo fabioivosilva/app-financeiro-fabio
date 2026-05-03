@@ -5,9 +5,9 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T3.1 completo — Tela de Metas implementada.
+STATUS     : PAUSA PARA BUGFIX — auditar UI 100% referência + integração front↔back antes de novas features.
 BRANCH     : develop
-PRÓXIMA    : T3.2 — Aporte Manual [M]
+PRÓXIMA    : BUG.1 — Auditoria UI/API de todos os menus [G]
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -27,15 +27,16 @@ QUANDO LER MAIS:
 | Thiago | Claude.ai |
 
 **Repo:** `github.com/fabioivosilva/app-financeiro-fabio` · Branch: `develop`
-**Exe:** `ControleFinanceiro\ControleFinanceiro.exe` · **DB:** `data\finance.db` (local, não versionar)
+**Dev:** backend FastAPI `127.0.0.1:8000` + Vite `127.0.0.1:5173` · **DB:** `data\finance.db` (local, não versionar)
 
 ---
 
 ## 🛠 Stack & Design
 
-**Stack:** React 19 + Vite + TS + TailwindCSS + Recharts · FastAPI + SQLAlchemy + SQLite · PyWebView + PyInstaller
+**Stack:** React 19 + Vite + TS + TailwindCSS + Recharts · FastAPI + SQLAlchemy + SQLite
 **Cores:** Primary `#820AD1` · Fundo `#fff7fd` · Verde `#0e8345` · Vermelho `#ba1a1a` · Orange `#f97316`
-**Design:** Dark mode · Glassmorphism · Fonte Inter · Referência visual: `07_UX_REFERENCE.md`
+**Design:** Dark mode · Glassmorphism · Fonte Inter · Referência visual obrigatória: `C:\Users\fabio\Downloads\App-financeiro`
+**Regra UI rígida:** nenhuma tela, modal, popover, filtro ou card pode ser "parecido"; precisa copiar estrutura/classes/ordem/labels do componente de referência antes de adaptar dados reais.
 **Ciclo financeiro:** dia 27 ao dia 26 · **Seed:** `backend/app/seed.py` = fonte da verdade das regras
 
 ---
@@ -54,6 +55,24 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 ---
 
 ## 📋 ROADMAP
+
+### TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
+
+- [ ] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *qualquer um*
+  Conferir cada rota do menu contra backend real e contra `C:\Users\fabio\Downloads\App-financeiro`: Dashboard, Importar, Transações, Cartão, Provisões, Metas, Regras e Configurações. Registrar o que está conectado, placeholder, mockado ou visualmente divergente.
+  **Validação mínima:** `npm.cmd run build`; healthcheck `GET /`, `/categories/`, `/persons/`, `/cards/`, `/transactions/?month=5&year=2026`, `/rules/`, `/goals/`, `/imports/history`.
+
+- [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
+  Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
+
+- [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1*
+  Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
+
+- [ ] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *qualquer um · depende BUG.1*
+  Importar foi portado com upload real, mas histórico inicial ainda usa amostra visual. Identificar dados fake restantes e conectar ao backend ou deixar item explícito no backlog antes de marcar trilha concluída.
+
+- [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um*
+  Ajustar/validar `rodar.bat` para subir backend + Vite no modelo atual. Não usar `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller enquanto não existirem no repo novo.
 
 ### TRILHA 0 — Fundação *(nenhum código existe ainda — começar aqui)*
 
@@ -177,7 +196,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 git add NORTE.md
 git add -A
 git commit -m "feat(TXX): descrição"
-# 2. Rodar build_desktop.bat (Windows local)
+# 2. Validar no modelo atual: backend FastAPI + Vite + npm.cmd run build
 git push origin develop
 ```
 
