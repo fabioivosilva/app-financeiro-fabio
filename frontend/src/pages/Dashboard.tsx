@@ -353,7 +353,7 @@ function ProjectionChart({ meses }: { meses: Array<{ label: string; saldo: numbe
 // ---------- Donut ----------
 function CategoryDonut({ data, total }: { data: any[]; total: number }) {
   const [hovered, setHovered] = useState<number | null>(null)
-  const R = 70, r = 52, cx = 90, cy = 90
+  const R = 82, r = 62, cx = 90, cy = 90
 
   let acc = 0
   const slices = data.map((d, i) => {
