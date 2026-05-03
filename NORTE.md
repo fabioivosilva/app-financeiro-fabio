@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : BUG.2 segue aberto; fatia Configurações > Bancos corrigida pelo Codex. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : T1.2b em andamento por Codex; conectar bancos ativos à tela Importar sem backend. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
-PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
-CLAIMS     : nenhum
+PRÓXIMA    : T1.2b — Importar deve respeitar bancos ativos configurados
+CLAIMS     : 🔒 [CODEX] T1.2b
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -164,7 +164,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico via localStorage (loadHistory/saveHistory) · começa vazio · empty state adicionado. BUG.4 fechado.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
-- [ ] `[P]` **T1.2b — Conectar Bancos Ativos → Tela de Importar** · *Thiago ou Codex · depende T6.2*
+- [ ] `🔒 [CODEX]` `[P]` **T1.2b — Conectar Bancos Ativos → Tela de Importar** · *Codex · depende T6.2*
   Hoje a tela de Importar aceita qualquer arquivo e não sabe quais bancos o usuário usa.
   Após T6.2, a seleção de bancos existe em `localStorage` com a chave `cfg_bancos_ativos`.
 
