@@ -5,7 +5,7 @@ import { Icon } from '../components/ui/Icon'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
-import type { Card, Category, Person } from '../api/types'
+import type { Card, Category, Person, Rule } from '../api/types'
 import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
 
 const PERSON_COLORS = ['#820AD1', '#06B6D4', '#C084FC', '#22C55E', '#F59E0B', '#F472B6']
@@ -22,6 +22,7 @@ export function Config() {
   const [persons, setPersons] = useState<Person[]>([])
   const [cards, setCards] = useState<Card[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [rules, setRules] = useState<Rule[]>([])
   const [loading, setLoading] = useState(true)
   const [secao, setSecao] = useState('pessoas')
 
@@ -40,8 +41,9 @@ export function Config() {
       api.get<Person[]>('/persons/'),
       api.get<Card[]>('/cards/'),
       api.get<Category[]>('/categories/'),
-    ]).then(([p, c, cat]) => {
-      setPersons(p); setCards(c); setCategories(cat)
+      api.get<Rule[]>('/rules/'),
+    ]).then(([p, c, cat, rls]) => {
+      setPersons(p); setCards(c); setCategories(cat); setRules(rls)
     }).finally(() => setLoading(false))
   }
 
@@ -195,6 +197,7 @@ export function Config() {
             <section ref={refCategorias}>
               <CategoriaSection
                 categories={categories}
+                rules={rules}
                 onEdit={cat => setCatModal({ open: true, editing: cat })}
                 onDelete={deleteCategory}
                 onAdd={() => setCatModal({ open: true })}
@@ -242,8 +245,9 @@ export function Config() {
 
 // ─── Categorias ────────────────────────────────────────────────────────────────
 
-function CategoriaSection({ categories, onEdit, onDelete, onAdd, onAddSub }: {
+function CategoriaSection({ categories, rules, onEdit, onDelete, onAdd, onAddSub }: {
   categories: Category[]
+  rules: Rule[]
   onEdit: (c: Category) => void
   onDelete: (id: number) => void
   onAdd: () => void
@@ -327,6 +331,7 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd, onAddSub }: {
                 key={cat.id}
                 cat={cat}
                 subs={categories.filter(c => c.parent_id === cat.id)}
+                rules={rules}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onAddSub={onAddSub}
@@ -348,9 +353,10 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd, onAddSub }: {
   )
 }
 
-function CategoryCard({ cat, subs, onEdit, onDelete, onAddSub }: {
+function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
   cat: Category
   subs: Category[]
+  rules: Rule[]
   onEdit: (c: Category) => void
   onDelete: (id: number) => void
   onAddSub: (parentId: number) => void
@@ -397,7 +403,11 @@ function CategoryCard({ cat, subs, onEdit, onDelete, onAddSub }: {
                 <Icon name={CATEGORY_ICONS[s.name] ?? 'label'} size={13} />
               </div>
               <div className="cfg-sub-name">{s.name}</div>
-              <div className="cfg-sub-meta" />
+              <div className="cfg-sub-meta">
+                <span className="cfg-sub-meta-item" title="Palavras-chave">
+                  <Icon name="key" size={11} /> {rules.filter(r => r.category_id === s.id).length}
+                </span>
+              </div>
               <button className="btn-icon btn-icon-sm" onClick={() => onEdit(s)}><Icon name="edit" size={12} /></button>
               <button className="btn-icon btn-icon-sm" onClick={() => onDelete(s.id)}><Icon name="close" size={12} /></button>
             </div>
