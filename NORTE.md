@@ -98,6 +98,18 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Adicionar controles com setas para voltar/avançar ciclos/meses e exibir claramente o período ativo. Manter ciclo atual como padrão, mas oferecer opção/filtro `Todas` para auditoria geral.
   Decisão sugerida: não listar tudo sempre por padrão; isso deixa a categorização mais ruidosa. Fluxo ideal é navegar por ciclo e usar `Todas` só quando o usuário quiser varrer histórico completo.
 
+#### HANDOFF ANTIGRAVITY — 2026-05-03 sessão 4 (Fim do dia)
+
+- **BUG.7 Concluído ✅:** Importação Itaú (PDF, OFX, Excel) estabilizada.
+  - **Performance:** Deduplicação otimizada de N+1 para query única (IN).
+  - **Estabilidade:** Banco migrado de `Enum` para `String` em `origin` e `status` para evitar erros de encoding/acentuação (Error 500).
+  - **Conectividade:** Alinhamento de hostnames (`localhost` vs `127.0.0.1`) resolveu o `Failed to fetch`.
+- **FEATURE TOGGLE DE IMPORTAÇÃO 🚀:**
+  - O motor de importação agora é "amarrado" aos bancos ativos nas configurações.
+  - O backend recebe `active_bank_ids` e só executa os parsers permitidos.
+  - O `OFXParser` agora detecta automaticamente se o arquivo é do Itaú (código 341).
+- **BANCO DE DADOS:** Resetado em `data/finance.db` com o novo esquema e populado via `seed.py`.
+
 #### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
 
 - **Entregues:**
