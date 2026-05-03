@@ -2,6 +2,7 @@ export interface Category {
   id: number
   name: string
   color?: string
+  icon?: string
   limit?: number
   limit_value?: number
   type?: 'fixa' | 'variavel' | 'receita' | 'interna'

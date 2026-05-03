@@ -1,9 +1,14 @@
 import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { CycleProgress } from '../components/layout/CycleProgress'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
 import { useTransacoes } from '../hooks/useTransacoes'
+import { useMetas } from '../hooks/useMetas'
+
+const META_COLORS = ['#820AD1', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899', '#14B8A6']
+const META_ICONS = ['savings', 'home', 'directions_car', 'flight', 'laptop', 'beach_access']
 
 // Format BRL values
 const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
@@ -16,16 +21,18 @@ const brlCompact = (v: number) => {
 const fmtData = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
 export function Dashboard() {
+  const navigate = useNavigate()
   const { transactions = [], categories = [] } = useTransacoes({})
+  const { goals } = useMetas()
 
-  const { receitas, gastos, gastosPorCat, topGastos, pendentes } = useMemo(() => {
-    const ok = transactions.filter(t => t.status === 'ok')
-    const receitas = ok.filter(t => t.value > 0).reduce((s, t) => s + t.value, 0)
-    const gastos = -ok.filter(t => t.value < 0).reduce((s, t) => s + t.value, 0)
+  const { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas } = useMemo(() => {
+    const ok = transactions.filter(t => t.status === 'confirmado')
+    const receitas = ok.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
+    const gastos = -ok.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
 
     const byCat: Record<number, number> = {}
-    ok.filter(t => t.value < 0).forEach(t => {
-      if (t.category_id) byCat[t.category_id] = (byCat[t.category_id] || 0) + (-t.value)
+    ok.filter(t => t.amount < 0).forEach(t => {
+      if (t.category_id) byCat[t.category_id] = (byCat[t.category_id] || 0) + (-t.amount)
     })
 
     const gastosPorCat = Object.entries(byCat)
@@ -35,10 +42,19 @@ export function Dashboard() {
       })
       .sort((a, b) => b.valor - a.valor)
 
-    const topGastos = ok.filter(t => t.value < 0).sort((a, b) => a.value - b.value).slice(0, 5)
+    const topGastos = ok.filter(t => t.amount < 0).sort((a, b) => a.amount - b.amount).slice(0, 5)
     const pendentes = transactions.filter(t => t.status === 'pendente' || !t.category_id).length
 
-    return { receitas, gastos, gastosPorCat, topGastos, pendentes }
+    const alertas = categories
+      .filter(c => c.limit_value && c.limit_value > 0)
+      .map(c => {
+        const usado = byCat[c.id] || 0
+        const pct = usado / c.limit_value!
+        return { cat: c, usado, limite: c.limit_value!, pct }
+      })
+      .filter(a => a.pct >= 0.85)
+
+    return { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas }
   }, [transactions, categories])
 
   const saldoAtual = receitas - gastos
@@ -120,7 +136,7 @@ export function Dashboard() {
       </div>
 
       {pendentes > 0 && (
-        <button className="alert-banner">
+        <button className="alert-banner" onClick={() => navigate('/transacoes')}>
           <div className="alert-icon" style={{ background: '#F59E0B20', color: '#F59E0B' }}>
             <Icon name="inbox" size={20} />
           </div>
@@ -140,7 +156,7 @@ export function Dashboard() {
           title="Próximos 6 meses"
           hint="Saldo projetado considerando provisões mensais e parcelas ativas"
           right={
-            <button className="btn-ghost">
+            <button className="btn-ghost" onClick={() => navigate('/provisoes')}>
               Gerenciar provisões <Icon name="arrow_forward" size={14} />
             </button>
           }
@@ -180,8 +196,33 @@ export function Dashboard() {
           </div>
         </Glass>
 
-        {/* TOP GASTOS (right column) */}
+        {/* RIGHT COLUMN */}
         <div className="col-stack">
+          {alertas.length > 0 && (
+            <Glass>
+              <SectionHeader
+                title="Alertas"
+                hint={`${alertas.length} ${alertas.length === 1 ? 'categoria' : 'categorias'} próximas do limite`}
+              />
+              <div className="alert-list">
+                {alertas.map(a => (
+                  <div key={a.cat.id} className="alert-row">
+                    <div className="alert-row-icon" style={{ background: (a.cat.color || '#C084FC') + '20', color: a.cat.color || '#C084FC' }}>
+                      <Icon name={(a.cat as any).icon || 'warning'} size={18} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="t-sm">{a.cat.name}</div>
+                      <div className="t-xs t-muted">{brl(a.usado)} de {brl(a.limite)}</div>
+                    </div>
+                    <div className={`alert-pct${a.pct >= 1 ? ' alert-pct-over' : ''}`}>
+                      {Math.round(a.pct * 100)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Glass>
+          )}
+
           <Glass>
             <SectionHeader title="Top gastos do ciclo" />
             <div className="top-list">
@@ -190,7 +231,7 @@ export function Dashboard() {
                 return (
                   <div key={t.id} className="top-row">
                     <div className="top-row-icon" style={{ background: (cat?.color || '#C084FC') + '20', color: cat?.color || '#C084FC' }}>
-                      <Icon name={cat?.icon || 'shopping_cart'} size={18} />
+                      <Icon name={(cat as any)?.icon || 'shopping_cart'} size={18} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="t-sm" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -201,7 +242,38 @@ export function Dashboard() {
                       </div>
                     </div>
                     <div className="t-sm" style={{ color: '#F472B6', fontVariantNumeric: 'tabular-nums' }}>
-                      {brl(t.value)}
+                      {brl(t.amount)}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </Glass>
+
+          <Glass>
+            <SectionHeader
+              title="Metas & cofrinhos"
+              right={<button className="btn-ghost" onClick={() => navigate('/metas')}>Ver todas</button>}
+            />
+            <div className="metas-list">
+              {goals.slice(0, 4).map((m, idx) => {
+                const cor = META_COLORS[idx % META_COLORS.length]
+                const icon = META_ICONS[idx % META_ICONS.length]
+                const pct = m.target > 0 ? (m.current / m.target) * 100 : 0
+                return (
+                  <div key={m.id} className="meta-row">
+                    <div className="meta-icon" style={{ background: cor + '20', color: cor }}>
+                      <Icon name={icon} size={18} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="meta-head">
+                        <span className="t-sm">{m.name}</span>
+                        <span className="t-xs t-muted">{Math.round(pct)}%</span>
+                      </div>
+                      <div className="meta-bar">
+                        <div className="meta-fill" style={{ width: Math.min(100, pct) + '%', background: cor }} />
+                      </div>
+                      <div className="t-xs t-muted">{brlCompact(m.current)} de {brlCompact(m.target)}</div>
                     </div>
                   </div>
                 )
