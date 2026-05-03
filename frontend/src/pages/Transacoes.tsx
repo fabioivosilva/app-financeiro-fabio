@@ -23,7 +23,7 @@ export function Transacoes() {
     person_id: filtroPessoa,
   }
 
-  const { transactions, categories, persons, loading, error } = useTransacoes(filters)
+  const { transactions, categories, persons, loading, error, refetch } = useTransacoes(filters)
 
   const filtered = useMemo(() => {
     if (!busca) return transactions
@@ -175,7 +175,7 @@ export function Transacoes() {
             </span>
           </div>
           {txs.map(tx => (
-            <TransacaoRow key={tx.id} tx={tx} categories={categories} persons={persons} />
+            <TransacaoRow key={tx.id} tx={tx} categories={categories} persons={persons} onUpdated={refetch} />
           ))}
         </Glass>
       ))}
