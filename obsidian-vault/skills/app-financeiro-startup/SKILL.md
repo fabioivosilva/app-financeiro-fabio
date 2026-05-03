@@ -14,6 +14,9 @@ git checkout develop && git pull origin develop
 Ler **só o bloco SNAPSHOT** (primeiras ~15 linhas) de `NORTE.md`.
 Parar de ler assim que tiver: próxima tarefa, claims ativos, capacidade da sessão.
 
+Se a tarefa for frontend, usar também `app-financeiro-ui-reference` e ler a tela correspondente em
+`C:\Users\fabio\Downloads\App-financeiro` antes de editar código.
+
 Apresentar ao usuário:
 ```
 🔒 Claims ativos: [listar ou "nenhum"]

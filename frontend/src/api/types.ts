@@ -3,6 +3,8 @@ export interface Category {
   name: string
   color?: string
   limit?: number
+  limit_value?: number
+  type?: 'fixa' | 'variavel'
 }
 
 export interface Person {
@@ -42,6 +44,7 @@ export interface Goal {
   current: number
   deadline?: string
   category_id?: number
+  keyword?: string
 }
 
 export interface Settings {

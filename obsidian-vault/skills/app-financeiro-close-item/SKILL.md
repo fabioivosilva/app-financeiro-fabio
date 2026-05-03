@@ -1,91 +1,42 @@
 ---
 name: app-financeiro-close-item
-description: >
-  Protocolo obrigatorio de fechamento de tarefa no App Financeiro Fabio.
-  Use ao concluir qualquer item do backlog.
+description: Protocolo obrigatorio de fechamento de tarefa no App Financeiro Fabio. Use ao concluir qualquer item do roadmap/backlog, especialmente itens marcados em NORTE.md com claim ativo.
 ---
 
-# Skill: App Financeiro - Fechar Item do Backlog
+# App Financeiro - Fechar Item
 
-## Estado base
+## Estado Base
 
-O repositorio foi zerado em 2026-05-02.
-Enquanto o scaffold desktop nao for recriado, nao existe `build_desktop.bat`
-nem `ControleFinanceiro.exe` para validar.
+O repo atual esta em `develop` e possui backend FastAPI e frontend React/Vite. Neste reset, `build_desktop.bat` pode ainda nao existir; confirmar no workspace antes de declarar build desktop.
 
-O fechamento oficial agora e:
+Arquivos de controle:
 
-1. atualizar backlog;
-2. atualizar checkpoint;
-3. validar o que for possivel para o estado atual;
-4. commitar;
-5. dar push.
+- `NORTE.md`: fonte do snapshot, roadmap e claims.
+- `obsidian-vault/07_UX_REFERENCE.md`: resumo visual.
+- `C:\Users\fabio\Downloads\App-financeiro`: referencia visual detalhada para frontend.
 
-Quando a trilha desktop recriar o build, o passo de build volta a ser obrigatorio
-para itens que alterem codigo executavel.
+## Fechamento
 
-## Passo 1 - Marcar no backlog
+1. Validar a implementacao com os checks relevantes.
+   - Frontend: `npm.cmd run build` em `frontend`.
+   - Backend Python: `backend\.venv\Scripts\python.exe -m py_compile <arquivos>` e testes relevantes quando existirem.
+   - Desktop: rodar `.\build_desktop.bat` quando o arquivo existir e a tarefa alterar codigo executavel ou frontend empacotado.
+2. Atualizar `NORTE.md`.
+   - Marcar o item concluido com `[x]`.
+   - Remover o cadeado do item concluido.
+   - Atualizar o SNAPSHOT: `STATUS`, `PROXIMA`, `CLAIMS`.
+3. Atualizar memoria compacta quando houver mudanca relevante.
+   - Preferir `NORTE.md` para o fluxo novo.
+   - Usar Obsidian apenas para detalhes/handoff curto que ajudem a proxima sessao.
+4. Conferir `git status --short`.
+   - Nao incluir `.pyc`, banco local, exe gerado ou artefatos privados.
+5. Commitar o escopo da tarefa.
+   - Exemplo: `git commit -m "feat(T3.1): implementa tela de metas"`.
+6. Fazer push para `origin develop` somente quando autorizado.
 
-Abrir `obsidian-vault/05_PENDENCIAS.md` e mudar o item:
+## Guardrails
 
-```markdown
-- [x] `[M]` R0 - Scaffolding minimo do repo
-```
-
-Se a tarefa ficar incompleta, manter `[/]` e deixar uma nota clara no item.
-
-## Passo 2 - Atualizar checkpoint
-
-Editar `obsidian-vault/10_CHECKPOINT_ATUAL.md`:
-
-- registrar o que foi concluido;
-- atualizar a proxima tarefa;
-- registrar pendencias ou riscos;
-- manter a data atualizada.
-
-## Passo 3 - Validar
-
-Escolha a validacao de acordo com o estado do repo:
-
-- Apenas vault/backlog: revisar markdown e rodar `git status`.
-- Apos R0: rodar checks basicos do scaffold criado.
-- Apos desktop existir: rodar `build_desktop.bat` e validar timestamp do exe.
-
-Nunca declarar build desktop feito se ainda nao houver scaffold desktop.
-
-## Passo 4 - Commit
-
-```bash
-git add -A
-git commit -m "tipo(escopo): descricao curta"
-```
-
-Tipos comuns:
-
-- `docs`
-- `chore`
-- `feat`
-- `fix`
-- `refactor`
-
-## Passo 5 - Push
-
-```bash
-git push origin develop
-```
-
-Mensagem final esperada:
-
-```text
-Push feito no develop. Proxima sessao deve comecar pelo vault.
-```
-
-## Checklist
-
-```text
-- [ ] 05_PENDENCIAS.md atualizado
-- [ ] 10_CHECKPOINT_ATUAL.md atualizado
-- [ ] validacao possivel executada
-- [ ] commit feito
-- [ ] push feito no develop
-```
+- Nunca declarar T concluida sem atualizar `NORTE.md`.
+- Nunca declarar build desktop feito se `build_desktop.bat` nao existir ou nao rodou com sucesso.
+- Nunca commitar artefatos locais de runtime/build por acidente.
+- Se o push for bloqueado por politica ou permissao, registrar que o commit ficou local e pedir aprovacao explicita.
