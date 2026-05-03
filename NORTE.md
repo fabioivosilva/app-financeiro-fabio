@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Projeto zerado. Nenhum código ainda. Decisão: sem .exe, usar rodar.bat + browser.
+STATUS     : Projeto zerado. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
 PRÓXIMA    : T0.1 — Setup Backend Base [G]
 CLAIMS     : nenhum
@@ -71,7 +71,14 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ---
 
-### TRILHA 1 — Importação *(T1.1 antes de T1.2)*
+- [ ] `[M]` **T0.4 — Onboarding de Perfil** · *qualquer um · depende T0.2*
+  Wizard no primeiro acesso: nome do usuário, dia de início do ciclo, bancos utilizados + formatos por banco.
+  Persiste em `data/perfil.json` (não sobe pro Git). Parser Registry carrega apenas os parsers do perfil.
+  Se perfil não existe → redireciona para o wizard ao abrir o app.
+  **Campos:** nome · ciclo_inicio (dia) · bancos[] (nome + formatos suportados)
+  **Saída:** `data/perfil.json` criado · tela de importação mostra só os bancos/formatos declarados
+
+### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
 
 - [ ] `[G]` **T1.1 — Parsers Plugáveis** · *qualquer um · depende T0.1*
   Interface `BaseParser` · `PARSER_REGISTRY {(banco,formato): Parser}` · parsers: OFX, Itaú Excel, Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada
