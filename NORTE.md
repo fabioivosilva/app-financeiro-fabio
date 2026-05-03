@@ -56,7 +56,11 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ## 📋 ROADMAP
 
-### TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
+## 🔴 BUGS BLOQUEANTES — LER ANTES DAS TRILHAS
+
+As trilhas abaixo mostram o que já foi implementado, mas **não liberam novas features** enquanto a auditoria UI/API não passar. O trabalho de amanhã começa em BUG.1.
+
+### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
 - [ ] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *qualquer um*
   Conferir cada rota do menu contra backend real e contra `C:\Users\fabio\Downloads\App-financeiro`: Dashboard, Importar, Transações, Cartão, Provisões, Metas, Regras e Configurações. Registrar o que está conectado, placeholder, mockado ou visualmente divergente.
@@ -99,20 +103,20 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
   - [ ] Backlog v2: switch light/dark mode (tokens já preparados no index.css)
   **NOTA:** design light mode em elaboração com designer (Claude.ai) — sessão estourou tokens antes de concluir. Arquivo incompleto. Retomar quando designer tiver nova sessão.
 
-- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · depende T0.1+T0.2*
-  `rodar.bat` sobe backend + abre browser · `auto_sync.ps1` só faz git pull + notificação (sem rebuild exe)
+- [x] `[P]` **T0.3 — Script de Execução** · *Fabio · CONCLUÍDO COM VALIDAÇÃO BUG.5*
+  `rodar.bat` existe e sobe backend + Vite + abre browser. **Pendente BUG.5:** validar fluxo dev confiável ponta a ponta e ajustar se necessário.
   **Saída:** app abrindo no browser via rodar.bat
 
 ---
 
 ### TRILHA 1 — Importação *(T1.1 antes de T1.2)*
 
-- [ ] `[G]` **T1.1 — Parsers Plugáveis** · *qualquer um · depende T0.1*
-  Interface `BaseParser` · `PARSER_REGISTRY {(banco,formato): Parser}` · parsers: OFX, Itaú Excel, Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada
+- [x] `[G]` **T1.1 — Parsers Plugáveis** · *Fabio · CONCLUÍDO*
+  Interface `BaseParser` · `PARSER_REGISTRY` · parsers OFX, Itaú Excel e Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada.
   **Detalhe técnico:** `08_PARSERS.md`
 
-- [ ] `[M]` **T1.2 — Tela de Importação** · *qualquer um · depende T1.1*
-  Dropdown banco+formato · drag & drop · resumo pós-import · histórico de imports
+- [x] `[M]` **T1.2 — Tela de Importação** · *Fabio · CONCLUÍDO COM PENDÊNCIA BUG.4*
+  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico visual. **Pendente BUG.4:** histórico inicial ainda usa amostra visual/mock.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
@@ -122,12 +126,12 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 2 — Transações & Regras *(depende T0+T1)*
 
-- [ ] `[M]` **T2.1 — Tela de Transações** · *qualquer um*
-  Lista agrupada por data · filtros pill (mês, categoria, pessoa, origem, status) · toggle pendentes · inline edit categoria · "criar regra automática"
+- [x] `[M]` **T2.1 — Tela de Transações** · *Fabio · CONCLUÍDO COM REAUDITORIA BUG.2/BUG.3*
+  Lista agrupada por data · filtros pill conforme referência · aba pendentes · sem categoria conta como pendente · inline edit categoria · botão `Revisar N pendentes` abre inbox one-by-one · categoriza e cria regra automática.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Transações"
 
-- [ ] `[M]` **T2.2 — Tela de Regras** · *qualquer um · depende T2.1*
-  CRUD regras (keyword→categoria+pessoa+origem+goal_id opcional) · vínculo cartão→pessoa · grid com busca e paginação
+- [x] `[M]` **T2.2 — Tela de Regras** · *Fabio · CONCLUÍDO COM REAUDITORIA BUG.2/BUG.3*
+  CRUD regras keyword→categoria+pessoa · nova regra em modal · exclusão · lista no padrão visual de referência. **Pendente:** vínculo cartão→pessoa/paginação ficam para auditoria BUG.1 se ainda forem necessários.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Regras"
 
 - [ ] `[P]` **T2.3 — Cofrinho por Keyword** · *qualquer um · depende T2.2+T3.1*
