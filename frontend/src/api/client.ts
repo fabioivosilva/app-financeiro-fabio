@@ -1,8 +1,6 @@
 const apiHost = (() => {
-  if (typeof window === 'undefined') return '127.0.0.1'
-  const host = window.location.hostname
-  if (!host || host === 'localhost' || host === '::1') return '127.0.0.1'
-  return host
+  if (typeof window === 'undefined') return 'localhost'
+  return window.location.hostname || 'localhost'
 })()
 
 export const API_BASE_URL = `http://${apiHost}:8000`
