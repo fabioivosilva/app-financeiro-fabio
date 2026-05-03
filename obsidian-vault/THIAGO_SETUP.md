@@ -1,51 +1,46 @@
 # Setup do Projeto - Thiago
 
-## Estado Atual
-
-O repo foi zerado. So existe `obsidian-vault/`.
-
-Nao tente rodar backend, frontend ou build desktop antes da tarefa `R0 - Scaffolding minimo do repo`.
-
 ## Como Comecar
 
-```powershell
+```bash
 git clone https://github.com/fabioivosilva/app-financeiro-fabio.git
 cd app-financeiro-fabio
 git checkout develop
 git pull origin develop
 ```
 
-Depois leia, nesta ordem:
-
-1. `obsidian-vault/10_CHECKPOINT_ATUAL.md`
-2. `obsidian-vault/05_PENDENCIAS.md`
-3. `obsidian-vault/00_INDEX.md`
+Leia **apenas** `NORTE.md` — é a única fonte de verdade do projeto.
+Leia só o bloco SNAPSHOT (primeiras ~20 linhas). Ele tem tudo que precisa para começar.
 
 ## Prompt para Claude
 
 ```text
-Estou iniciando uma sessao no projeto App Financeiro Fabio.
+Projeto: App Financeiro Fabio & Thiago
+Repo já clonado em: <caminho local>
 
-O repo foi zerado de proposito e so o obsidian-vault permanece.
+INÍCIO OBRIGATÓRIO:
+1. git checkout develop && git pull origin develop
+2. Ler APENAS o bloco SNAPSHOT no topo de NORTE.md (primeiras ~20 linhas)
+3. Me apresentar: claims ativos + próxima tarefa + orçamento da sessão
 
-Regras:
-- Sempre branch develop.
-- Nao usar main.
-- Ler primeiro obsidian-vault/10_CHECKPOINT_ATUAL.md.
-- Depois ler obsidian-vault/05_PENDENCIAS.md.
-- Comecar pelo primeiro item sem claim.
-- O backlog atual reconstrói o app do zero.
-- Parsers devem nascer plugaveis e multi-banco, nao acoplados ao Itau.
-
-Antes de codar, me diga:
-1. Estado atual.
-2. Proxima tarefa.
-3. Arquivos que pretende criar.
-4. Validacoes que pretende rodar.
+Depois do SNAPSHOT, aguarda minha confirmação antes de qualquer código.
 ```
 
 ## Dinamica
 
-- Ao iniciar uma tarefa, marcar claim no backlog.
-- Ao concluir, marcar `[x]`, atualizar checkpoint, commitar e dar push.
-- Build desktop so volta a ser exigido depois que a trilha Desktop for recriada.
+- Ao iniciar uma tarefa: marcar `🔒 [THIAGO]` no item em NORTE.md + commit + push.
+- Ao concluir: remover 🔒, marcar `[x]`, atualizar SNAPSHOT, commitar e dar push.
+- Sempre branch `develop`. Nunca `main`.
+- Sem .exe — app roda via `rodar.bat` + browser (`localhost:5173`).
+- Parsers plugáveis e multi-banco (não acoplados ao Itaú).
+
+## Rodar o app localmente
+
+```bash
+# Opção 1 — script completo
+./rodar.bat
+
+# Opção 2 — manual
+cd frontend && npm run dev        # localhost:5173
+cd backend && uvicorn app.main:app --port 8000  # quando T0.1 estiver pronto
+```
