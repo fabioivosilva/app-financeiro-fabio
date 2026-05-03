@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : PDF Itaú validado pelo Fabio; OFX/XLSX ainda falham na importação com mensagem de backend indisponível. BUG.7 adicionado para próxima sessão. T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : PDF Itaú validado pelo Fabio; OFX/XLSX ainda falham na importação com mensagem de backend indisponível. BUG.7 adicionado para próxima sessão. UX Transações precisa navegação de ciclo com setas e opção "Todas". T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
@@ -92,6 +92,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [ ] `[P]` **BUG.7 — Importação Itaú OFX/XLSX ainda falha após PDF funcionar** · *próxima sessão*
   Teste do Fabio: PDF Itaú importou corretamente, mas OFX e XLSX mostram na tela `Não consegui conectar ao backend em http://127.0.0.1:8000. Abra pelo rodar.bat e confirme que a API está ativa.`
   Próxima investigação: confirmar se o backend fica ativo durante uploads OFX/XLSX, olhar log do `/imports/upload`, diferenciar erro real de parser/exception de erro de conexão no frontend e validar com os arquivos modelo reais.
+
+- [ ] `[P]` **BUG.8 — Navegação de ciclos na tela Transações** · *próxima sessão*
+  Hoje a tela parece mostrar só o ciclo atual, dificultando revisar/categorizar transações importadas de meses anteriores.
+  Adicionar controles com setas para voltar/avançar ciclos/meses e exibir claramente o período ativo. Manter ciclo atual como padrão, mas oferecer opção/filtro `Todas` para auditoria geral.
+  Decisão sugerida: não listar tudo sempre por padrão; isso deixa a categorização mais ruidosa. Fluxo ideal é navegar por ciclo e usar `Todas` só quando o usuário quiser varrer histórico completo.
 
 #### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
 
