@@ -58,8 +58,11 @@ parse(file) -> ImportResult
 Antes do reset, existiam parsers funcionais para OFX, PDF Itau e Excel Itau.
 O Excel do Itau era o caminho mais confiavel para faturas de cartao.
 
-Arquivo real citado anteriormente para testes manuais:
+Arquivo real citado anteriormente para testes manuais excel, ofx e pdf :
 
 ```text
 C:\Users\fabio\Downloads\Fatura-Excel.xls
+C:\Users\fabio\Downloads\Extrato Conta Corrente-020520260135.ofx
+C:\Users\fabio\Downloads\Fatura_LATAM_PASS_ITAU_MASTERCARD_BLACK_5761_2026_05.pdf
+
 ```
