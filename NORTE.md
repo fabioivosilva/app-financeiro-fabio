@@ -81,7 +81,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
   Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.
 
-- [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um · PARCIAL 2026-05-03*
+- [ ] `🔒 [CODEX]` `[P]` **BUG.5 — Script dev confiável** · *Codex · PARCIAL 2026-05-03*
   `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, adiciona `--reload` ao uvicorn. Problema de "porta ocupada" resolvido. Falta validação ponta-a-ponta confirmada pelo Fabio.
 
 #### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
