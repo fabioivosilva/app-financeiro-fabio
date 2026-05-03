@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
-from app.models import Transaction
+from app.models import Transaction, Card
 from app.parsers import PARSER_REGISTRY
 from app.parsers.dedup import deduplicate
 
@@ -43,8 +43,17 @@ async def upload_file(
 
         novas, duplicadas = deduplicate(result, db)
 
+        # Monta cache last4 -> card_id para associar transações ao cartão correto
+        card_by_last4: dict[str, int] = {
+            c.last4: c.id
+            for c in db.query(Card).all()
+            if c.last4
+        }
+
         criadas = []
         for tx in novas:
+            card_last4 = (tx.raw or {}).get("card_last4")
+            card_id = card_by_last4.get(card_last4) if card_last4 else None
             db_tx = Transaction(
                 date=tx.date,
                 description=tx.description,
@@ -54,6 +63,7 @@ async def upload_file(
                 external_id=tx.external_id,
                 installment_current=tx.installment_current,
                 installment_total=tx.installment_total,
+                card_id=card_id,
             )
             db.add(db_tx)
             criadas.append(db_tx)
