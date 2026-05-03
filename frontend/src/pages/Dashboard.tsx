@@ -398,18 +398,25 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
         ))}
         <circle cx={cx} cy={cy} r={r - 1} fill="rgba(20,15,35,0.6)" />
         {/* % labels on slices > 5% */}
-        {slices.map((s, i) => s.pct >= 5 && (
-          <text
-            key={i} x={s.lx} y={s.ly}
-            textAnchor="middle" dominantBaseline="middle"
-            fontSize={hovered === i ? '11' : '9'}
-            fontWeight={hovered === i ? '700' : '500'}
-            fill="#fff"
-            style={{ pointerEvents: 'none', transition: 'all 0.15s', opacity: hovered !== null && hovered !== i ? 0 : 1 }}
-          >
-            {Math.round(s.pct)}%
-          </text>
-        ))}
+        {slices.map((s, i) => {
+          if (s.pct < 5) return null
+          const isHov = hovered === i
+          const txt = Math.round(s.pct) + '%'
+          const fs = isHov ? 10.5 : 8.5
+          const pw = txt.length * fs * 0.62 + 8
+          const ph = fs + 7
+          const op = hovered !== null && !isHov ? 0 : 1
+          return (
+            <g key={i} style={{ pointerEvents: 'none', transition: 'opacity 0.15s', opacity: op }}>
+              <rect x={s.lx - pw/2} y={s.ly - ph/2} width={pw} height={ph} rx={ph/2}
+                fill="rgba(0,0,0,0.55)" />
+              <text x={s.lx} y={s.ly} textAnchor="middle" dominantBaseline="middle"
+                fontSize={fs} fontWeight={isHov ? 700 : 600} fill="#fff"
+                fontFamily="ui-monospace,monospace" letterSpacing="-0.3"
+              >{txt}</text>
+            </g>
+          )
+        })}
       </svg>
       <div className="donut-center" style={{ pointerEvents: 'none' }}>
         {hov ? (
