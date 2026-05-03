@@ -163,22 +163,26 @@ export function Transacoes() {
         </Glass>
       )}
 
-      {!loading && !error && grupos.map(([dateStr, txs]) => (
-        <Glass key={dateStr} padded={false} className="day-group">
-          <div className="day-header">
-            <div className="day-label">
-              <span style={{ fontSize: 13, fontWeight: 500 }}>{formatDate(dateStr)}</span>
-              <span className="t-xs t-muted">{txs.length} transações</span>
+      {!loading && !error && filtered.length > 0 && (
+        <Glass padded={false}>
+          {grupos.map(([dateStr, txs]) => (
+            <div key={dateStr} className="day-group">
+              <div className="day-header">
+                <div className="day-label">
+                  <span className="t-sm">{formatDate(dateStr)}</span>
+                  <span className="t-xs t-muted">· {txs.length} transações</span>
+                </div>
+                <span className="t-xs t-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {formatCurrency(txs.reduce((s, t) => s + t.amount, 0))}
+                </span>
+              </div>
+              {txs.map(tx => (
+                <TransacaoRow key={tx.id} tx={tx} categories={categories} persons={persons} onUpdated={refetch} />
+              ))}
             </div>
-            <span className="t-sm t-muted">
-              {formatCurrency(txs.reduce((s, t) => s + t.amount, 0))}
-            </span>
-          </div>
-          {txs.map(tx => (
-            <TransacaoRow key={tx.id} tx={tx} categories={categories} persons={persons} onUpdated={refetch} />
           ))}
         </Glass>
-      ))}
+      )}
     </div>
   )
 }
