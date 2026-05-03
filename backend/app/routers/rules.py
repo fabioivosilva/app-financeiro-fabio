@@ -71,7 +71,6 @@ def apply_rules(db: Session = Depends(get_db)):
 
     pending = db.query(Transaction).filter(
         Transaction.category_id.is_(None),
-        Transaction.status == "pendente",
     ).all()
 
     updated = 0
