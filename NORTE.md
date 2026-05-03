@@ -5,9 +5,9 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : BUG.1✅ BUG.4✅ T6.1✅ — pendentes: C3❌ BUG.2/3/5 (visual/modal/script) + Dashboard + Provisões
+STATUS     : BUG.1✅ BUG.4✅ T6.1✅ · C3🟡(parser reconhece/fluxo→Transações quebrado) BUG.5🟡(bat melhorado) — pendentes: BUG.2/3 + Dashboard + Provisões
 BRANCH     : develop
-PRÓXIMA    : C3 — Rever parsers CSV (colnames reais dos bancos) ou BUG.2 — Conformidade visual [G]
+PRÓXIMA    : C3-fluxo — transações importadas somem (suspeita: filtro ciclo dia27→26; testar mudando MonthSelector)
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -81,8 +81,24 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
   Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.
 
-- [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um*
-  Ajustar/validar `rodar.bat` para subir backend + Vite no modelo atual. Não usar `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller enquanto não existirem no repo novo.
+- [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um · PARCIAL 2026-05-03*
+  `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, adiciona `--reload` ao uvicorn. Problema de "porta ocupada" resolvido. Falta validação ponta-a-ponta confirmada pelo Fabio.
+
+#### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
+
+- **Entregues:**
+  - `rodar.bat`: mata portas 8000/5173 antes de subir novos processos + `--reload` no uvicorn → problema de "porta ocupada" resolvido
+  - C3 parser C6 Bank (`backend/app/parsers/c6_csv.py`): detecta `Fatura_YYYY-MM-DD.csv` pelo header real (`Data de Compra;Final do Cartão;Valor (em R$)`), extrai parcelas (`N/M`), inverte sinal compra/pagamento
+  - Encoding CSV corrigido em todos parsers: `utf-8-sig` (strip BOM) + fallback `latin-1`
+  - PDF protegido por senha: `can_parse` retorna 0.80 para PDFs criptografados; `parse` emite `PDF_ENCRYPTED`; frontend abre modal de senha e re-envia
+  - Nubank corrigido: campo real do CSV de crédito é `title`, não `description`
+  - Generic CSV: keyword sets expandidos com aliases brasileiros reais (`data de compra`, `valor (em r$)`, `title` etc.)
+
+- **Pendente C3 — dois sub-problemas para próxima sessão:**
+  1. **ESTRATÉGIA MULTI-BANCO:** deliberar a forma mais prática de reconhecer e diferenciar extratos/faturas de múltiplas instituições sem virar um labirinto de parsers. Arquivos modelo disponíveis em `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse` para guiar decisão.
+  2. **FLUXO IMPORTAÇÃO→TRANSAÇÕES:** parser reconhece e salva no banco (confirmado: `total_found` e `imported` retornam valores), mas as transações não aparecem na tela de Transações. Causa mais provável: **filtro de ciclo (dia 27→26)** — o arquivo C6 tem datas de out/2025 a abr/2026, que caem em ciclos anteriores ao atual (maio 2026). Antes de qualquer código: mudar o MonthSelector para o ciclo de abril (abr/27 → mai/26) e verificar se as transações aparecem.
+
+- **Arquivos modelo para C3:** `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse\` — qualquer novo parser deve ser validado contra estes arquivos antes de marcar concluído.
 
 #### HANDOFF CLAUDE — 2026-05-03 sessão 2 (Fabio + Claude Code)
 
