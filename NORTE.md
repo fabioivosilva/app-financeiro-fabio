@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : BUGFIX EM ANDAMENTO — BUG.1 ✅ BUG.4 ✅ T6.1 ✅ · próximo: BUG.2 ou BUG.3
+STATUS     : BUG.1✅ BUG.4✅ C3✅ T6.1✅ — pendentes: BUG.2/3/5 (visual/modal/script) + Dashboard + Provisões
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade 100% referência visual [G]  OU  BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum

@@ -103,7 +103,7 @@ export function Importar() {
         ref={inputRef}
         type="file"
         multiple
-        accept=".ofx,.xls,.xlsx,.pdf"
+        accept=".ofx,.xls,.xlsx,.pdf,.csv"
         style={{ display: 'none' }}
         onChange={e => e.target.files && handleFiles(e.target.files)}
       />
@@ -123,11 +123,12 @@ export function Importar() {
             <Icon name={uploading ? 'hourglass_empty' : 'upload_file'} size={36} />
           </div>
           <div className="dropzone-title">{uploading ? 'Processando arquivos...' : 'Arraste arquivos ou clique para selecionar'}</div>
-          <div className="dropzone-sub">Suporta OFX (banco), Excel (Itaú) e PDF (fatura). Múltiplos arquivos.</div>
+          <div className="dropzone-sub">Suporta OFX (qualquer banco), CSV (Nubank, Inter e outros), Excel e PDF (Itaú). Múltiplos arquivos.</div>
           <div className="dropzone-tags">
             <span className="tag"><Icon name="description" size={14} />OFX</span>
             <span className="tag"><Icon name="grid_on" size={14} />XLSX</span>
             <span className="tag"><Icon name="picture_as_pdf" size={14} />PDF</span>
+            <span className="tag"><Icon name="table_chart" size={14} />CSV</span>
           </div>
           {error && <div className="t-sm" style={{ color: '#F87171' }}>{error}</div>}
         </div>
@@ -200,16 +201,18 @@ function detectType(filename: string, fallback?: string) {
   if (lower.endsWith('.ofx')) return 'OFX'
   if (lower.endsWith('.pdf')) return 'PDF'
   if (lower.endsWith('.xls') || lower.endsWith('.xlsx')) return 'Excel'
+  if (lower.endsWith('.csv')) return 'CSV'
   return fallback ?? 'Arquivo'
 }
 
 function fileIcon(type: string) {
   if (type === 'OFX') return 'description'
   if (type === 'PDF') return 'picture_as_pdf'
+  if (type === 'CSV') return 'table_chart'
   return 'grid_on'
 }
 
 function fileIconStyle(type: string): React.CSSProperties {
-  const color = type === 'OFX' ? '#06B6D4' : type === 'PDF' ? '#EC4899' : '#22C55E'
+  const color = type === 'OFX' ? '#06B6D4' : type === 'PDF' ? '#EC4899' : type === 'CSV' ? '#A855F7' : '#22C55E'
   return { background: `${color}20`, color }
 }

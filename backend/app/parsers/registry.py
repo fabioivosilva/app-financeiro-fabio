@@ -42,7 +42,14 @@ def setup_registry() -> None:
     from app.parsers.ofx import OFXParser
     from app.parsers.itau_excel import ItauExcelParser
     from app.parsers.itau_pdf import ItauPDFParser
+    from app.parsers.nubank_csv import NubankCSVParser
+    from app.parsers.inter_csv import InterCSVParser
+    from app.parsers.generic_csv import GenericCSVParser
 
     PARSER_REGISTRY.register(OFXParser())
     PARSER_REGISTRY.register(ItauExcelParser())
     PARSER_REGISTRY.register(ItauPDFParser())
+    # Parsers CSV — registrar do mais específico ao mais genérico
+    PARSER_REGISTRY.register(NubankCSVParser())
+    PARSER_REGISTRY.register(InterCSVParser())
+    PARSER_REGISTRY.register(GenericCSVParser())
