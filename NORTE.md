@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : PDF/OFX/XLSX Itaú 100% funcionais (BUG.7 resolvido); Deduplicação otimizada; Feature Toggle 100% funcional — imports.py filename corrigido + bank_id adicionado em C6/Nubank/Inter; Enums removidos do DB para estabilidade. UX Transações precisa navegação de ciclo com setas e opção "Todas".
+STATUS     : Feature Toggle 100% (BUG.7+parsers); BUG.8 fechado (nav ciclo com setas+Todas em Transações); T6.3 fechado (Bradesco/Santander/MercadoPago como Em construção). Pendente: BUG.2 [G] conformidade visual · BUG.3 [M] modais/popovers.
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
@@ -93,10 +93,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   O erro "backend indisponível" era um erro de CORS/Timeout causado por N+1 queries no deduplicate (lento no Windows).
   **Fixes:** Deduplicação otimizada para query única (IN) + tratamento de erro robusto no router + aumento do sample de detecção Excel. Validado com arquivos reais do Fabio.
 
-- [ ] `[P]` **BUG.8 — Navegação de ciclos na tela Transações** · *próxima sessão*
-  Hoje a tela parece mostrar só o ciclo atual, dificultando revisar/categorizar transações importadas de meses anteriores.
-  Adicionar controles com setas para voltar/avançar ciclos/meses e exibir claramente o período ativo. Manter ciclo atual como padrão, mas oferecer opção/filtro `Todas` para auditoria geral.
-  Decisão sugerida: não listar tudo sempre por padrão; isso deixa a categorização mais ruidosa. Fluxo ideal é navegar por ciclo e usar `Todas` só quando o usuário quiser varrer histórico completo.
+- [x] `[P]` **BUG.8 — Navegação de ciclos na tela Transações** · *CONCLUÍDO 2026-05-03*
+  Adicionado navegador de ciclo com setas ← → acima dos filtros. Label mostra mês/ano atual. Seta esquerda volta meses; seta direita avança (desabilitada no mês atual). Botão "Todas" remove filtro de mês e carrega histórico completo. useTransacoes agora aceita month/year opcionais.
 
 #### HANDOFF ANTIGRAVITY — 2026-05-03 sessão 4 (Fim do dia)
 
@@ -300,10 +298,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Toggle ativo/inativo com check visual. Formatos suportados por banco como chips.
   Persiste em localStorage. Nav lateral atualizado. CSS seguindo design system.
 
-- [ ] `[P]` **T6.3 — Status de disponibilidade dos bancos** · *qualquer um · depende T6.2/T1.2b*
-  Como os cards de bancos funcionam como feature toggle da importação, a UI precisa diferenciar banco suportado de banco ainda sem parser validado.
-  Bancos/formatos sem leitura pronta devem aparecer como `Em construção`, com toggle desabilitado ou bloqueado, para o usuário não habilitar uma opção que ainda não consegue importar.
-  Fonte provável: `frontend/src/config/banks.ts` deve expor status/capabilities por banco/formato e `Config.tsx` + `Importar.tsx` devem respeitar essa disponibilidade.
+- [x] `[P]` **T6.3 — Status de disponibilidade dos bancos** · *CONCLUÍDO 2026-05-03*
+  Campo `available` adicionado em BankConfig. Bradesco, Santander e Mercado Pago marcados como `available: false`. Card desabilitado (opacidade + pointer-events), ícone `construction`, chip laranja "Em construção". Toggle bloqueado para bancos indisponíveis.
 
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 

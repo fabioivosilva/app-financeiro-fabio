@@ -422,6 +422,18 @@ body::before {
 .hero-bar-fill { height: 100%; border-radius: 2px; }
 
 /* ===== Transações ===== */
+.cycle-nav {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 2px;
+}
+.cycle-nav-arrow { padding: 4px 6px; min-width: unset; }
+.cycle-nav-arrow:disabled { opacity: 0.3; pointer-events: none; }
+.cycle-nav-label {
+  min-width: 96px; text-align: center;
+  font-size: 14px; font-weight: 600; color: var(--text-1);
+  text-transform: capitalize;
+}
+.cycle-nav-todas { margin-left: 8px; }
 .filters-bar {
   display: flex; flex-direction: column; gap: 8px;
   padding: 10px 12px;
@@ -976,6 +988,8 @@ body::before {
   background: rgba(35,18,58,0.82);
   box-shadow: 0 0 0 3px rgba(130,10,209,0.10);
 }
+.cfg-banco-card-disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.cfg-banco-chip-wip { background: rgba(245,158,11,0.12); color: #F59E0B; border-color: rgba(245,158,11,0.25); }
 .cfg-banco-top { display: flex; justify-content: space-between; align-items: center; }
 .cfg-banco-logo {
   width: 40px; height: 40px;

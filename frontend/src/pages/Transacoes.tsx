@@ -14,10 +14,19 @@ type FiltroValor = null | 'entradas' | 'saidas' | 'grandes'
 type FiltroData = null | 'hoje' | '7d' | 'ciclo'
 type FiltroStatus = null | 'categorizada' | 'pendente' | 'vinculada'
 
-export function Transacoes() {
+function cycleFromOffset(offset: number | null): { month?: number; year?: number; label: string } {
+  if (offset === null) return { label: 'Todas' }
   const now = new Date()
-  const month = now.getMonth() + 1
-  const year = now.getFullYear()
+  const d = new Date(now.getFullYear(), now.getMonth() + offset, 1)
+  return {
+    month: d.getMonth() + 1,
+    year: d.getFullYear(),
+    label: d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.', ''),
+  }
+}
+
+export function Transacoes() {
+  const [cycleOffset, setCycleOffset] = useState<number | null>(0)
   const [tab, setTab] = useState<Tab>('todas')
   const [busca, setBusca] = useState('')
   const [filtroCat, setFiltroCat] = useState<number | undefined>()
@@ -27,9 +36,8 @@ export function Transacoes() {
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>(null)
   const [ordem, setOrdem] = useState<Ordem>('data-desc')
 
-  const filters = {
-    month, year,
-  }
+  const cycle = cycleFromOffset(cycleOffset)
+  const filters = { month: cycle.month, year: cycle.year }
 
   const { transactions, categories, persons, rules, loading, error, refetch } = useTransacoes(filters)
 
@@ -109,6 +117,26 @@ export function Transacoes() {
           ) : undefined
         }
       />
+
+      <div className="cycle-nav">
+        <button className="btn-ghost cycle-nav-arrow" onClick={() => setCycleOffset(o => (o ?? 0) - 1)}>
+          <Icon name="chevron_left" size={20} />
+        </button>
+        <span className="cycle-nav-label">{cycle.label}</span>
+        <button
+          className="btn-ghost cycle-nav-arrow"
+          onClick={() => setCycleOffset(o => o === null ? null : o + 1)}
+          disabled={cycleOffset === null || cycleOffset >= 0}
+        >
+          <Icon name="chevron_right" size={20} />
+        </button>
+        <button
+          className={`chip-filter cycle-nav-todas${cycleOffset === null ? ' chip-filter-on' : ''}`}
+          onClick={() => setCycleOffset(null)}
+        >
+          Todas
+        </button>
+      </div>
 
       <Glass padded={false} className="filters-bar">
         <div className="filters-row">

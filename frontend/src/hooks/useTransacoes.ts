@@ -3,8 +3,8 @@ import { api } from '../api/client'
 import type { Transaction, Category, Person, Rule } from '../api/types'
 
 interface Filters {
-  month: number
-  year: number
+  month?: number
+  year?: number
   status?: string
   category_id?: number
   person_id?: number
@@ -34,10 +34,9 @@ export function useTransacoes(filters: Filters): UseTransacoesResult {
     setLoading(true)
     setError(null)
 
-    const params = new URLSearchParams({
-      month: String(filters.month),
-      year: String(filters.year),
-    })
+    const params = new URLSearchParams()
+    if (filters.month) params.set('month', String(filters.month))
+    if (filters.year) params.set('year', String(filters.year))
     if (filters.status) params.set('status', filters.status)
     if (filters.category_id) params.set('category_id', String(filters.category_id))
     if (filters.person_id) params.set('person_id', String(filters.person_id))

@@ -5,18 +5,19 @@ export interface BankConfig {
   formatos: string[]
   extensions: string[]
   keywords: string[]
+  available?: boolean
 }
 
 export const BANKS_STORAGE_KEY = 'cfg_bancos_ativos'
 
 export const BANCOS_DISPONIVEIS: BankConfig[] = [
-  { id: 'itau', label: 'Itaú', icon: '/banks/itau.svg', formatos: ['Fatura Excel', 'Fatura PDF', 'Extrato OFX'], extensions: ['.xls', '.xlsx', '.pdf', '.ofx'], keywords: ['itau', 'itaú'] },
-  { id: 'c6', label: 'C6 Bank', icon: '/banks/c6.svg', formatos: ['Fatura CSV'], extensions: ['.csv'], keywords: ['c6'] },
-  { id: 'nubank', label: 'Nubank', icon: '/banks/nubank.svg', formatos: ['Fatura CSV'], extensions: ['.csv'], keywords: ['nubank', 'nu_'] },
-  { id: 'inter', label: 'Banco Inter', icon: '/banks/inter.svg', formatos: ['Extrato CSV'], extensions: ['.csv'], keywords: ['inter'] },
-  { id: 'bradesco', label: 'Bradesco', icon: '/banks/bradesco.svg', formatos: ['Extrato OFX'], extensions: ['.ofx'], keywords: ['bradesco'] },
-  { id: 'santander', label: 'Santander', icon: '/banks/santander.svg', formatos: ['Extrato OFX'], extensions: ['.ofx'], keywords: ['santander'] },
-  { id: 'mercado_pago', label: 'Mercado Pago', icon: '/banks/mercadopago.svg', formatos: ['Extrato CSV'], extensions: ['.csv'], keywords: ['mercado_pago', 'mercadopago', 'mercado pago'] },
+  { id: 'itau', label: 'Itaú', icon: '/banks/itau.svg', formatos: ['Fatura Excel', 'Fatura PDF', 'Extrato OFX'], extensions: ['.xls', '.xlsx', '.pdf', '.ofx'], keywords: ['itau', 'itaú'], available: true },
+  { id: 'c6', label: 'C6 Bank', icon: '/banks/c6.svg', formatos: ['Fatura CSV'], extensions: ['.csv'], keywords: ['c6'], available: true },
+  { id: 'nubank', label: 'Nubank', icon: '/banks/nubank.svg', formatos: ['Fatura CSV'], extensions: ['.csv'], keywords: ['nubank', 'nu_'], available: true },
+  { id: 'inter', label: 'Banco Inter', icon: '/banks/inter.svg', formatos: ['Extrato CSV'], extensions: ['.csv'], keywords: ['inter'], available: true },
+  { id: 'bradesco', label: 'Bradesco', icon: '/banks/bradesco.svg', formatos: ['Extrato OFX'], extensions: ['.ofx'], keywords: ['bradesco'], available: false },
+  { id: 'santander', label: 'Santander', icon: '/banks/santander.svg', formatos: ['Extrato OFX'], extensions: ['.ofx'], keywords: ['santander'], available: false },
+  { id: 'mercado_pago', label: 'Mercado Pago', icon: '/banks/mercadopago.svg', formatos: ['Extrato CSV'], extensions: ['.csv'], keywords: ['mercado_pago', 'mercadopago', 'mercado pago'], available: false },
 ]
 
 export function loadBancosAtivos() {

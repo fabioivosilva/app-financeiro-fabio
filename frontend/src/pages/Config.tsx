@@ -222,28 +222,32 @@ export function Config() {
               <SectionHeader title="Bancos" hint="Selecione os bancos que você utiliza. Apenas os formatos de importação destes bancos serão exibidos." />
               <div className="cfg-bancos-grid">
                 {BANCOS_DISPONIVEIS.map(banco => {
-                  const ativo = bancosAtivos.includes(banco.id)
+                  const disponivel = banco.available !== false
+                  const ativo = disponivel && bancosAtivos.includes(banco.id)
                   return (
                     <button
                       key={banco.id}
                       type="button"
-                      onClick={() => toggleBanco(banco.id)}
-                      className={`cfg-banco-card${ativo ? ' cfg-banco-card-on' : ''}`}
+                      onClick={() => disponivel && toggleBanco(banco.id)}
+                      className={`cfg-banco-card${ativo ? ' cfg-banco-card-on' : ''}${!disponivel ? ' cfg-banco-card-disabled' : ''}`}
                       aria-pressed={ativo}
+                      aria-disabled={!disponivel}
+                      title={!disponivel ? 'Em construção — parser não disponível ainda' : undefined}
                     >
                       <div className="cfg-banco-top">
                         <span className="cfg-banco-logo">
                           <img src={banco.icon} alt="" aria-hidden="true" />
                         </span>
                         <span className={`cfg-banco-check${ativo ? ' cfg-banco-check-on' : ''}`}>
-                          <Icon name={ativo ? 'check_circle' : 'radio_button_unchecked'} size={20} />
+                          <Icon name={!disponivel ? 'construction' : ativo ? 'check_circle' : 'radio_button_unchecked'} size={20} />
                         </span>
                       </div>
                       <p className="cfg-banco-nome">{banco.label}</p>
                       <div className="cfg-banco-formatos">
-                        {banco.formatos.map(f => (
-                          <span key={f} className="cfg-banco-chip">{f}</span>
-                        ))}
+                        {!disponivel
+                          ? <span className="cfg-banco-chip cfg-banco-chip-wip">Em construção</span>
+                          : banco.formatos.map(f => <span key={f} className="cfg-banco-chip">{f}</span>)
+                        }
                       </div>
                     </button>
                   )
