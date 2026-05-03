@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T2.1 + T2.2a concluídos. Regras com lista, busca, nova regra, delete.
+STATUS     : T2.1 + T2.2a concluídos. Iniciando T2.2b — vínculo cartão→pessoa.
 BRANCH     : develop
-PRÓXIMA    : T2.2b — vínculo cartão→pessoa [P] · T3.1 — Tela de Metas [M]
-CLAIMS     : nenhum
+PRÓXIMA    : T3.1 — Tela de Metas [M]
+CLAIMS     : 🔒 [FABIO] T2.2b — vínculo cartão→pessoa na Tela de Regras
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
