@@ -5,6 +5,7 @@ export interface Category {
   limit?: number
   limit_value?: number
   type?: 'fixa' | 'variavel'
+  parent_id?: number | null
 }
 
 export interface Person {

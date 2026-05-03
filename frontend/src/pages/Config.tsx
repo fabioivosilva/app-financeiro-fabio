@@ -32,7 +32,7 @@ export function Config() {
 
   const [personModal, setPersonModal] = useState<{ open: boolean; editing?: Person }>({ open: false })
   const [cardModal, setCardModal] = useState<{ open: boolean; editing?: Card }>({ open: false })
-  const [catModal, setCatModal] = useState<{ open: boolean; editing?: Category }>({ open: false })
+  const [catModal, setCatModal] = useState<{ open: boolean; editing?: Category; parentId?: number }>({ open: false })
 
   function load() {
     setLoading(true)
@@ -198,6 +198,7 @@ export function Config() {
                 onEdit={cat => setCatModal({ open: true, editing: cat })}
                 onDelete={deleteCategory}
                 onAdd={() => setCatModal({ open: true })}
+                onAddSub={parentId => setCatModal({ open: true, parentId })}
               />
             </section>
 
@@ -231,6 +232,7 @@ export function Config() {
       <CategoryModal
         open={catModal.open}
         editing={catModal.editing}
+        parentId={catModal.parentId}
         onClose={() => setCatModal({ open: false })}
         onSaved={load}
       />
@@ -240,20 +242,23 @@ export function Config() {
 
 // ─── Categorias ────────────────────────────────────────────────────────────────
 
-function CategoriaSection({ categories, onEdit, onDelete, onAdd }: {
+function CategoriaSection({ categories, onEdit, onDelete, onAdd, onAddSub }: {
   categories: Category[]
   onEdit: (c: Category) => void
   onDelete: (id: number) => void
   onAdd: () => void
+  onAddSub: (parentId: number) => void
 }) {
   const [busca, setBusca] = useState('')
   const [grupo, setGrupo] = useState('todos')
 
-  const filtered = useMemo(() => categories.filter(c => {
+  const topLevel = useMemo(() => categories.filter(c => !c.parent_id), [categories])
+
+  const filtered = useMemo(() => topLevel.filter(c => {
     if (grupo !== 'todos' && (c.type ?? 'variavel') !== grupo) return false
     if (busca && !c.name.toLowerCase().includes(busca.toLowerCase())) return false
     return true
-  }), [categories, busca, grupo])
+  }), [topLevel, busca, grupo])
 
   const grouped = useMemo(() => {
     const out: Record<string, Category[]> = {}
@@ -266,7 +271,7 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd }: {
       <div className="cfg-section-head">
         <div>
           <div className="cfg-section-title">Categorias</div>
-          <div className="t-xs t-muted">{categories.length} categorias</div>
+          <div className="t-xs t-muted">{topLevel.length} categorias</div>
         </div>
         <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 12px' }} onClick={onAdd}>
           <Icon name="add" size={14} /> Nova categoria
@@ -286,10 +291,10 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd }: {
           </div>
           <div className="cfg-grupo-tabs">
             <button className={`cfg-grupo${grupo === 'todos' ? ' cfg-grupo-on' : ''}`} onClick={() => setGrupo('todos')}>
-              Todas <span style={{ fontSize: 11, opacity: 0.6 }}>{categories.length}</span>
+              Todas <span style={{ fontSize: 11, opacity: 0.6 }}>{topLevel.length}</span>
             </button>
             {GRUPOS.map(g => {
-              const count = categories.filter(c => (c.type ?? 'variavel') === g.id).length
+              const count = topLevel.filter(c => (c.type ?? 'variavel') === g.id).length
               return (
                 <button
                   key={g.id}
@@ -318,26 +323,14 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd }: {
           </div>
           <div className="cfg-cat-grid">
             {grouped[g.id].map(cat => (
-              <div key={cat.id} className="cfg-cat-card" style={{ ['--cat-color' as string]: cat.color ?? '#888' }}>
-                <div className="cfg-cat-card-bar" />
-                <div className="cfg-cat-card-head">
-                  <div className="cfg-cat-card-icon" style={{ background: (cat.color ?? '#888') + '25', color: cat.color ?? '#888' }}>
-                    <Icon name={CATEGORY_ICONS[cat.name] ?? 'label'} size={18} />
-                  </div>
-                  <div className="cfg-cat-card-name">{cat.name}</div>
-                  <div className="cfg-cat-card-actions">
-                    <button className="btn-icon" title="Editar" onClick={() => onEdit(cat)}><Icon name="edit" size={14} /></button>
-                    <button className="btn-icon" title="Excluir" onClick={() => onDelete(cat.id)}><Icon name="delete" size={14} /></button>
-                  </div>
-                </div>
-                <div className="cfg-cat-card-badges">
-                  {cat.limit_value ? (
-                    <span className="cfg-badge"><Icon name="speed" size={12} /> {fmtCurrency(cat.limit_value)}/mês</span>
-                  ) : (
-                    <span className="t-xs t-muted">Sem limite</span>
-                  )}
-                </div>
-              </div>
+              <CategoryCard
+                key={cat.id}
+                cat={cat}
+                subs={categories.filter(c => c.parent_id === cat.id)}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onAddSub={onAddSub}
+              />
             ))}
           </div>
         </div>
@@ -355,15 +348,79 @@ function CategoriaSection({ categories, onEdit, onDelete, onAdd }: {
   )
 }
 
+function CategoryCard({ cat, subs, onEdit, onDelete, onAddSub }: {
+  cat: Category
+  subs: Category[]
+  onEdit: (c: Category) => void
+  onDelete: (id: number) => void
+  onAddSub: (parentId: number) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const color = cat.color ?? '#888'
+  return (
+    <div className={`cfg-cat-card${open ? ' cfg-cat-card-open' : ''}`} style={{ ['--cat-color' as string]: color }}>
+      <div className="cfg-cat-card-bar" />
+      <div className="cfg-cat-card-head">
+        <div className="cfg-cat-card-icon" style={{ background: color + '25', color }}>
+          <Icon name={CATEGORY_ICONS[cat.name] ?? 'label'} size={18} />
+        </div>
+        <div className="cfg-cat-card-name">{cat.name}</div>
+        <div className="cfg-cat-card-actions">
+          <button className="btn-icon" title="Editar" onClick={() => onEdit(cat)}><Icon name="edit" size={14} /></button>
+          <button className="btn-icon" title="Excluir" onClick={() => onDelete(cat.id)}><Icon name="delete" size={14} /></button>
+        </div>
+      </div>
+      <div className="cfg-cat-card-badges">
+        {cat.limit_value
+          ? <span className="cfg-badge"><Icon name="speed" size={12} /> {fmtCurrency(cat.limit_value)}/mês</span>
+          : <span className="t-xs t-muted">Sem limite</span>}
+      </div>
+      <button className="cfg-sub-toggle" onClick={() => setOpen(o => !o)}>
+        <Icon name={open ? 'expand_less' : 'expand_more'} size={16} />
+        <span>{subs.length > 0 ? `${subs.length} subcategoria${subs.length > 1 ? 's' : ''}` : 'Adicionar subcategoria'}</span>
+        {!open && subs.length > 0 && (
+          <div className="cfg-sub-preview">
+            {subs.slice(0, 4).map(s => (
+              <div key={s.id} className="cfg-sub-dot" style={{ background: color + '30', color }} title={s.name}>
+                <Icon name={CATEGORY_ICONS[s.name] ?? 'label'} size={11} />
+              </div>
+            ))}
+            {subs.length > 4 && <div className="cfg-sub-more">+{subs.length - 4}</div>}
+          </div>
+        )}
+      </button>
+      {open && (
+        <div className="cfg-sub-list">
+          {subs.map(s => (
+            <div key={s.id} className="cfg-sub-row">
+              <div className="cfg-sub-icon" style={{ background: color + '20', color }}>
+                <Icon name={CATEGORY_ICONS[s.name] ?? 'label'} size={13} />
+              </div>
+              <div className="cfg-sub-name">{s.name}</div>
+              <div className="cfg-sub-meta" />
+              <button className="btn-icon btn-icon-sm" onClick={() => onEdit(s)}><Icon name="edit" size={12} /></button>
+              <button className="btn-icon btn-icon-sm" onClick={() => onDelete(s.id)}><Icon name="close" size={12} /></button>
+            </div>
+          ))}
+          <button className="cfg-sub-add" onClick={() => onAddSub(cat.id)}>
+            <Icon name="add" size={14} /> Nova subcategoria
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Sistema ────────────────────────────────────────────────────────────────���──
 
 function SistemaSection() {
   const [pasta, setPasta] = useState(() => localStorage.getItem('importFolder') ?? '')
-  const [diaCiclo] = useState(27)
+  const [diaCiclo, setDiaCiclo] = useState(() => Number(localStorage.getItem('cycleDayStart') ?? '27'))
   const [saved, setSaved] = useState(false)
 
   function handleSave() {
     localStorage.setItem('importFolder', pasta)
+    localStorage.setItem('cycleDayStart', String(Math.min(28, Math.max(1, diaCiclo))))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -394,7 +451,7 @@ function SistemaSection() {
             <label className="cfg-label"><Icon name="event" size={16} /> Dia de início do ciclo</label>
             <div className="cfg-hint">Define o período mensal usado nos relatórios (ex: 27 → 26)</div>
             <div className="cfg-input-row">
-              <input type="number" className="cfg-input cfg-input-num" value={diaCiclo} readOnly />
+              <input type="number" min={1} max={28} className="cfg-input cfg-input-num" value={diaCiclo} onChange={e => setDiaCiclo(Number(e.target.value))} />
               <span className="t-sm t-muted">do mês</span>
             </div>
           </div>
@@ -566,7 +623,7 @@ function CardModal({ open, editing, persons, onClose, onSaved }: { open: boolean
   )
 }
 
-function CategoryModal({ open, editing, onClose, onSaved }: { open: boolean; editing?: Category; onClose: () => void; onSaved: () => void }) {
+function CategoryModal({ open, editing, parentId, onClose, onSaved }: { open: boolean; editing?: Category; parentId?: number; onClose: () => void; onSaved: () => void }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('#820AD1')
   const [type, setType] = useState<'fixa' | 'variavel'>('variavel')
@@ -586,7 +643,7 @@ function CategoryModal({ open, editing, onClose, onSaved }: { open: boolean; edi
     if (!name.trim()) return
     setSaving(true)
     try {
-      const payload = { name: name.trim(), color, type, limit_value: limitValue ? Number(limitValue) : null }
+      const payload = { name: name.trim(), color, type, limit_value: limitValue ? Number(limitValue) : null, parent_id: parentId ?? null }
       if (editing) await api.put(`/categories/${editing.id}`, payload)
       else await api.post('/categories/', payload)
       onSaved(); onClose()

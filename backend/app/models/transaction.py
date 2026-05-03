@@ -29,6 +29,7 @@ class Category(Base):
     color = Column(String, default="#888888")
     limit_value = Column(Float, nullable=True)
     type = Column(SAEnum(CategoryType), default=CategoryType.variavel)
+    parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 
     transactions = relationship("Transaction", back_populates="category")
     rules = relationship("Rule", back_populates="category")

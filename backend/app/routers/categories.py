@@ -13,6 +13,7 @@ class CategoryIn(BaseModel):
     color: Optional[str] = "#888888"
     limit_value: Optional[float] = None
     type: Optional[str] = "variavel"
+    parent_id: Optional[int] = None
 
 
 class CategoryOut(CategoryIn):
