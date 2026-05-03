@@ -47,6 +47,15 @@ export interface Goal {
   keyword?: string
 }
 
+export interface Rule {
+  id: number
+  keyword: string
+  category_id?: number
+  person_id?: number
+  origin?: string
+  goal_id?: number
+}
+
 export interface Settings {
   cycle_start_day: number
   default_import_folder?: string

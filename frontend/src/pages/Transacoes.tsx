@@ -5,7 +5,7 @@ import { Icon } from '../components/ui/Icon'
 import { CategoryChip } from '../components/ui/Badge'
 import { CATEGORY_ICONS, TransacaoRow } from '../components/transactions/TransacaoRow'
 import { api } from '../api/client'
-import type { Category, Person, Transaction } from '../api/types'
+import type { Category, Person, Rule, Transaction } from '../api/types'
 import { useTransacoes, groupByDate, formatDate, formatCurrency, isTransactionPending } from '../hooks/useTransacoes'
 
 type Tab = 'todas' | 'pendentes' | 'inbox'
@@ -31,7 +31,7 @@ export function Transacoes() {
     month, year,
   }
 
-  const { transactions, categories, persons, loading, error, refetch } = useTransacoes(filters)
+  const { transactions, categories, persons, rules, loading, error, refetch } = useTransacoes(filters)
 
   const filtered = useMemo(() => {
     let list = [...transactions]
@@ -49,6 +49,17 @@ export function Transacoes() {
       const cutoff = new Date()
       cutoff.setDate(cutoff.getDate() - 7)
       list = list.filter(t => new Date(t.date + 'T00:00:00') >= cutoff)
+    }
+    if (filtroData === 'ciclo') {
+      const today = new Date()
+      const m = today.getMonth()
+      const y = today.getFullYear()
+      const start = new Date(m === 0 ? y - 1 : y, m === 0 ? 11 : m - 1, 27)
+      const end = new Date(y, m, 26)
+      list = list.filter(t => {
+        const d = new Date(t.date + 'T00:00:00')
+        return d >= start && d <= end
+      })
     }
     if (busca) list = list.filter(t => t.description.toLowerCase().includes(busca.toLowerCase()))
     if (ordem === 'data-desc') list.sort((a, b) => b.date.localeCompare(a.date))
@@ -75,6 +86,7 @@ export function Transacoes() {
         transactions={pendingTransactions}
         categories={categories}
         persons={persons}
+        rules={rules}
         loading={loading}
         error={error}
         onClose={() => setTab('todas')}
@@ -316,13 +328,14 @@ interface PendingInboxProps {
   transactions: Transaction[]
   categories: Category[]
   persons: Person[]
+  rules: Rule[]
   loading: boolean
   error: string | null
   onClose: () => void
   onUpdated: () => void
 }
 
-function PendingInbox({ transactions, categories, persons, loading, error, onClose, onUpdated }: PendingInboxProps) {
+function PendingInbox({ transactions, categories, persons, rules, loading, error, onClose, onUpdated }: PendingInboxProps) {
   const [doneIds, setDoneIds] = useState<number[]>([])
   const pending = transactions.filter(tx => !doneIds.includes(tx.id))
   const tx = pending[0]
@@ -334,7 +347,7 @@ function PendingInbox({ transactions, categories, persons, loading, error, onClo
 
   useEffect(() => {
     if (!tx) return
-    setSelectedCat(suggestCategory(tx, categories)?.id ?? null)
+    setSelectedCat(suggestCategory(tx, categories, rules)?.id ?? null)
     setSelectedPerson(tx.person_id ?? null)
     setCreateRule(true)
   }, [tx, categories])
@@ -495,18 +508,10 @@ function PendingInbox({ transactions, categories, persons, loading, error, onClo
   )
 }
 
-function suggestCategory(tx: Transaction, categories: Category[]): Category | undefined {
+function suggestCategory(tx: Transaction, categories: Category[], rules: Rule[]): Category | undefined {
   const text = normalizeText(tx.description)
-  const pairs: Array<[string, string[]]> = [
-    ['Mercado', ['mercado', 'supermercado', 'carrefour', 'extra']],
-    ['iFood', ['ifood', 'rappi', 'delivery']],
-    ['Farmácia', ['farmacia', 'drogasil', 'droga', 'farma']],
-    ['Transporte', ['uber', '99', 'metro', 'taxi']],
-    ['Lazer', ['netflix', 'spotify', 'cinema']],
-    ['Moradia', ['aluguel', 'condominio']],
-  ]
-  const matched = pairs.find(([, words]) => words.some(word => text.includes(word)))
-  if (matched) return categories.find(cat => normalizeText(cat.name) === normalizeText(matched[0]))
+  const matchedRule = rules.find(r => r.category_id && text.includes(normalizeText(r.keyword)))
+  if (matchedRule) return categories.find(cat => cat.id === matchedRule.category_id)
   if (tx.amount > 0) return categories.find(cat => normalizeText(cat.name).includes('salario')) ?? categories.find(cat => normalizeText(cat.name) === 'outros')
   return categories.find(cat => normalizeText(cat.name) === 'outros') ?? categories[0]
 }

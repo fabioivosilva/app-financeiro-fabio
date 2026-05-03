@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api/client'
-import type { Transaction, Category, Person } from '../api/types'
+import type { Transaction, Category, Person, Rule } from '../api/types'
 
 interface Filters {
   month: number
@@ -14,6 +14,7 @@ interface UseTransacoesResult {
   transactions: Transaction[]
   categories: Category[]
   persons: Person[]
+  rules: Rule[]
   loading: boolean
   error: string | null
   refetch: () => void
@@ -23,6 +24,7 @@ export function useTransacoes(filters: Filters): UseTransacoesResult {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [persons, setPersons] = useState<Person[]>([])
+  const [rules, setRules] = useState<Rule[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
@@ -44,12 +46,14 @@ export function useTransacoes(filters: Filters): UseTransacoesResult {
       api.get<Transaction[]>(`/transactions/?${params}`),
       api.get<Category[]>('/categories/'),
       api.get<Person[]>('/persons/'),
+      api.get<Rule[]>('/rules/'),
     ])
-      .then(([txs, cats, people]) => {
+      .then(([txs, cats, people, rls]) => {
         if (cancelled) return
         setTransactions(txs)
         setCategories(cats)
         setPersons(people)
+        setRules(rls)
       })
       .catch(e => {
         if (!cancelled) setError(e.message)
@@ -61,7 +65,7 @@ export function useTransacoes(filters: Filters): UseTransacoesResult {
     return () => { cancelled = true }
   }, [filters.month, filters.year, filters.status, filters.category_id, filters.person_id, tick])
 
-  return { transactions, categories, persons, loading, error, refetch: () => setTick(t => t + 1) }
+  return { transactions, categories, persons, rules, loading, error, refetch: () => setTick(t => t + 1) }
 }
 
 export function groupByDate(transactions: Transaction[]): [string, Transaction[]][] {

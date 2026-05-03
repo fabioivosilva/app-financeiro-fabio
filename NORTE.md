@@ -50,7 +50,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-🔒 [FABIO] BUG.1 — Auditoria UI/API de todos os menus
+*Nenhum claim ativo no momento.*
 
 ---
 
@@ -62,8 +62,9 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
-- [x] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *Thiago · CONCLUÍDO 2026-05-03*
+- [x] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *Thiago + Fabio · CONCLUÍDO 2026-05-03*
   Resultado: Dashboard🔴placeholder, Importar🟡funcional/BUG.4, Transações🟡funcional/BUG.2-3, Cartão🔴placeholder, Provisões🔴placeholder(sem backend), Metas🟢funcional, Regras🟢funcional, Config🔴placeholder. Backend: todas as rotas existem exceto provisions e settings.
+  **Fixes entregues:** filtro "Ciclo atual" (dia 27→26) em Transações + suggestCategory agora usa regras reais do backend.
 
 - [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
@@ -114,8 +115,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Interface `BaseParser` · `PARSER_REGISTRY` · parsers OFX, Itaú Excel e Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada.
   **Detalhe técnico:** `08_PARSERS.md`
 
-- [ ] `[M]` **T1.2 — Tela de Importação** · *Fabio · PARCIAL/BLOQUEADO BUG.4*
-  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico visual existem, mas histórico inicial ainda usa amostra visual/mock. Não marcar concluído até BUG.4 fechar.
+- [x] `[M]` **T1.2 — Tela de Importação** · *Thiago · CONCLUÍDO 2026-05-03*
+  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico via localStorage (loadHistory/saveHistory) · começa vazio · empty state adicionado. BUG.4 fechado.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
