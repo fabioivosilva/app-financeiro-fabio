@@ -5,9 +5,15 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Feature Toggle 100% (BUG.7+parsers); BUG.8 fechado (nav ciclo com setas+Todas em Transações); T6.3 fechado (Bradesco/Santander/MercadoPago como Em construção). Pendente: BUG.2 [G] conformidade visual · BUG.3 [M] modais/popovers.
+STATUS     : Sessão 2026-05-03 encerrada. Fixes de importação: Feature Toggle 100%, cartões
+             auto-criados com person_id ao importar PDF/Excel, card_id associado às tx.
+             Regras: apply retroativo ao categorizar + botão Aplicar Regras em Regras.
+             Zona de Perigo implementada. Categorias: 4 grupos (Fixas/Variáveis/Receitas/Internas)
+             com 40+ subcategorias e ícones, badge Fora dos totais em Transferência.
+             Navegação de ciclo em Transações (BUG.8 ✅). Bancos Em construção (T6.3 ✅).
+             PENDENTE: BUG.2 [G] conformidade visual · BUG.3 [M] modais/popovers.
 BRANCH     : develop
-PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
+PRÓXIMA    : BUG.3 — Modais/popovers [M] · ou · BUG.2 — Conformidade visual [G]
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
