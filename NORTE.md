@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Projeto zerado. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : BUG.5 em validação Codex. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
-PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
-CLAIMS     : nenhum
+PRÓXIMA    : concluir BUG.5 após Fabio confirmar teste local · depois BUG.2 ou BUG.3
+CLAIMS     : 🔒 [CODEX] BUG.5
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -82,7 +82,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.
 
 - [ ] `🔒 [CODEX]` `[P]` **BUG.5 — Script dev confiável** · *Codex · PARCIAL 2026-05-03*
-  `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, adiciona `--reload` ao uvicorn. Problema de "porta ocupada" resolvido. Falta validação ponta-a-ponta confirmada pelo Fabio.
+  `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, adiciona `--reload` ao uvicorn. Codex validou em 2026-05-03 que o script sobe backend/frontend com portas ocupadas, abre `localhost:5173`, retorna exit code 0, `/docs`, `/categories/`, `/` e `/config` respondem 200. Falta Fabio confirmar no browser para fechar `[x]`.
 
 #### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
 

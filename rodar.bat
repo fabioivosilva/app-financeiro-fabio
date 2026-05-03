@@ -1,4 +1,5 @@
 @echo off
+setlocal
 chcp 65001 >nul
 title App Financeiro
 
@@ -10,14 +11,14 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5173 " 2^>nul') do taskkill
 
 timeout /t 1 /nobreak >nul
 
-:: Sobe o backend com reload (recarrega automaticamente ao salvar arquivos Python)
-if exist "backend\.venv\Scripts\activate" (
-    start /b "" cmd /c "cd backend && .venv\Scripts\activate && uvicorn app.main:app --port 8000 --reload --log-level warning"
+:: Sobe o backend com reload usando o Python da venv
+if exist "backend\.venv\Scripts\python.exe" (
+    start /b "" cmd /c "cd backend && .venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --log-level warning"
     timeout /t 3 /nobreak >nul
 )
 
 :: Sobe o frontend
-start /b "" cmd /c "cd frontend && npm run dev"
+start /b "" cmd /c "cd frontend && npm.cmd run dev -- --host localhost"
 
 :: Aguarda frontend subir
 timeout /t 4 /nobreak >nul
@@ -25,4 +26,4 @@ timeout /t 4 /nobreak >nul
 :: Abre no browser
 start http://localhost:5173
 
-exit
+exit /b 0
