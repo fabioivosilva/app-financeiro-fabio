@@ -62,9 +62,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
-- [ ] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *qualquer um*
-  Conferir cada rota do menu contra backend real e contra `C:\Users\fabio\Downloads\App-financeiro`: Dashboard, Importar, Transações, Cartão, Provisões, Metas, Regras e Configurações. Registrar o que está conectado, placeholder, mockado ou visualmente divergente.
-  **Validação mínima:** `npm.cmd run build`; healthcheck `GET /`, `/categories/`, `/persons/`, `/cards/`, `/transactions/?month=5&year=2026`, `/rules/`, `/goals/`, `/imports/history`.
+- [x] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *Thiago · CONCLUÍDO 2026-05-03*
+  Resultado: Dashboard🔴placeholder, Importar🟡funcional/BUG.4, Transações🟡funcional/BUG.2-3, Cartão🔴placeholder, Provisões🔴placeholder(sem backend), Metas🟢funcional, Regras🟢funcional, Config🔴placeholder. Backend: todas as rotas existem exceto provisions e settings.
 
 - [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
@@ -72,8 +71,8 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1*
   Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
 
-- [ ] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *qualquer um · depende BUG.1*
-  Importar foi portado com upload real, mas histórico inicial ainda usa amostra visual. Identificar dados fake restantes e conectar ao backend ou deixar item explícito no backlog antes de marcar trilha concluída.
+- [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
+  Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.
 
 - [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um*
   Ajustar/validar `rodar.bat` para subir backend + Vite no modelo atual. Não usar `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller enquanto não existirem no repo novo.

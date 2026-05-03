@@ -23,22 +23,33 @@ interface UploadResult {
   duplicates?: number
 }
 
-const sampleImports: ImportItem[] = [
-  { id: 'f1', nome: 'extrato_itau_abr2026.ofx', tipo: 'OFX', fonte: 'Itaú · Conta Corrente', transacoes: 47, novas: 47, dup: 0, status: 'ok' },
-  { id: 'f2', nome: 'fatura_itau_mai2026.pdf', tipo: 'PDF', fonte: 'Itaú · Cartão Visa', transacoes: 32, novas: 28, dup: 4, status: 'ok' },
-  { id: 'f3', nome: 'extrato_corrente_mai_parcial.xls', tipo: 'Excel', fonte: 'Itaú · Conta Corrente', transacoes: 12, novas: 9, dup: 3, status: 'ok' },
-]
+const STORAGE_KEY = 'app-financeiro-import-history'
+
+function loadHistory(): ImportItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as ImportItem[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(items: ImportItem[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  } catch { /* quota exceeded — silently skip */ }
+}
 
 export function Importar() {
   const [drag, setDrag] = useState(false)
-  const [importados, setImportados] = useState<ImportItem[]>(sampleImports)
+  const [importados, setImportados] = useState<ImportItem[]>(loadHistory)
   const [novo, setNovo] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const totalNovas = useMemo(() => importados.reduce((sum, item) => sum + item.novas, 0), [importados])
-  const totalDup = useMemo(() => importados.reduce((sum, item) => sum + item.dup, 0), [importados])
+  const totalNovas = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.novas, 0), [importados])
+  const totalDup = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.dup, 0), [importados])
 
   async function handleFiles(files: FileList | File[]) {
     const fileList = Array.from(files)
@@ -67,7 +78,11 @@ export function Importar() {
         }
         newItems.push(item)
       }
-      setImportados(prev => [...newItems, ...prev])
+      setImportados(prev => {
+        const updated = [...newItems, ...prev]
+        saveHistory(updated)
+        return updated
+      })
       setNovo(newItems[0]?.id ?? null)
       window.setTimeout(() => setNovo(null), 1800)
     } catch (e) {
@@ -138,24 +153,32 @@ export function Importar() {
 
       <Glass>
         <SectionHeader title="Histórico de importações" />
-        <div className="imp-list">
-          {importados.map(item => (
-            <div key={item.id} className={`imp-row ${novo === item.id ? 'imp-row-new' : ''}`}>
-              <div className="imp-icon" style={fileIconStyle(item.tipo)}>
-                <Icon name={fileIcon(item.tipo)} size={20} />
+        {importados.length === 0 ? (
+          <div className="empty-state-mini">
+            <Icon name="upload_file" size={32} className="t-muted" />
+            <div className="t-sm">Nenhum arquivo importado ainda</div>
+            <div className="t-xs t-muted">Arraste ou selecione um arquivo acima para começar</div>
+          </div>
+        ) : (
+          <div className="imp-list">
+            {importados.map((item: ImportItem) => (
+              <div key={item.id} className={`imp-row ${novo === item.id ? 'imp-row-new' : ''}`}>
+                <div className="imp-icon" style={fileIconStyle(item.tipo)}>
+                  <Icon name={fileIcon(item.tipo)} size={20} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="t-sm">{item.nome}</div>
+                  <div className="t-xs t-muted">{item.fonte} · {item.transacoes} transações lidas</div>
+                </div>
+                <div className="imp-stats">
+                  <span className="imp-pill imp-pill-new">+{item.novas} novas</span>
+                  {item.dup > 0 && <span className="imp-pill imp-pill-dup">{item.dup} dup.</span>}
+                </div>
+                <button className="btn-icon"><Icon name="more_vert" size={18} /></button>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="t-sm">{item.nome}</div>
-                <div className="t-xs t-muted">{item.fonte} · {item.transacoes} transações lidas</div>
-              </div>
-              <div className="imp-stats">
-                <span className="imp-pill imp-pill-new">+{item.novas} novas</span>
-                {item.dup > 0 && <span className="imp-pill imp-pill-dup">{item.dup} dup.</span>}
-              </div>
-              <button className="btn-icon"><Icon name="more_vert" size={18} /></button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </Glass>
 
       <Glass className="hint-card">
