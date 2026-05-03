@@ -374,7 +374,7 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
     const dx = hovered === i ? Math.cos(aMid) * 5 : 0
     const dy = hovered === i ? Math.sin(aMid) * 5 : 0
     // label outside ring: line from R+2 to R+14, text at R+18
-    const Rline0 = R + 3, Rline1 = R + 13, Rtext = R + 18
+    const Rline0 = R + 3, Rline1 = R + 15, Rtext = R + 22
     const lx0 = cx + Rline0 * Math.cos(aMid), ly0 = cy + Rline0 * Math.sin(aMid)
     const lx1 = cx + Rline1 * Math.cos(aMid), ly1 = cy + Rline1 * Math.sin(aMid)
     const lx  = cx + Rtext  * Math.cos(aMid), ly  = cy + Rtext  * Math.sin(aMid)
@@ -403,7 +403,7 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
           if (s.pct < 7) return null
           const isHov = hovered === i
           const txt = Math.round(s.pct) + '%'
-          const fs = isHov ? 10 : 9
+          const fs = isHov ? 12.5 : 11
           const pw = txt.length * fs * 0.62 + 7
           const ph = fs + 6
           const op = hovered !== null && !isHov ? 0.25 : 1
