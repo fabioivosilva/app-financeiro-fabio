@@ -5,10 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T0.1 + T0.2a concluídos. Backend (8000) + Frontend (5173) prontos.
-             Seed com Fabio/Fernanda, 10 categorias, regras, meta e transações de exemplo.
+STATUS     : T0.1 + T0.2a + T0.2b concluídos. Fundação completa.
+             Backend (8000) + Frontend (5173) + Design System prontos.
 BRANCH     : develop
-PRÓXIMA    : T0.2b — Design System [M] · T1.1 — Parsers Plugáveis [G]
+PRÓXIMA    : T1.1 — Parsers Plugáveis [G]  ← desbloqueia importação
+             T2.1 — Tela de Transações [M] ← paralelo
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -65,14 +66,9 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 - [x] `[G]` **T0.2a — Frontend Shell** · *Fabio · CONCLUÍDO*
   Vite + React 19 + TS + Tailwind · AppShell + Sidebar + MonthSelector · react-router · API client tipado · 6 pages placeholder
 
-- [ ] `[M]` **T0.2b — Design System** · *qualquer um · paralelo com T0.1*
-  Button, Card, Modal, Badge · tokens completos · fontes Inter
-  **Saída:** componentes reutilizáveis com visual glassmorphism
-  **PENDÊNCIAS antes de iniciar:**
-  - [x] ⚠️ Modo: DARK MODE confirmado para v1 (UX ref é light — será v2)
-  - [ ] Sidebar: ajustar de 220px → 256px conforme UX ref
-  - [ ] Carregar fonte Inter via Google Fonts ou bundle local
-  - [ ] Criar rota /configuracoes (Pessoas, Cartões, Categorias, Sistema)
+- [x] `[M]` **T0.2b — Design System** · *Fabio · CONCLUÍDO*
+  Icon, Button, Glass, Badge, CategoryChip, Modal, PageHeader, SectionHeader, CycleProgress
+  CSS completo fiel ao design de referência (styles.css) · tokens corretos · Inter + Material Symbols
   - [ ] Cor primary: separar #6200a0 (texto) de #820AD1 (brand/botões)
   - [ ] Backlog v2: switch light/dark mode (tokens já preparados no index.css)
   **NOTA:** design light mode em elaboração com designer (Claude.ai) — sessão estourou tokens antes de concluir. Arquivo incompleto. Retomar quando designer tiver nova sessão.
