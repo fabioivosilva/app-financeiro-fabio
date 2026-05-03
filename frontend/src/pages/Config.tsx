@@ -33,13 +33,13 @@ export function Config() {
   const refPerigo = useRef<HTMLElement>(null)
 
   const BANCOS_DISPONIVEIS = [
-    { id: 'itau',         label: 'Itaú',        logo: '🟠', formatos: ['Excel (.xls)', 'PDF', 'OFX'] },
-    { id: 'c6',           label: 'C6 Bank',      logo: '⚫', formatos: ['CSV'] },
-    { id: 'nubank',       label: 'Nubank',       logo: '🟣', formatos: ['CSV'] },
-    { id: 'inter',        label: 'Banco Inter',  logo: '🟠', formatos: ['CSV'] },
-    { id: 'bradesco',     label: 'Bradesco',     logo: '🔴', formatos: ['OFX'] },
-    { id: 'santander',    label: 'Santander',    logo: '🔴', formatos: ['OFX'] },
-    { id: 'mercado_pago', label: 'Mercado Pago', logo: '🔵', formatos: ['CSV'] },
+    { id: 'itau',         label: 'Itaú',         icon: '/banks/itau.svg',        formatos: ['Fatura Excel', 'Fatura PDF', 'Extrato OFX'] },
+    { id: 'c6',           label: 'C6 Bank',      icon: '/banks/c6.svg',          formatos: ['Fatura CSV'] },
+    { id: 'nubank',       label: 'Nubank',       icon: '/banks/nubank.svg',      formatos: ['Fatura CSV'] },
+    { id: 'inter',        label: 'Banco Inter',  icon: '/banks/inter.svg',       formatos: ['Extrato CSV'] },
+    { id: 'bradesco',     label: 'Bradesco',     icon: '/banks/bradesco.svg',    formatos: ['Extrato OFX'] },
+    { id: 'santander',    label: 'Santander',    icon: '/banks/santander.svg',   formatos: ['Extrato OFX'] },
+    { id: 'mercado_pago', label: 'Mercado Pago', icon: '/banks/mercadopago.svg', formatos: ['Extrato CSV'] },
   ]
   const STORAGE_KEY = 'cfg_bancos_ativos'
   const [bancosAtivos, setBancosAtivos] = useState<string[]>(() => {
@@ -237,13 +237,17 @@ export function Config() {
                   return (
                     <button
                       key={banco.id}
+                      type="button"
                       onClick={() => toggleBanco(banco.id)}
                       className={`cfg-banco-card${ativo ? ' cfg-banco-card-on' : ''}`}
+                      aria-pressed={ativo}
                     >
                       <div className="cfg-banco-top">
-                        <span className="cfg-banco-logo">{banco.logo}</span>
+                        <span className="cfg-banco-logo">
+                          <img src={banco.icon} alt="" aria-hidden="true" />
+                        </span>
                         <span className={`cfg-banco-check${ativo ? ' cfg-banco-check-on' : ''}`}>
-                          <span className="material-symbols-rounded">{ativo ? 'check_circle' : 'radio_button_unchecked'}</span>
+                          <Icon name={ativo ? 'check_circle' : 'radio_button_unchecked'} size={20} />
                         </span>
                       </div>
                       <p className="cfg-banco-nome">{banco.label}</p>

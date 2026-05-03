@@ -936,13 +936,14 @@ body::before {
 /* ── Bancos ────────────────────────────────────────────────── */
 .cfg-bancos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
 }
 .cfg-banco-card {
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column; gap: 12px;
   padding: 16px;
-  background: rgba(255,255,255,0.6);
+  min-height: 150px;
+  background: rgba(28,20,50,0.45);
   border: 1.5px solid rgba(192,132,252,0.12);
   border-radius: 16px;
   backdrop-filter: blur(var(--glass-blur));
@@ -951,28 +952,39 @@ body::before {
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 .cfg-banco-card:hover {
-  border-color: rgba(130,10,209,0.25);
-  background: rgba(130,10,209,0.04);
+  border-color: rgba(192,132,252,0.35);
+  background: rgba(28,20,50,0.72);
 }
 .cfg-banco-card-on {
   border-color: var(--primary-2);
-  background: rgba(130,10,209,0.07);
+  background: rgba(35,18,58,0.82);
   box-shadow: 0 0 0 3px rgba(130,10,209,0.10);
 }
 .cfg-banco-top { display: flex; justify-content: space-between; align-items: center; }
-.cfg-banco-logo { font-size: 26px; line-height: 1; }
-.cfg-banco-check { color: rgba(130,10,209,0.25); font-size: 20px; display: grid; place-items: center; }
+.cfg-banco-logo {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.cfg-banco-logo img {
+  width: 40px; height: 40px;
+  display: block;
+  border-radius: 10px;
+}
+.cfg-banco-check { color: rgba(192,132,252,0.38); display: grid; place-items: center; }
 .cfg-banco-check-on { color: var(--primary-2); }
-.cfg-banco-nome { font-size: 14px; font-weight: 600; color: var(--text); }
+.cfg-banco-nome { margin: 0; font-size: 14px; font-weight: 600; color: var(--text); }
 .cfg-banco-formatos { display: flex; flex-wrap: wrap; gap: 4px; }
 .cfg-banco-chip {
   font-size: 11px; font-weight: 500;
   padding: 2px 8px;
   border-radius: 20px;
-  background: rgba(192,132,252,0.12);
-  color: var(--primary);
+  background: rgba(192,132,252,0.10);
+  color: #C084FC;
+  border: 1px solid rgba(192,132,252,0.12);
 }
 .cfg-banco-card-on .cfg-banco-chip {
-  background: rgba(130,10,209,0.15);
+  background: rgba(130,10,209,0.20);
   color: var(--primary-2);
+  border-color: rgba(192,132,252,0.22);
 }
