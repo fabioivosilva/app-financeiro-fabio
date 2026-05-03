@@ -74,6 +74,15 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 - [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um*
   Ajustar/validar `rodar.bat` para subir backend + Vite no modelo atual. Não usar `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller enquanto não existirem no repo novo.
 
+#### HANDOFF CLAUDE — 2026-05-03 noite
+
+- **Regra UX absoluta:** abrir `C:\Users\fabio\Downloads\App-financeiro` antes de mexer em qualquer tela. Copiar estrutura, classes, ordem, labels e comportamento do componente de referencia; adaptar somente dados/API depois. "Parecido" nao passa.
+- **Validado hoje:** `npm.cmd run build` passou depois dos ajustes de UI em Transacoes/sidebar.
+- **Commits recentes em `develop`:** `da83edd` inbox de pendentes; `0a9ddef` sem categoria conta como pendente; `6e303ba` status local da sidebar; `01285d9` dropdown acima da lista; `c75f069` filtros de Transacoes conforme referencia.
+- **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
+- **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
+- **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
+
 ### TRILHA 0 — Fundação *(nenhum código existe ainda — começar aqui)*
 
 - [x] `[G]` **T0.1 — Backend Base** · *Fabio · CONCLUÍDO*
