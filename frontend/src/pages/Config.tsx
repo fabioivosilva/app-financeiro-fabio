@@ -62,6 +62,29 @@ export function Config() {
 
   useEffect(() => { load() }, [])
 
+  // Atualiza item ativo conforme o usuário rola
+  useEffect(() => {
+    const refs: [string, React.RefObject<HTMLElement | null>][] = [
+      ['pessoas', refPessoas], ['categorias', refCategorias],
+      ['bancos', refBancos], ['sistema', refSistema], ['perigo', refPerigo],
+    ]
+    const observer = new IntersectionObserver(
+      entries => {
+        // Pega a seção mais próxima do topo que está visível
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length > 0) {
+          const found = refs.find(([, ref]) => ref.current === visible[0].target)
+          if (found) setSecao(found[0])
+        }
+      },
+      { threshold: 0.2 }
+    )
+    refs.forEach(([, ref]) => { if (ref.current) observer.observe(ref.current) })
+    return () => observer.disconnect()
+  }, [loading])
+
   function goTo(id: string) {
     setSecao(id)
     const map: Record<string, React.RefObject<HTMLElement | null>> = {
