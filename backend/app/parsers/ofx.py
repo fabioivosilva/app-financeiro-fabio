@@ -35,9 +35,19 @@ class OFXParser(BaseParser):
             result.account = getattr(account, "account_id", None)
             institution = getattr(account, "institution", None)
             if institution:
-                result.bank = getattr(institution, "organization", "Generic") or "Generic"
-
-        # ofxparse: transações ficam em account.statement, não em ofx.statements
+                org = str(getattr(institution, "organization", "") or "").upper()
+                fid = str(getattr(institution, "fid", "") or "")
+                
+                if "ITAU" in org or fid == "0341" or fid == "341":
+                    result.bank = "Itaú"
+                else:
+                    result.bank = getattr(institution, "organization", "Generic") or "Generic"
+        
+        # Fallback: busca no conteúdo bruto se não pegou no header
+        if result.bank == "Generic":
+            raw_upper = content[:2048].upper()
+            if b"ITAU" in raw_upper or b"0341" in raw_upper:
+                result.bank = "Itaú"
         statements = []
         if account and hasattr(account, "statement") and account.statement:
             statements = [account.statement]

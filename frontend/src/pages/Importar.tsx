@@ -91,6 +91,9 @@ export function Importar() {
         const form = new FormData()
         form.append('file', file)
         if (password) form.append('password', password)
+        
+        const detectedBanco = detectBankForFile(file.name, bancosAtivos)
+        if (detectedBanco) form.append('bank_hint', detectedBanco.id)
 
         const res = await fetch(`${API_BASE_URL}/imports/upload`, { method: 'POST', body: form })
 

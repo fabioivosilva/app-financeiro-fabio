@@ -13,11 +13,11 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 async def upload_file(
     file: UploadFile = File(...),
     password: Optional[str] = Form(None),
+    bank_hint: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
     content = await file.read()
     filename = file.filename or "upload"
-
     try:
         result = PARSER_REGISTRY.parse(filename, content, password=password)
 
@@ -33,6 +33,11 @@ async def upload_file(
                 status_code=422,
                 detail={"code": "PDF_ENCRYPTED", "message": "Este PDF está protegido por senha."},
             )
+
+        if result.bank == "Generic" and bank_hint:
+            # Converte hint do frontend (id) para label bonitinho
+            hints = {"itau": "Itaú", "c6": "C6 Bank", "nubank": "Nubank", "inter": "Banco Inter"}
+            result.bank = hints.get(bank_hint.lower(), result.bank)
 
         novas, duplicadas = deduplicate(result, db)
 
