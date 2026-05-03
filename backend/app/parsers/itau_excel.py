@@ -46,7 +46,7 @@ class ItauExcelParser(BaseParser):
         # para vencer o GenericCSV (que só aceita .csv)
         return 0.3
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         result = ImportResult(bank="Itaú", format="Excel")
 
         try:

@@ -19,7 +19,7 @@ class OFXParser(BaseParser):
             return 0.80
         return 0.0
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         from ofxparse import OfxParser as LibOfxParser
 
         result = ImportResult(bank="Generic", format="OFX")
