@@ -7,9 +7,15 @@
 ```
 STATUS     : Projeto zerado. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
-PRÓXIMA    : T0.1 — Setup Backend Base [G]
+PRÓXIMA    : C3-fluxo — transações importadas somem (suspeita: filtro ciclo dia27→26; testar mudando MonthSelector)
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
+
+REGRA UX ABSOLUTA (ler antes de qualquer tela):
+  Abrir C:\Users\fabio\Downloads\App-financeiro ANTES de escrever qualquer JSX.
+  Copiar estrutura, classes CSS, ordem dos elementos, labels e comportamento do
+  componente de referência. Adaptar SOMENTE os dados/API depois. "Parecido" nao passa.
+  Nunca inventar layout, classes ou UX — o codigo de referencia já existe, use-o.
 
 QUANDO LER MAIS:
   UI / componentes visuais  →  obsidian-vault/07_UX_REFERENCE.md
@@ -27,15 +33,16 @@ QUANDO LER MAIS:
 | Thiago | Claude.ai |
 
 **Repo:** `github.com/fabioivosilva/app-financeiro-fabio` · Branch: `develop`
-**Exe:** `ControleFinanceiro\ControleFinanceiro.exe` · **DB:** `data\finance.db` (local, não versionar)
+**Dev:** backend FastAPI `127.0.0.1:8000` + Vite `127.0.0.1:5173` · **DB:** `data\finance.db` (local, não versionar)
 
 ---
 
 ## 🛠 Stack & Design
 
-**Stack:** React 19 + Vite + TS + TailwindCSS + Recharts · FastAPI + SQLAlchemy + SQLite · PyWebView + PyInstaller
+**Stack:** React 19 + Vite + TS + TailwindCSS + Recharts · FastAPI + SQLAlchemy + SQLite
 **Cores:** Primary `#820AD1` · Fundo `#fff7fd` · Verde `#0e8345` · Vermelho `#ba1a1a` · Orange `#f97316`
-**Design:** Dark mode · Glassmorphism · Fonte Inter · Referência visual: `07_UX_REFERENCE.md`
+**Design:** Dark mode · Glassmorphism · Fonte Inter · Referência visual obrigatória: `C:\Users\fabio\Downloads\App-financeiro`
+**Regra UI rígida:** nenhuma tela, modal, popover, filtro ou card pode ser "parecido"; precisa copiar estrutura/classes/ordem/labels do componente de referência antes de adaptar dados reais.
 **Ciclo financeiro:** dia 27 ao dia 26 · **Seed:** `backend/app/seed.py` = fonte da verdade das regras
 
 ---
@@ -55,18 +62,86 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ## 📋 ROADMAP
 
+## 🔴 BUGS BLOQUEANTES — LER ANTES DAS TRILHAS
+
+Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**. O trabalho de amanhã começa em BUG.1.
+
+### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
+
+- [x] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *Thiago + Fabio · CONCLUÍDO 2026-05-03*
+  Resultado: Dashboard🔴placeholder, Importar🟡funcional/BUG.4, Transações🟡funcional/BUG.2-3, Cartão🔴placeholder, Provisões🔴placeholder(sem backend), Metas🟢funcional, Regras🟢funcional, Config🔴placeholder. Backend: todas as rotas existem exceto provisions e settings.
+  **Fixes entregues:** filtro "Ciclo atual" (dia 27→26) em Transações + suggestCategory agora usa regras reais do backend.
+
+- [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
+  Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
+
+- [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1*
+  Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
+
+- [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
+  Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.
+
+- [ ] `[P]` **BUG.5 — Script dev confiável** · *qualquer um · PARCIAL 2026-05-03*
+  `rodar.bat` melhorado: mata portas 8000/5173 antes de subir, adiciona `--reload` ao uvicorn. Problema de "porta ocupada" resolvido. Falta validação ponta-a-ponta confirmada pelo Fabio.
+
+#### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
+
+- **Entregues:**
+  - `rodar.bat`: mata portas 8000/5173 antes de subir novos processos + `--reload` no uvicorn → problema de "porta ocupada" resolvido
+  - C3 parser C6 Bank (`backend/app/parsers/c6_csv.py`): detecta `Fatura_YYYY-MM-DD.csv` pelo header real (`Data de Compra;Final do Cartão;Valor (em R$)`), extrai parcelas (`N/M`), inverte sinal compra/pagamento
+  - Encoding CSV corrigido em todos parsers: `utf-8-sig` (strip BOM) + fallback `latin-1`
+  - PDF protegido por senha: `can_parse` retorna 0.80 para PDFs criptografados; `parse` emite `PDF_ENCRYPTED`; frontend abre modal de senha e re-envia
+  - Nubank corrigido: campo real do CSV de crédito é `title`, não `description`
+  - Generic CSV: keyword sets expandidos com aliases brasileiros reais (`data de compra`, `valor (em r$)`, `title` etc.)
+
+- **Pendente C3 — dois sub-problemas para próxima sessão:**
+  1. **ESTRATÉGIA MULTI-BANCO:** deliberar a forma mais prática de reconhecer e diferenciar extratos/faturas de múltiplas instituições sem virar um labirinto de parsers. Arquivos modelo disponíveis em `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse` para guiar decisão.
+  2. **FLUXO IMPORTAÇÃO→TRANSAÇÕES:** parser reconhece e salva no banco (confirmado: `total_found` e `imported` retornam valores), mas as transações não aparecem na tela de Transações. Causa mais provável: **filtro de ciclo (dia 27→26)** — o arquivo C6 tem datas de out/2025 a abr/2026, que caem em ciclos anteriores ao atual (maio 2026). Antes de qualquer código: mudar o MonthSelector para o ciclo de abril (abr/27 → mai/26) e verificar se as transações aparecem.
+
+- **Arquivos modelo para C3:** `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse\` — qualquer novo parser deve ser validado contra estes arquivos antes de marcar concluído.
+
+#### HANDOFF CLAUDE — 2026-05-03 sessão 2 (Fabio + Claude Code)
+
+- **Entregues nesta sessão:**
+  - BUG.1 ✅ auditoria completa UI/API (Thiago fez junto)
+  - BUG.4 ✅ Importar sem mock — localStorage (Thiago)
+  - T1.2 ✅ desbloqueada (BUG.4 fechado)
+  - fix b7: filtro "Ciclo atual" dia 27→26 em Transações
+  - fix b8: suggestCategory usa regras reais do backend (não hardcoded)
+  - T6.1 ✅ Configurações completa: Pessoas+Cartões CRUD, Categorias com subcategorias, Sistema, Zona de Perigo
+  - Backend: `parent_id` em Category com migration automática no startup
+  - CORS liberado para porta 5174
+- **REGRA CRÍTICA aprendida:** SEMPRE abrir `C:\Users\fabio\Downloads\App-financeiro` antes de qualquer JSX. Copiar o código de referência, não reinventar. Subcategorias, modais, grids — tudo tem código pronto.
+- **Próximo:** BUG.2 (conformidade visual Dashboard/Cartão/Provisões) ou BUG.3 (modais/popovers). Não iniciar T3.2/T4/T5 antes de fechar BUG.2+BUG.3.
+- **Backend rodando:** `uvicorn app.main:app --port 8000 --reload` dentro de `backend/` com `.venv` ativado.
+
+#### HANDOFF CLAUDE — 2026-05-03 noite
+
+- **Regra UX absoluta:** abrir `C:\Users\fabio\Downloads\App-financeiro` antes de mexer em qualquer tela. Copiar estrutura, classes, ordem, labels e comportamento do componente de referencia; adaptar somente dados/API depois. "Parecido" nao passa.
+- **Validado hoje:** `npm.cmd run build` passou depois dos ajustes de UI em Transacoes/sidebar.
+- **Commits recentes em `develop`:** `da83edd` inbox de pendentes; `0a9ddef` sem categoria conta como pendente; `6e303ba` status local da sidebar; `01285d9` dropdown acima da lista; `c75f069` filtros de Transacoes conforme referencia.
+- **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
+- **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
+- **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
+
 ### TRILHA 0 — Fundação *(nenhum código existe ainda — começar aqui)*
 
-- [ ] `[G]` **T0.1 — Backend Base** · *qualquer um*
-  Modelos SQLAlchemy (Transaction, Category, Rule, Person, Card, Goal, Settings) · CRUD · FastAPI com routers por domínio · seed.py com regras · migrations via database.py
-  **Saída:** `localhost:8000` com dados de seed funcionando
+- [x] `[G]` **T0.1 — Backend Base** · *Fabio · CONCLUÍDO*
+  FastAPI + SQLAlchemy + SQLite · 7 modelos · 8 routers CRUD · seed com Fabio/Fernanda/cartões/10 cats/regras/meta/transações
+  **Saída:** `localhost:8000` funcionando com dados de seed
 
-- [ ] `[G]` **T0.2 — Frontend Base** · *qualquer um · paralelo com T0.1*
-  Vite + React 19 + TS + Tailwind · Layout shell (sidebar + conteúdo + MonthSelector) · Design system (tokens, Button, Card, Modal, Badge) · react-router · API client tipado
-  **Saída:** shell navegável com design system visível
+- [x] `[G]` **T0.2a — Frontend Shell** · *Fabio · CONCLUÍDO*
+  Vite + React 19 + TS + Tailwind · AppShell + Sidebar + MonthSelector · react-router · API client tipado · 6 pages placeholder
 
-- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · depende T0.1+T0.2*
-  `rodar.bat` sobe backend + abre browser · `auto_sync.ps1` só faz git pull + notificação (sem rebuild exe)
+- [x] `[M]` **T0.2b — Design System** · *Fabio · CONCLUÍDO*
+  Icon, Button, Glass, Badge, CategoryChip, Modal, PageHeader, SectionHeader, CycleProgress
+  CSS completo fiel ao design de referência (styles.css) · tokens corretos · Inter + Material Symbols
+  - [ ] Cor primary: separar #6200a0 (texto) de #820AD1 (brand/botões)
+  - [ ] Backlog v2: switch light/dark mode (tokens já preparados no index.css)
+  **NOTA:** design light mode em elaboração com designer (Claude.ai) — sessão estourou tokens antes de concluir. Arquivo incompleto. Retomar quando designer tiver nova sessão.
+
+- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · PARCIAL/BLOQUEADO BUG.5*
+  `rodar.bat` existe, mas ainda precisa validação ponta a ponta como fluxo dev confiável antes de marcar concluído.
   **Saída:** app abrindo no browser via rodar.bat
 
 ---
@@ -80,12 +155,12 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
 
-- [ ] `[G]` **T1.1 — Parsers Plugáveis** · *qualquer um · depende T0.1*
-  Interface `BaseParser` · `PARSER_REGISTRY {(banco,formato): Parser}` · parsers: OFX, Itaú Excel, Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada
+- [x] `[G]` **T1.1 — Parsers Plugáveis** · *Fabio · CONCLUÍDO*
+  Interface `BaseParser` · `PARSER_REGISTRY` · parsers OFX, Itaú Excel e Itaú PDF · endpoint único `POST /imports/upload` · deduplicação centralizada.
   **Detalhe técnico:** `08_PARSERS.md`
 
-- [ ] `[M]` **T1.2 — Tela de Importação** · *qualquer um · depende T1.1*
-  Dropdown banco+formato · drag & drop · resumo pós-import · histórico de imports
+- [x] `[M]` **T1.2 — Tela de Importação** · *Thiago · CONCLUÍDO 2026-05-03*
+  Drag & drop · upload real `POST /imports/upload` · resumo pós-import · histórico via localStorage (loadHistory/saveHistory) · começa vazio · empty state adicionado. BUG.4 fechado.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Importar Dados"
 
 - [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
@@ -95,12 +170,12 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 2 — Transações & Regras *(depende T0+T1)*
 
-- [ ] `[M]` **T2.1 — Tela de Transações** · *qualquer um*
-  Lista agrupada por data · filtros pill (mês, categoria, pessoa, origem, status) · toggle pendentes · inline edit categoria · "criar regra automática"
+- [ ] `[M]` **T2.1 — Tela de Transações** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
+  Lista agrupada por data · filtros pill conforme referência · aba pendentes · sem categoria conta como pendente · inline edit categoria · botão `Revisar N pendentes` abre inbox one-by-one · categoriza e cria regra automática. Não marcar concluído até reauditoria visual/API passar.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Transações"
 
-- [ ] `[M]` **T2.2 — Tela de Regras** · *qualquer um · depende T2.1*
-  CRUD regras (keyword→categoria+pessoa+origem+goal_id opcional) · vínculo cartão→pessoa · grid com busca e paginação
+- [ ] `[M]` **T2.2 — Tela de Regras** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
+  CRUD regras keyword→categoria+pessoa · nova regra em modal · exclusão · lista no padrão visual de referência existem, mas ainda precisam reauditoria visual/API. Vínculo cartão→pessoa/paginação ficam para BUG.1 se ainda forem necessários.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Regras"
 
 - [ ] `[P]` **T2.3 — Cofrinho por Keyword** · *qualquer um · depende T2.2+T3.1*
@@ -110,8 +185,8 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 3 — Metas & Cofrinho *(depende T0+T2)*
 
-- [ ] `[M]` **T3.1 — Tela de Metas** · *qualquer um*
-  Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria
+- [ ] `[M]` **T3.1 — Tela de Metas** · *Fabio · PARCIAL/BLOQUEADO BUG.2*
+  Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria existem, mas ainda precisam reauditoria 100% contra a referência antes de marcar concluído.
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Metas"
 
 - [ ] `[M]` **T3.2 — Aporte Manual** · *qualquer um · depende T3.1*
@@ -149,8 +224,8 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 6 — Configurações *(paralelo com T1-T3)*
 
-- [ ] `[M]` **T6.1 — Tela de Configurações** · *qualquer um*
-  Grid 2col: Pessoas (avatar iniciais) + Cartões (final→pessoa+limite) + Categorias full-width (cor, nome, limite, soft-delete, separadores Fixas/Variáveis) + Sistema (pasta import + reset com confirmação)
+- [x] `[M]` **T6.1 — Tela de Configurações** · *Fabio · CONCLUÍDO 2026-05-03*
+  Sidebar nav + Pessoas (CRUD, avatar com cores) + Cartões (CRUD, mini-card) + Categorias (CRUD, grid por tipo, search/filtro) + Sistema (pasta import via localStorage) + Zona de Perigo (confirmação com digitação).
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Configurações"
 
 ---
@@ -178,7 +253,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 git add NORTE.md
 git add -A
 git commit -m "feat(TXX): descrição"
-# 2. Rodar build_desktop.bat (Windows local)
+# 2. Validar no modelo atual: backend FastAPI + Vite + npm.cmd run build
 git push origin develop
 ```
 
