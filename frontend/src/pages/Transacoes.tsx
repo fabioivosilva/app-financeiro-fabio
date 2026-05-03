@@ -2,10 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
-import { TransacaoRow } from '../components/transactions/TransacaoRow'
+import { CategoryChip } from '../components/ui/Badge'
+import { CATEGORY_ICONS, TransacaoRow } from '../components/transactions/TransacaoRow'
+import { api } from '../api/client'
+import type { Category, Person, Transaction } from '../api/types'
 import { useTransacoes, groupByDate, formatDate, formatCurrency, isTransactionPending } from '../hooks/useTransacoes'
 
-type Tab = 'todas' | 'pendentes'
+type Tab = 'todas' | 'pendentes' | 'inbox'
 type Ordem = 'data-desc' | 'data-asc' | 'valor-desc' | 'valor-asc'
 type FiltroValor = null | 'entradas' | 'saidas' | 'grandes'
 type FiltroData = null | 'hoje' | '7d' | 'ciclo'
@@ -58,9 +61,27 @@ export function Transacoes() {
   const grupos = useMemo(() => (
     ordem.startsWith('data') ? groupByDate(filtered) : [['__flat', filtered] as [string, typeof filtered]]
   ), [filtered, ordem])
-  const pendentes = transactions.filter(isTransactionPending).length
+  const pendingTransactions = useMemo(
+    () => transactions.filter(isTransactionPending).sort((a, b) => b.date.localeCompare(a.date)),
+    [transactions],
+  )
+  const pendentes = pendingTransactions.length
   const totalGastos = filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
   const filtrosAtivos = [filtroCat, filtroPessoa, filtroValor, filtroData, filtroStatus].filter(Boolean).length
+
+  if (tab === 'inbox') {
+    return (
+      <PendingInbox
+        transactions={pendingTransactions}
+        categories={categories}
+        persons={persons}
+        loading={loading}
+        error={error}
+        onClose={() => setTab('todas')}
+        onUpdated={refetch}
+      />
+    )
+  }
 
   return (
     <div className="page page-transacoes">
@@ -69,9 +90,9 @@ export function Transacoes() {
         subtitle={`${filtered.length} transações · ${formatCurrency(totalGastos)} em gastos`}
         right={
           pendentes > 0 ? (
-            <button className="btn-primary" onClick={() => setTab('pendentes')}>
+            <button className="btn-primary" onClick={() => setTab('inbox')}>
               <Icon name="inbox" size={16} />
-              {pendentes} pendentes
+              Revisar {pendentes} pendentes
             </button>
           ) : undefined
         }
@@ -289,6 +310,228 @@ function FilterDropdown<T>({ icon, label, value, options, onChange, dismissable 
       )}
     </div>
   )
+}
+
+interface PendingInboxProps {
+  transactions: Transaction[]
+  categories: Category[]
+  persons: Person[]
+  loading: boolean
+  error: string | null
+  onClose: () => void
+  onUpdated: () => void
+}
+
+function PendingInbox({ transactions, categories, persons, loading, error, onClose, onUpdated }: PendingInboxProps) {
+  const [doneIds, setDoneIds] = useState<number[]>([])
+  const pending = transactions.filter(tx => !doneIds.includes(tx.id))
+  const tx = pending[0]
+  const [selectedCat, setSelectedCat] = useState<number | null>(null)
+  const [selectedPerson, setSelectedPerson] = useState<number | null>(null)
+  const [createRule, setCreateRule] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const reviewed = Math.min(doneIds.length, transactions.length)
+
+  useEffect(() => {
+    if (!tx) return
+    setSelectedCat(suggestCategory(tx, categories)?.id ?? null)
+    setSelectedPerson(tx.person_id ?? null)
+    setCreateRule(true)
+  }, [tx, categories])
+
+  if (loading) {
+    return (
+      <div className="page page-inbox">
+        <Glass className="inbox-done">
+          <Icon name="hourglass_empty" size={40} className="t-muted" />
+          <div className="inbox-done-title">Carregando pendentes...</div>
+        </Glass>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="page page-inbox">
+        <Glass className="inbox-done">
+          <Icon name="error_outline" size={40} style={{ color: '#F87171' }} />
+          <div className="inbox-done-title">Erro ao carregar transações</div>
+          <div className="inbox-done-sub">{error}</div>
+          <button className="btn-primary" onClick={onClose}>Voltar para transações</button>
+        </Glass>
+      </div>
+    )
+  }
+
+  if (!tx) {
+    return (
+      <div className="page page-inbox-done">
+        <Glass className="inbox-done">
+          <div className="inbox-done-icon">
+            <Icon name="task_alt" size={48} />
+          </div>
+          <div className="inbox-done-title">Tudo categorizado!</div>
+          <div className="inbox-done-sub">{transactions.length} transações revisadas. Seu dashboard está atualizado.</div>
+          <button className="btn-primary" onClick={onClose}>Voltar para transações</button>
+        </Glass>
+      </div>
+    )
+  }
+
+  const suggestion = categories.find(cat => cat.id === selectedCat)
+  const keyword = ruleKeyword(tx.description)
+
+  function next() {
+    setDoneIds(prev => [...prev, tx.id])
+  }
+
+  async function categorize() {
+    if (!selectedCat) return
+    setSaving(true)
+    try {
+      await api.put<Transaction>(`/transactions/${tx.id}`, {
+        ...tx,
+        category_id: selectedCat,
+        person_id: selectedPerson,
+        status: 'confirmado',
+      })
+      if (createRule) {
+        await api.post('/rules/', {
+          keyword,
+          category_id: selectedCat,
+          person_id: selectedPerson,
+          origin: null,
+          goal_id: null,
+        })
+      }
+      next()
+      onUpdated()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="page page-inbox">
+      <div className="inbox-head">
+        <button className="btn-ghost" onClick={onClose}>
+          <Icon name="arrow_back" size={16} /> Sair
+        </button>
+        <div className="inbox-progress">
+          <div className="t-xs t-muted">REVISANDO</div>
+          <div className="inbox-counter">{reviewed + 1} <span className="t-muted">/ {transactions.length}</span></div>
+        </div>
+        <div className="inbox-bar">
+          <div className="inbox-bar-fill" style={{ width: `${(reviewed / transactions.length) * 100}%` }} />
+        </div>
+      </div>
+
+      <Glass className="inbox-card">
+        <div className="inbox-source">
+          <Icon name={tx.origin === 'Crédito' ? 'credit_card' : 'upload_file'} size={14} />
+          {tx.origin} · {shortDate(tx.date)}
+        </div>
+        <div className="inbox-desc">{tx.description}</div>
+        <div className={`inbox-val ${tx.amount > 0 ? 'tx-val-pos' : ''}`}>
+          {tx.amount > 0 ? '+' : '-'}{formatCurrency(tx.amount)}
+        </div>
+
+        <div className="inbox-suggest">
+          <div className="t-xs t-muted">SUGESTÃO DO APP</div>
+          <div className="inbox-suggest-row">
+            {suggestion
+              ? <CategoryChip label={suggestion.name} color={suggestion.color} icon={CATEGORY_ICONS[suggestion.name] ?? 'category'} />
+              : <CategoryChip label="" empty />}
+            <span className="t-xs t-muted">baseado em descrições parecidas</span>
+          </div>
+        </div>
+
+        <div className="inbox-grid-label">OU ESCOLHA UMA CATEGORIA</div>
+        <div className="inbox-cat-grid">
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              className={`inbox-cat ${cat.id === selectedCat ? 'inbox-cat-suggest' : ''}`}
+              onClick={() => setSelectedCat(cat.id)}
+            >
+              <Icon name={CATEGORY_ICONS[cat.name] ?? 'category'} size={18} style={{ color: cat.color ?? 'var(--primary-2)' }} />
+              <span>{cat.name}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="inbox-people">
+          <div className="t-xs t-muted">VINCULAR A</div>
+          <div className="inbox-people-row">
+            {persons.map(person => (
+              <button
+                key={person.id}
+                className={`inbox-person ${selectedPerson === person.id ? 'inbox-cat-suggest' : ''}`}
+                onClick={() => setSelectedPerson(person.id)}
+              >
+                <span className="pessoa-avatar" style={avatarStyle(person.id)}>{initials(person.name)}</span>
+                {person.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="inbox-foot">
+          <label className="inbox-rule">
+            <input type="checkbox" checked={createRule} onChange={e => setCreateRule(e.target.checked)} />
+            <span>Criar regra automática para "{keyword}"</span>
+          </label>
+          <div className="inbox-actions">
+            <button className="btn-ghost" onClick={next} disabled={saving}>
+              <Icon name="skip_next" size={16} /> Pular
+            </button>
+            <button className="btn-primary" onClick={categorize} disabled={!selectedCat || saving}>
+              Categorizar e próxima <Icon name="arrow_forward" size={16} />
+            </button>
+          </div>
+        </div>
+      </Glass>
+    </div>
+  )
+}
+
+function suggestCategory(tx: Transaction, categories: Category[]): Category | undefined {
+  const text = normalizeText(tx.description)
+  const pairs: Array<[string, string[]]> = [
+    ['Mercado', ['mercado', 'supermercado', 'carrefour', 'extra']],
+    ['iFood', ['ifood', 'rappi', 'delivery']],
+    ['Farmácia', ['farmacia', 'drogasil', 'droga', 'farma']],
+    ['Transporte', ['uber', '99', 'metro', 'taxi']],
+    ['Lazer', ['netflix', 'spotify', 'cinema']],
+    ['Moradia', ['aluguel', 'condominio']],
+  ]
+  const matched = pairs.find(([, words]) => words.some(word => text.includes(word)))
+  if (matched) return categories.find(cat => normalizeText(cat.name) === normalizeText(matched[0]))
+  if (tx.amount > 0) return categories.find(cat => normalizeText(cat.name).includes('salario')) ?? categories.find(cat => normalizeText(cat.name) === 'outros')
+  return categories.find(cat => normalizeText(cat.name) === 'outros') ?? categories[0]
+}
+
+function ruleKeyword(description: string) {
+  return description.trim().split(/\s+/).slice(0, 2).join(' ')
+}
+
+function shortDate(dateStr: string) {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(new Date(year, month - 1, day))
+}
+
+function normalizeText(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+function initials(name: string) {
+  return name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase()
+}
+
+function avatarStyle(id: number) {
+  const colors = ['#820AD1', '#06B6D4', '#C084FC', '#22C55E']
+  const color = colors[id % colors.length]
+  return { background: `${color}30`, color, border: `1px solid ${color}50` }
 }
 
 function toISODate(date: Date) {
