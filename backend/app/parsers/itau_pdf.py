@@ -24,6 +24,7 @@ _INSTALLMENT_RE = re.compile(r"\s+(\d{2})/(\d{2})\s*$")
 
 # Seção de cartão: "fabio ivo silva - final 5761 (titular)"
 _CARD_RE = re.compile(r"final\s+(\d{4})", re.IGNORECASE)
+_CARD_HOLDER_RE = re.compile(r"^[^\w]*([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s]+?)\s*[-–]\s*final\s+\d{4}", re.IGNORECASE)
 
 # Mês da fatura: "fatura de\nmais" ou "fatura de maio"
 _FATURA_MES_RE = re.compile(r"fatura\s+de\s+(\w+)", re.IGNORECASE)
@@ -126,16 +127,19 @@ class ItauPDFParser(BaseParser):
                 fatura_month = _MONTHS_PT.get(mes_str, 1)
 
         current_card: str | None = None
+        current_holder: str | None = None
 
         for line in all_lines:
             line = line.strip()
             if not line:
                 continue
 
-            # Detecta seção de cartão
+            # Detecta seção de cartão: "fabio ivo silva - final 5761 (titular)"
             card_match = _CARD_RE.search(line)
             if card_match and not _TX_RE.match(line):
                 current_card = card_match.group(1)
+                holder_match = _CARD_HOLDER_RE.match(line)
+                current_holder = holder_match.group(1).strip().title() if holder_match else None
                 continue
 
             if _should_skip(line):
@@ -182,7 +186,7 @@ class ItauPDFParser(BaseParser):
                 origin="Crédito",
                 installment_current=inst_cur,
                 installment_total=inst_total,
-                raw={"card_last4": current_card, "is_credit": is_credit},
+                raw={"card_last4": current_card, "card_holder": current_holder, "is_credit": is_credit},
             )
             result.transactions.append(parsed)
 

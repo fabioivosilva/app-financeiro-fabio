@@ -29,9 +29,29 @@ def init_db():
 def _migrate():
     from sqlalchemy import inspect, text
     inspector = inspect(engine)
+
     if 'categories' in inspector.get_table_names():
         cols = [c['name'] for c in inspector.get_columns('categories')]
         if 'parent_id' not in cols:
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE categories ADD COLUMN parent_id INTEGER"))
+                conn.commit()
+
+    # Torna person_id nullable em cards (recria tabela se necessário)
+    if 'cards' in inspector.get_table_names():
+        col_info = {c['name']: c for c in inspector.get_columns('cards')}
+        if col_info.get('person_id', {}).get('nullable') is False:
+            with engine.connect() as conn:
+                conn.execute(text("""
+                    CREATE TABLE IF NOT EXISTS cards_new (
+                        id INTEGER PRIMARY KEY,
+                        name VARCHAR NOT NULL,
+                        last4 VARCHAR,
+                        limit_value FLOAT,
+                        person_id INTEGER REFERENCES persons(id)
+                    )
+                """))
+                conn.execute(text("INSERT INTO cards_new SELECT id, name, last4, limit_value, person_id FROM cards"))
+                conn.execute(text("DROP TABLE cards"))
+                conn.execute(text("ALTER TABLE cards_new RENAME TO cards"))
                 conn.commit()

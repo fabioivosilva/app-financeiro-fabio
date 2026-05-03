@@ -21,7 +21,7 @@ class Card(Base):
     name = Column(String, nullable=False)
     last4 = Column(String, nullable=True)
     limit_value = Column(Float, nullable=True)
-    person_id = Column(Integer, ForeignKey("persons.id"), nullable=False)
+    person_id = Column(Integer, ForeignKey("persons.id"), nullable=True)
 
     person = relationship("Person", back_populates="cards")
     transactions = relationship("Transaction", back_populates="card")

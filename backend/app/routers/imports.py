@@ -1,11 +1,73 @@
+import unicodedata
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.database import get_db
-from app.models import Transaction, Card, Rule
+from app.models import Transaction, Card, Person, Rule
 from app.parsers import PARSER_REGISTRY
 from app.parsers.dedup import deduplicate
 from app.routers.rules import apply_rules_to
+
+
+def _norm(text: str) -> str:
+    return unicodedata.normalize("NFD", text).encode("ascii", "ignore").decode().lower().strip()
+
+
+def _find_person_id(holder: str, persons: list) -> int | None:
+    """Tenta associar o nome do titular a uma pessoa cadastrada pelo primeiro nome."""
+    first = _norm(holder.split()[0]) if holder else ""
+    if not first:
+        return None
+    for p in persons:
+        if first in _norm(p.name):
+            return p.id
+    return None
+
+
+def _ensure_cards(transactions, bank: str, db: Session) -> dict[str, int]:
+    """Garante que todos os cartões detectados existem no banco.
+    Cria os que faltam e atualiza person_id nos que ainda estão sem titular."""
+    existing = {c.last4: c for c in db.query(Card).all() if c.last4}
+    card_by_last4: dict[str, int] = {last4: c.id for last4, c in existing.items()}
+    persons = db.query(Person).all()
+
+    # Coleta o melhor nome de titular encontrado para cada last4
+    holders: dict[str, str | None] = {}
+    for tx in transactions:
+        raw = tx.raw or {}
+        last4 = raw.get("card_last4")
+        holder = raw.get("card_holder")
+        if last4 and holder and not holders.get(last4):
+            holders[last4] = holder
+
+    for last4, holder in holders.items():
+        person_id = _find_person_id(holder, persons) if holder else None
+
+        if last4 in existing:
+            # Atualiza person_id se ainda estiver vazio
+            card = existing[last4]
+            if card.person_id is None and person_id:
+                card.person_id = person_id
+                if card.name == f"{bank} •••• {last4}":
+                    card.name = f"{holder} – {bank} •••• {last4}"
+        else:
+            card_name = f"{holder} – {bank} •••• {last4}" if holder else f"{bank} •••• {last4}"
+            new_card = Card(name=card_name, last4=last4, person_id=person_id)
+            db.add(new_card)
+            db.flush()
+            card_by_last4[last4] = new_card.id
+
+    # Cria cartões detectados que ainda não existem e não têm holder
+    for tx in transactions:
+        raw = tx.raw or {}
+        last4 = raw.get("card_last4")
+        if last4 and last4 not in card_by_last4:
+            new_card = Card(name=f"{bank} •••• {last4}", last4=last4, person_id=None)
+            db.add(new_card)
+            db.flush()
+            card_by_last4[last4] = new_card.id
+
+    return card_by_last4
 
 router = APIRouter(prefix="/imports", tags=["imports"])
 
@@ -44,12 +106,8 @@ async def upload_file(
 
         novas, duplicadas = deduplicate(result, db)
 
-        # Monta cache last4 -> card_id para associar transações ao cartão correto
-        card_by_last4: dict[str, int] = {
-            c.last4: c.id
-            for c in db.query(Card).all()
-            if c.last4
-        }
+        # Garante que todos os cartões detectados existem; cria os que faltam
+        card_by_last4 = _ensure_cards(result.transactions, result.bank, db)
 
         criadas = []
         for tx in novas:

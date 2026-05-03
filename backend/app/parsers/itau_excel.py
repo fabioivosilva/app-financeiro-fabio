@@ -56,16 +56,20 @@ class ItauExcelParser(BaseParser):
             return result
 
         current_card: str | None = None
+        current_holder: str | None = None
 
         for row in rows:
             col0 = str(row[0]).strip() if row[0] is not None else ""
             col1 = str(row[1]).strip() if len(row) > 1 and row[1] is not None else ""
             col3 = row[3] if len(row) > 3 else None
 
-            # Detecta header de seção de cartão
+            # Detecta header de seção de cartão: col0="NOME" col1="final XXXX"
             card_match = _CARD_RE.search(col0 + " " + col1)
             if card_match and not _DATE_RE.match(col0):
                 current_card = card_match.group(1)
+                # Nome do titular fica em col0 quando col1 contém "final XXXX"
+                if _CARD_RE.search(col1) and col0 and col0.lower() not in ("nan", "none", ""):
+                    current_holder = col0.title()
                 continue
 
             # Linha de transação: col0 é data, col3 é valor numérico
@@ -98,7 +102,7 @@ class ItauExcelParser(BaseParser):
                 origin="Crédito",
                 installment_current=inst_cur,
                 installment_total=inst_total,
-                raw={"card_last4": current_card, "raw_amount": amount},
+                raw={"card_last4": current_card, "card_holder": current_holder, "raw_amount": amount},
             )
             result.transactions.append(parsed)
 

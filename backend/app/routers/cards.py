@@ -12,7 +12,7 @@ class CardIn(BaseModel):
     name: str
     last4: Optional[str] = None
     limit_value: Optional[float] = None
-    person_id: int
+    person_id: Optional[int] = None
 
 
 class CardOut(CardIn):
