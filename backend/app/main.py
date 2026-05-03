@@ -26,6 +26,8 @@ app.include_router(imports.router)
 @app.on_event("startup")
 def startup():
     init_db()
+    from app.parsers import setup_registry
+    setup_registry()
 
 
 @app.get("/")
