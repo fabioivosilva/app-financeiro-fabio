@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T1.2b concluído por Codex; Importar respeita bancos ativos configurados. Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : T1.2b concluído por Codex; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
@@ -274,6 +274,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Cards selecionáveis por banco (Itaú, C6, Nubank, Inter, Bradesco, Santander, Mercado Pago).
   Toggle ativo/inativo com check visual. Formatos suportados por banco como chips.
   Persiste em localStorage. Nav lateral atualizado. CSS seguindo design system.
+
+- [ ] `[P]` **T6.3 — Status de disponibilidade dos bancos** · *qualquer um · depende T6.2/T1.2b*
+  Como os cards de bancos funcionam como feature toggle da importação, a UI precisa diferenciar banco suportado de banco ainda sem parser validado.
+  Bancos/formatos sem leitura pronta devem aparecer como `Em construção`, com toggle desabilitado ou bloqueado, para o usuário não habilitar uma opção que ainda não consegue importar.
+  Fonte provável: `frontend/src/config/banks.ts` deve expor status/capabilities por banco/formato e `Config.tsx` + `Importar.tsx` devem respeitar essa disponibilidade.
 
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 
