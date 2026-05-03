@@ -89,7 +89,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Corrigido o caminho de fetch da tela Importar: upload agora usa a URL central da API (`API_BASE_URL`), normaliza `localhost`/`::1` para `127.0.0.1:8000`, mostra erro claro quando a API não responde e o CORS aceita portas Vite locais `517x`.
   Observação: se o arquivo real do Itaú retornar erro de parser/formato depois da conexão, abrir item separado com o modelo do arquivo.
 
-- [ ] `[P]` **BUG.7 — Importação Itaú OFX/XLSX ainda falha após PDF funcionar** · *próxima sessão*
+- [ ] `[P]` 🔒 [ANTIGRAVITY] **BUG.7 — Importação Itaú OFX/XLSX ainda falha após PDF funcionar** · *próxima sessão*
   Teste do Fabio: PDF Itaú importou corretamente, mas OFX e XLSX mostram na tela `Não consegui conectar ao backend em http://127.0.0.1:8000. Abra pelo rodar.bat e confirme que a API está ativa.`
   Próxima investigação: confirmar se o backend fica ativo durante uploads OFX/XLSX, olhar log do `/imports/upload`, diferenciar erro real de parser/exception de erro de conexão no frontend e validar com os arquivos modelo reais.
 
