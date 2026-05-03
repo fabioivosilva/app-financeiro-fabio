@@ -388,7 +388,7 @@ function CategoryDonut({ data, total }: { data: any[]; total: number }) {
       </svg>
       <div className="donut-center">
         <div className="t-xs t-muted">TOTAL CICLO</div>
-        <div className="donut-total">{brl(-total)}</div>
+        <div className="donut-total">{brl(total)}</div>
       </div>
     </div>
   )
