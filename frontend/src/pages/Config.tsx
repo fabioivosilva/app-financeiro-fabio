@@ -1,8 +1,8 @@
-export function Importar() {
+export function Config() {
   return (
     <div>
-      <h1 style={h1}>Importar Dados</h1>
-      <div style={placeholder}>Em construção (T1.2)</div>
+      <h1 style={h1}>Configurações</h1>
+      <div style={placeholder}>Em construção (T0.2b)</div>
     </div>
   )
 }

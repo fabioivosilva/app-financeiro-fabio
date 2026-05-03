@@ -1,28 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #820AD1;
-  --bg-app: #0d0d0d;
-  --bg-sidebar: #141414;
-  --bg-card: rgba(255,255,255,0.04);
-  --border: rgba(255,255,255,0.08);
-  --green: #0e8345;
-  --red: #ba1a1a;
-  --orange: #f97316;
-  --text: #e5e5e5;
-  --text-muted: #888;
+  --primary:       #820AD1;
+  --primary-2:     #C084FC;
+  --glass-bg:      rgba(28, 20, 50, 0.55);
+  --glass-border:  rgba(192, 132, 252, 0.12);
+  --glass-blur:    24px;
+  --bg-1:          #0a0612;
+  --bg-2:          #1a0e2e;
+  --text:          #E8E4F0;
+  --text-muted:    rgba(232, 228, 240, 0.55);
+  --text-muted-2:  rgba(232, 228, 240, 0.4);
+  --green:         #22C55E;
+  --red:           #EF4444;
+  --pink:          #F472B6;
+  --orange:        #F59E0B;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-feature-settings: 'liga' !important;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--bg-app);
+  font-family: 'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-1);
   color: var(--text);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(900px 600px at 12% 10%, rgba(130, 10, 209, 0.18), transparent 60%),
+    radial-gradient(700px 500px at 88% 90%, rgba(192, 132, 252, 0.10), transparent 60%),
+    linear-gradient(180deg, #0a0612 0%, #07040d 100%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 #root {
   display: flex;
   height: 100svh;
+}
+
+/* Glass card */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 40px -20px rgba(0,0,0,0.4);
 }

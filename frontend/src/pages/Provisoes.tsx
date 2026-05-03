@@ -1,8 +1,8 @@
-export function Importar() {
+export function Provisoes() {
   return (
     <div>
-      <h1 style={h1}>Importar Dados</h1>
-      <div style={placeholder}>Em construção (T1.2)</div>
+      <h1 style={h1}>Provisões</h1>
+      <div style={placeholder}>Em construção (T5.1)</div>
     </div>
   )
 }
