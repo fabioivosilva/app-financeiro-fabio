@@ -72,7 +72,6 @@ class ItauPDFParser(BaseParser):
     def can_parse(self, filename: str, content: bytes) -> float:
         if not filename.lower().endswith(".pdf"):
             return 0.0
-        # Texto do PDF é encodado como fontes — precisa extrair para verificar
         try:
             import pdfplumber
             pdf = pdfplumber.open(io.BytesIO(content))
@@ -84,21 +83,29 @@ class ItauPDFParser(BaseParser):
             if hits >= 1:
                 return 0.50
             return 0.15
-        except Exception:
+        except Exception as e:
+            # PDF criptografado: ainda pode ser um PDF Itaú — retorna score médio
+            msg = str(e).lower()
+            if any(w in msg for w in ("password", "encrypt", "decrypt", "incorrect")):
+                return 0.80
             return 0.0
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         result = ImportResult(bank="Itaú", format="PDF")
 
         try:
             import pdfplumber
-            pdf = pdfplumber.open(io.BytesIO(content))
+            pdf = pdfplumber.open(io.BytesIO(content), password=password or "")
             all_lines = []
             for page in pdf.pages:
                 text = page.extract_text() or ""
                 all_lines.extend(text.split("\n"))
         except Exception as e:
-            result.errors.append(f"Falha ao abrir PDF: {e}")
+            msg = str(e).lower()
+            if any(w in msg for w in ("password", "encrypt", "decrypt", "incorrect")):
+                result.errors.append("PDF_ENCRYPTED")
+            else:
+                result.errors.append(f"Falha ao abrir PDF: {e}")
             return result
 
         # Detectar mês/ano da fatura a partir do texto completo

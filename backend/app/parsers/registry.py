@@ -26,11 +26,11 @@ class ParserRegistry:
                 pass
         return best_parser if best_score > 0.1 else None
 
-    def parse(self, filename: str, content: bytes) -> ImportResult | None:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult | None:
         parser = self.detect(filename, content)
         if not parser:
             return None
-        return parser.parse(filename, content)
+        return parser.parse(filename, content, password=password)
 
 
 # Instância global — importar este objeto em toda a aplicação

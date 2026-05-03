@@ -18,6 +18,13 @@ _AMOUNT_KEYS = {"valor", "value", "amount", "quantia", "montante", "debito",
 _DATE_FMTS = ["%Y-%m-%d", "%d/%m/%Y", "%d/%m/%y", "%m/%d/%Y"]
 
 
+def _decode(content: bytes) -> str:
+    try:
+        return content.decode("utf-8-sig")
+    except (UnicodeDecodeError, ValueError):
+        return content.decode("latin-1")
+
+
 def _parse_date(s: str) -> date | None:
     s = s.strip()
     for fmt in _DATE_FMTS:
@@ -50,7 +57,7 @@ class GenericCSVParser(BaseParser):
         if not filename.lower().endswith(".csv"):
             return 0.0
         try:
-            text = content[:2048].decode("utf-8", errors="replace")
+            text = _decode(content[:2048])
             lines = [l for l in text.split("\n") if l.strip()]
             if len(lines) < 2:
                 return 0.0
@@ -67,13 +74,9 @@ class GenericCSVParser(BaseParser):
             pass
         return 0.0
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         result = ImportResult(bank="Genérico", format="CSV")
-        try:
-            text = content.decode("utf-8", errors="replace")
-        except Exception as e:
-            result.errors.append(f"Falha ao decodificar: {e}")
-            return result
+        text = _decode(content)
 
         sep = ";" if text.count(";") > text.count(",") else ","
 

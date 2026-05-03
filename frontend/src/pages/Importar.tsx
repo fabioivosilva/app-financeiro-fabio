@@ -23,6 +23,10 @@ interface UploadResult {
   duplicates?: number
 }
 
+interface ApiError {
+  detail?: string | { code?: string; message?: string }
+}
+
 const STORAGE_KEY = 'app-financeiro-import-history'
 
 function loadHistory(): ImportItem[] {
@@ -48,10 +52,15 @@ export function Importar() {
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Estado do modal de senha para PDFs protegidos
+  const [pendingPdfFiles, setPendingPdfFiles] = useState<File[] | null>(null)
+  const [pdfPassword, setPdfPassword] = useState('')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
   const totalNovas = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.novas, 0), [importados])
   const totalDup = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.dup, 0), [importados])
 
-  async function handleFiles(files: FileList | File[]) {
+  async function handleFiles(files: FileList | File[], password?: string) {
     const fileList = Array.from(files)
     if (fileList.length === 0) return
 
@@ -62,9 +71,27 @@ export function Importar() {
       for (const file of fileList) {
         const form = new FormData()
         form.append('file', file)
+        if (password) form.append('password', password)
+
         const host = window.location.hostname
         const res = await fetch(`http://${host}:8000/imports/upload`, { method: 'POST', body: form })
-        if (!res.ok) throw new Error(`Importação falhou (${res.status}) para ${file.name}`)
+
+        if (!res.ok) {
+          const body = await res.json() as ApiError
+          const detail = body.detail
+          if (detail && typeof detail === 'object' && detail.code === 'PDF_ENCRYPTED') {
+            // Parar o loop e pedir senha
+            setPendingPdfFiles(fileList)
+            setPdfPassword('')
+            setPasswordError(null)
+            setUploading(false)
+            return
+          }
+          throw new Error(
+            typeof detail === 'string' ? detail : `Importação falhou (${res.status}) para ${file.name}`
+          )
+        }
+
         const result = await res.json() as UploadResult
         const item: ImportItem = {
           id: `${file.name}-${Date.now()}`,
@@ -87,6 +114,59 @@ export function Importar() {
       window.setTimeout(() => setNovo(null), 1800)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao importar arquivo')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handlePasswordSubmit() {
+    if (!pendingPdfFiles || !pdfPassword.trim()) return
+    setPasswordError(null)
+    setUploading(true)
+
+    // Tenta re-enviar com a senha; detecta senha incorreta na resposta
+    const file = pendingPdfFiles[0]
+    const form = new FormData()
+    form.append('file', file)
+    form.append('password', pdfPassword.trim())
+
+    const host = window.location.hostname
+    try {
+      const res = await fetch(`http://${host}:8000/imports/upload`, { method: 'POST', body: form })
+      if (!res.ok) {
+        const body = await res.json() as ApiError
+        const detail = body.detail
+        if (detail && typeof detail === 'object' && detail.code === 'PDF_ENCRYPTED') {
+          setPasswordError('Senha incorreta. Tente novamente.')
+          setUploading(false)
+          return
+        }
+        throw new Error(typeof detail === 'string' ? detail : `Erro ${res.status}`)
+      }
+
+      const result = await res.json() as UploadResult
+      const item: ImportItem = {
+        id: `${file.name}-${Date.now()}`,
+        nome: file.name,
+        tipo: detectType(file.name, result.format),
+        fonte: `${result.bank ?? 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
+        transacoes: result.total_found ?? 0,
+        novas: result.imported ?? 0,
+        dup: result.duplicates ?? 0,
+        status: 'novo',
+      }
+      setPendingPdfFiles(null)
+      setPdfPassword('')
+      setImportados(prev => {
+        const updated = [item, ...prev]
+        saveHistory(updated)
+        return updated
+      })
+      setNovo(item.id)
+      window.setTimeout(() => setNovo(null), 1800)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao importar arquivo')
+      setPendingPdfFiles(null)
     } finally {
       setUploading(false)
     }
@@ -133,6 +213,45 @@ export function Importar() {
           {error && <div className="t-sm" style={{ color: '#F87171' }}>{error}</div>}
         </div>
       </Glass>
+
+      {/* Modal de senha para PDF protegido */}
+      {pendingPdfFiles && (
+        <div className="modal-overlay" onClick={() => setPendingPdfFiles(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title">PDF protegido por senha</span>
+              <button className="btn-icon" onClick={() => setPendingPdfFiles(null)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="t-sm t-muted">
+                O arquivo <strong>{pendingPdfFiles[0].name}</strong> está protegido. Informe a senha para continuar.
+              </div>
+              <input
+                type="password"
+                className="input"
+                placeholder="Senha do PDF"
+                value={pdfPassword}
+                onChange={e => setPdfPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handlePasswordSubmit()}
+                autoFocus
+              />
+              {passwordError && <div className="t-sm" style={{ color: '#F87171' }}>{passwordError}</div>}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={() => setPendingPdfFiles(null)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                onClick={handlePasswordSubmit}
+                disabled={!pdfPassword.trim() || uploading}
+              >
+                {uploading ? 'Processando...' : 'Importar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid-3">
         <Glass className="stat-card">

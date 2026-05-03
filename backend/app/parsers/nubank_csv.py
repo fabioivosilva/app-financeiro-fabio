@@ -13,6 +13,14 @@ _CREDIT_HEADERS = {"date", "description", "amount"}
 _ACCOUNT_HEADERS = {"data", "valor", "identificador"}
 
 
+def _decode(content: bytes) -> str:
+    """utf-8-sig strip BOM automaticamente; fallback latin-1 para bancos legados."""
+    try:
+        return content.decode("utf-8-sig")
+    except (UnicodeDecodeError, ValueError):
+        return content.decode("latin-1")
+
+
 class NubankCSVParser(BaseParser):
 
     def can_parse(self, filename: str, content: bytes) -> float:
@@ -22,7 +30,7 @@ class NubankCSVParser(BaseParser):
         if "nubank" in fname:
             return 0.95
         try:
-            text = content[:2048].decode("utf-8", errors="replace")
+            text = _decode(content[:2048])
             first = {h.strip().strip('"').lower() for h in text.split("\n")[0].split(",")}
             if _CREDIT_HEADERS.issubset(first):
                 return 0.85
@@ -32,13 +40,9 @@ class NubankCSVParser(BaseParser):
             pass
         return 0.0
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         result = ImportResult(bank="Nubank", format="CSV")
-        try:
-            text = content.decode("utf-8", errors="replace")
-        except Exception as e:
-            result.errors.append(f"Falha ao decodificar: {e}")
-            return result
+        text = _decode(content)
 
         try:
             reader = csv.DictReader(io.StringIO(text))
@@ -59,9 +63,10 @@ class NubankCSVParser(BaseParser):
     def _parse_credit(self, result: ImportResult, reader: csv.DictReader) -> None:
         for row in reader:
             try:
-                tx_date = datetime.strptime(row["date"].strip(), "%Y-%m-%d").date()
-                desc = row["description"].strip()
-                amount = float(row["amount"].strip())
+                row_n = {k.lower().strip(): v.strip() for k, v in row.items() if k}
+                tx_date = datetime.strptime(row_n["date"], "%Y-%m-%d").date()
+                desc = row_n["description"]
+                amount = float(row_n["amount"])
                 result.transactions.append(ParsedTransaction(
                     date=tx_date,
                     description=desc,

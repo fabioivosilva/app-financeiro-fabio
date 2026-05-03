@@ -1,6 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import date as date_type
+from typing import Optional
 from app.database import get_db
 from app.models import Transaction
 from app.parsers import PARSER_REGISTRY
@@ -10,22 +10,31 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_file(
+    file: UploadFile = File(...),
+    password: Optional[str] = Form(None),
+    db: Session = Depends(get_db),
+):
     content = await file.read()
     filename = file.filename or "upload"
 
-    result = PARSER_REGISTRY.parse(filename, content)
+    result = PARSER_REGISTRY.parse(filename, content, password=password)
 
     if result is None:
         raise HTTPException(
             status_code=422,
             detail=f"Nenhum parser reconheceu o arquivo '{filename}'. "
-                   "Formatos suportados: OFX, XLS/XLSX (Itaú)."
+                   "Formatos suportados: OFX, XLS/XLSX (Itaú), PDF (Itaú), CSV (Nubank, Inter, genérico).",
+        )
+
+    if "PDF_ENCRYPTED" in result.errors:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "PDF_ENCRYPTED", "message": "Este PDF está protegido por senha."},
         )
 
     novas, duplicadas = deduplicate(result, db)
 
-    # Persiste as transações novas
     criadas = []
     for tx in novas:
         db_tx = Transaction(
@@ -33,7 +42,7 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
             description=tx.description,
             amount=tx.amount,
             origin=tx.origin,
-            status="pendente",          # importadas entram como pendente para revisão
+            status="pendente",
             external_id=tx.external_id,
             installment_current=tx.installment_current,
             installment_total=tx.installment_total,
@@ -59,7 +68,6 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
 
 @router.get("/history")
 def import_history(db: Session = Depends(get_db)):
-    """Retorna contagem de transações por status para histórico de imports."""
     total = db.query(Transaction).count()
     pendentes = db.query(Transaction).filter(Transaction.status == "pendente").count()
     confirmadas = db.query(Transaction).filter(Transaction.status == "confirmado").count()

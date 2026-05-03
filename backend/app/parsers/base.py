@@ -49,5 +49,5 @@ class BaseParser(ABC):
         """
 
     @abstractmethod
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         """Processa o arquivo e retorna ImportResult."""

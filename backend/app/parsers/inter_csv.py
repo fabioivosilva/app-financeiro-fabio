@@ -11,6 +11,13 @@ from app.parsers.base import BaseParser, ImportResult, ParsedTransaction
 _HEADER_KEYWORDS = {"histórico", "historico", "lançamento", "lancamento"}
 
 
+def _decode(content: bytes) -> str:
+    try:
+        return content.decode("utf-8-sig")
+    except (UnicodeDecodeError, ValueError):
+        return content.decode("latin-1")
+
+
 class InterCSVParser(BaseParser):
 
     def can_parse(self, filename: str, content: bytes) -> float:
@@ -20,7 +27,7 @@ class InterCSVParser(BaseParser):
         if "inter" in fname:
             return 0.92
         try:
-            text = content[:2048].decode("utf-8", errors="replace")
+            text = _decode(content[:2048])
             first = text.split("\n")[0].lower()
             if ";" in first and any(kw in first for kw in _HEADER_KEYWORDS):
                 return 0.82
@@ -28,13 +35,9 @@ class InterCSVParser(BaseParser):
             pass
         return 0.0
 
-    def parse(self, filename: str, content: bytes) -> ImportResult:
+    def parse(self, filename: str, content: bytes, password: str | None = None) -> ImportResult:
         result = ImportResult(bank="Inter", format="CSV")
-        try:
-            text = content.decode("utf-8", errors="replace")
-        except Exception as e:
-            result.errors.append(f"Falha ao decodificar: {e}")
-            return result
+        text = _decode(content)
 
         try:
             reader = csv.DictReader(io.StringIO(text), delimiter=";")
