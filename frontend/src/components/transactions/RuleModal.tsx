@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
+import { Icon } from '../ui/Icon'
 import { api } from '../../api/client'
 import type { Category, Person } from '../../api/types'
+import { CATEGORY_ICONS } from './TransacaoRow'
 
 interface Props {
   open: boolean
@@ -14,7 +16,6 @@ interface Props {
 }
 
 export function RuleModal({ open, onClose, description, categoryId, categories, persons }: Props) {
-  // Extrai keyword sugerida: primeira palavra relevante da descrição
   const suggestedKeyword = description.split(/[\s*]+/)[0].toLowerCase()
   const [keyword, setKeyword] = useState(suggestedKeyword)
   const [selectedCat, setSelectedCat] = useState<number | undefined>(categoryId)
@@ -58,49 +59,37 @@ export function RuleModal({ open, onClose, description, categoryId, categories, 
         </>
       }
     >
-      {/* Preview da descrição */}
-      <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(0,0,0,0.2)', fontFamily: 'ui-monospace, monospace', fontSize: 13, color: 'var(--text-muted)' }}>
-        {description}
-      </div>
+      <div className="modal-prefix">{description}</div>
 
-      {/* Keyword */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-          Quando descrição contiver
-        </label>
+      <div className="cfg-field">
+        <label className="cfg-label">Quando descrição contiver</label>
         <input
+          className="cfg-input"
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
           placeholder="ex: ifood, uber, amazon..."
-          style={inputStyle}
         />
       </div>
 
-      {/* Categoria */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-          Classificar como categoria
-        </label>
-        <div className="modal-cat-grid">
+      <div className="cfg-field">
+        <label className="cfg-label">Classificar como categoria</label>
+        <div className="inbox-cat-grid">
           {categories.map(cat => (
             <button
               key={cat.id}
               className={`inbox-cat ${selectedCat === cat.id ? 'inbox-cat-suggest' : ''}`}
               onClick={() => setSelectedCat(selectedCat === cat.id ? undefined : cat.id)}
             >
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color ?? '#888', display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ fontSize: 11 }}>{cat.name}</span>
+              <Icon name={CATEGORY_ICONS[cat.name] ?? 'label'} size={16} style={{ color: cat.color ?? '#888' }} />
+              <span>{cat.name}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Pessoa (opcional) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-          Pessoa (opcional)
-        </label>
-        <div style={{ display: 'flex', gap: 8 }}>
+      <div className="cfg-field">
+        <label className="cfg-label">Pessoa (opcional)</label>
+        <div className="inbox-people-row">
           {persons.map(p => (
             <button
               key={p.id}
@@ -114,21 +103,8 @@ export function RuleModal({ open, onClose, description, categoryId, categories, 
       </div>
 
       {error && (
-        <div style={{ fontSize: 12, color: '#F87171', padding: '6px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 6 }}>
-          {error}
-        </div>
+        <div className="modal-error">{error}</div>
       )}
     </Modal>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  background: 'rgba(0,0,0,0.25)',
-  border: '1px solid rgba(192,132,252,0.1)',
-  borderRadius: 8,
-  color: 'var(--text)',
-  font: 'inherit',
-  fontSize: 13,
-  outline: 'none',
 }

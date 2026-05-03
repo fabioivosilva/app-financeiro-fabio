@@ -7,6 +7,7 @@ import { CategoryChip } from '../components/ui/Badge'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import { useRegras } from '../hooks/useRegras'
+import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
 
 export function Regras() {
   const { rules, categories, persons, loading, error, refetch, deleteRule } = useRegras()
@@ -173,20 +174,20 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
         </>
       }
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={labelStyle}>Palavra-chave</label>
+      <div className="cfg-field">
+        <label className="cfg-label">Palavra-chave</label>
         <input
           autoFocus
+          className="cfg-input"
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="ex: ifood, netflix, uber..."
-          style={inputStyle}
         />
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={labelStyle}>Categoria</label>
+      <div className="cfg-field">
+        <label className="cfg-label">Categoria</label>
         <div className="inbox-cat-grid">
           {categories.map(cat => (
             <button
@@ -194,16 +195,16 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
               className={`inbox-cat ${catId === cat.id ? 'inbox-cat-suggest' : ''}`}
               onClick={() => setCatId(catId === cat.id ? undefined : cat.id)}
             >
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color ?? '#888', display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ fontSize: 11 }}>{cat.name}</span>
+              <Icon name={CATEGORY_ICONS[cat.name] ?? 'label'} size={16} style={{ color: cat.color ?? '#888' }} />
+              <span>{cat.name}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <label style={labelStyle}>Pessoa (opcional)</label>
-        <div style={{ display: 'flex', gap: 8 }}>
+      <div className="cfg-field">
+        <label className="cfg-label">Pessoa (opcional)</label>
+        <div className="inbox-people-row">
           {persons.map(p => (
             <button
               key={p.id}
@@ -216,19 +217,7 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
         </div>
       </div>
 
-      {err && <div style={{ fontSize: 12, color: '#F87171' }}>{err}</div>}
+      {err && <div className="modal-error">{err}</div>}
     </Modal>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 12, color: 'var(--text-muted)', fontWeight: 500,
-}
-
-const inputStyle: React.CSSProperties = {
-  padding: '9px 12px',
-  background: 'rgba(0,0,0,0.25)',
-  border: '1px solid rgba(192,132,252,0.1)',
-  borderRadius: 8,
-  color: 'var(--text)', font: 'inherit', fontSize: 13, outline: 'none',
 }
