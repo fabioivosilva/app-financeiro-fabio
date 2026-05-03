@@ -5,9 +5,9 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : BUG.1✅ BUG.4✅ C3✅ T6.1✅ — pendentes: BUG.2/3/5 (visual/modal/script) + Dashboard + Provisões
+STATUS     : BUG.1✅ BUG.4✅ T6.1✅ — pendentes: C3❌ BUG.2/3/5 (visual/modal/script) + Dashboard + Provisões
 BRANCH     : develop
-PRÓXIMA    : BUG.2 — Conformidade 100% referência visual [G]  OU  BUG.3 — Modais/popovers [M]
+PRÓXIMA    : C3 — Rever parsers CSV (colnames reais dos bancos) ou BUG.2 — Conformidade visual [G]
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
