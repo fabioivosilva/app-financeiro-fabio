@@ -10,6 +10,7 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 
 
 @router.post("/upload")
+async def upload_file(
     file: UploadFile = File(...),
     password: Optional[str] = Form(None),
     bank_hint: Optional[str] = Form(None),
