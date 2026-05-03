@@ -18,52 +18,63 @@ async def upload_file(
     content = await file.read()
     filename = file.filename or "upload"
 
-    result = PARSER_REGISTRY.parse(filename, content, password=password)
+    try:
+        result = PARSER_REGISTRY.parse(filename, content, password=password)
 
-    if result is None:
+        if result is None:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Nenhum parser reconheceu o arquivo '{filename}'. "
+                       "Formatos suportados: OFX, XLS/XLSX (Itaú), PDF (Itaú), CSV (Nubank, Inter, genérico).",
+            )
+
+        if "PDF_ENCRYPTED" in result.errors:
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "PDF_ENCRYPTED", "message": "Este PDF está protegido por senha."},
+            )
+
+        novas, duplicadas = deduplicate(result, db)
+
+        criadas = []
+        for tx in novas:
+            db_tx = Transaction(
+                date=tx.date,
+                description=tx.description,
+                amount=tx.amount,
+                origin=tx.origin,
+                status="pendente",
+                external_id=tx.external_id,
+                installment_current=tx.installment_current,
+                installment_total=tx.installment_total,
+            )
+            db.add(db_tx)
+            criadas.append(db_tx)
+
+        db.commit()
+
+        return {
+            "bank": result.bank,
+            "format": result.format,
+            "account": result.account,
+            "period_start": result.period_start.isoformat() if result.period_start else None,
+            "period_end": result.period_end.isoformat() if result.period_end else None,
+            "total_found": len(result.transactions),
+            "imported": len(novas),
+            "duplicates": len(duplicadas),
+            "warnings": result.warnings,
+            "errors": result.errors,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        print(f"ERRO CRÍTICO NA IMPORTAÇÃO: {e}")
+        traceback.print_exc()
         raise HTTPException(
-            status_code=422,
-            detail=f"Nenhum parser reconheceu o arquivo '{filename}'. "
-                   "Formatos suportados: OFX, XLS/XLSX (Itaú), PDF (Itaú), CSV (Nubank, Inter, genérico).",
+            status_code=500,
+            detail=f"Erro interno ao processar {filename}: {str(e)}"
         )
-
-    if "PDF_ENCRYPTED" in result.errors:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "PDF_ENCRYPTED", "message": "Este PDF está protegido por senha."},
-        )
-
-    novas, duplicadas = deduplicate(result, db)
-
-    criadas = []
-    for tx in novas:
-        db_tx = Transaction(
-            date=tx.date,
-            description=tx.description,
-            amount=tx.amount,
-            origin=tx.origin,
-            status="pendente",
-            external_id=tx.external_id,
-            installment_current=tx.installment_current,
-            installment_total=tx.installment_total,
-        )
-        db.add(db_tx)
-        criadas.append(db_tx)
-
-    db.commit()
-
-    return {
-        "bank": result.bank,
-        "format": result.format,
-        "account": result.account,
-        "period_start": result.period_start.isoformat() if result.period_start else None,
-        "period_end": result.period_end.isoformat() if result.period_end else None,
-        "total_found": len(result.transactions),
-        "imported": len(novas),
-        "duplicates": len(duplicadas),
-        "warnings": result.warnings,
-        "errors": result.errors,
-    }
 
 
 @router.get("/history")

@@ -36,11 +36,14 @@ class ItauExcelParser(BaseParser):
         if not (fname.endswith(".xls") or fname.endswith(".xlsx")):
             return 0.0
         # Detecta assinatura Itaú no conteúdo binário
-        sample = content[:4096]
-        if b"Ita" in sample or b"fatura" in sample.lower() or b"itau" in sample.lower():
+        # Aumentamos o sample para 16KB para garantir que pegamos o texto em arquivos .xls grandes
+        sample = content[:16384].lower()
+        if b"ita" in sample or b"fatura" in sample or b"itau" in sample:
             return 0.85
-        # .xls sem assinatura Itaú — score baixo
-        return 0.2
+        
+        # Se for .xls ou .xlsx mas sem marca óbvia do Itaú, ainda damos score 0.3
+        # para vencer o GenericCSV (que só aceita .csv)
+        return 0.3
 
     def parse(self, filename: str, content: bytes) -> ImportResult:
         result = ImportResult(bank="Itaú", format="Excel")

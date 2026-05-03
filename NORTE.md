@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : PDF Itaú validado pelo Fabio; OFX/XLSX ainda falham na importação com mensagem de backend indisponível. BUG.7 adicionado para próxima sessão. UX Transações precisa navegação de ciclo com setas e opção "Todas". T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção". Decisões: sem .exe (rodar.bat+browser) · onboarding declarativo (T0.4) vem antes dos parsers (T1.1)
+STATUS     : PDF/OFX/XLSX Itaú validados e otimizados (BUG.7 resolvido); Deduplicação agora usa query única (performance++). UX Transações precisa navegação de ciclo com setas e opção "Todas". T1.2b concluído; Importar respeita bancos ativos configurados. Backlog T6.3 adicionado para bancos sem parser aparecerem como "Em construção".
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum
@@ -89,9 +89,9 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Corrigido o caminho de fetch da tela Importar: upload agora usa a URL central da API (`API_BASE_URL`), normaliza `localhost`/`::1` para `127.0.0.1:8000`, mostra erro claro quando a API não responde e o CORS aceita portas Vite locais `517x`.
   Observação: se o arquivo real do Itaú retornar erro de parser/formato depois da conexão, abrir item separado com o modelo do arquivo.
 
-- [ ] `[P]` 🔒 [ANTIGRAVITY] **BUG.7 — Importação Itaú OFX/XLSX ainda falha após PDF funcionar** · *próxima sessão*
-  Teste do Fabio: PDF Itaú importou corretamente, mas OFX e XLSX mostram na tela `Não consegui conectar ao backend em http://127.0.0.1:8000. Abra pelo rodar.bat e confirme que a API está ativa.`
-  Próxima investigação: confirmar se o backend fica ativo durante uploads OFX/XLSX, olhar log do `/imports/upload`, diferenciar erro real de parser/exception de erro de conexão no frontend e validar com os arquivos modelo reais.
+- [x] `[P]` **BUG.7 — Importação Itaú OFX/XLSX ainda falha após PDF funcionar** · *CONCLUÍDO 2026-05-03*
+  O erro "backend indisponível" era um erro de CORS/Timeout causado por N+1 queries no deduplicate (lento no Windows).
+  **Fixes:** Deduplicação otimizada para query única (IN) + tratamento de erro robusto no router + aumento do sample de detecção Excel. Validado com arquivos reais do Fabio.
 
 - [ ] `[P]` **BUG.8 — Navegação de ciclos na tela Transações** · *próxima sessão*
   Hoje a tela parece mostrar só o ciclo atual, dificultando revisar/categorizar transações importadas de meses anteriores.

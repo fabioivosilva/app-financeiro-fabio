@@ -95,19 +95,21 @@ export function Importar() {
         const res = await fetch(`${API_BASE_URL}/imports/upload`, { method: 'POST', body: form })
 
         if (!res.ok) {
-          const body = await res.json() as ApiError
-          const detail = body.detail
-          if (detail && typeof detail === 'object' && detail.code === 'PDF_ENCRYPTED') {
-            // Parar o loop e pedir senha
-            setPendingPdfFiles(fileList)
-            setPdfPassword('')
-            setPasswordError(null)
-            setUploading(false)
-            return
+          let detail = `Erro ${res.status}`
+          try {
+            const body = await res.json() as ApiError
+            if (body.detail && typeof body.detail === 'object' && 'code' in body.detail && body.detail.code === 'PDF_ENCRYPTED') {
+              setPendingPdfFiles(fileList)
+              setPdfPassword('')
+              setPasswordError(null)
+              setUploading(false)
+              return
+            }
+            detail = typeof body.detail === 'string' ? body.detail : (body.detail as any)?.message || detail
+          } catch {
+            detail = `Importação falhou (${res.status}) para ${file.name}`
           }
-          throw new Error(
-            typeof detail === 'string' ? detail : `Importação falhou (${res.status}) para ${file.name}`
-          )
+          throw new Error(detail)
         }
 
         const result = await res.json() as UploadResult
@@ -350,9 +352,10 @@ export function Importar() {
 
 function importErrorMessage(error: unknown) {
   if (error instanceof TypeError) {
-    return `Não consegui conectar ao backend em ${API_BASE_URL}. Abra pelo rodar.bat e confirme que a API está ativa.`
+    console.error('Network/CORS error:', error)
+    return `Não consegui conectar ao backend em ${API_BASE_URL}. Verifique se o rodar.bat está aberto e se não há bloqueio de Firewall/Antivírus.`
   }
-  return error instanceof Error ? error.message : 'Erro ao importar arquivo'
+  return error instanceof Error ? error.message : 'Erro desconhecido ao importar arquivo'
 }
 
 function detectType(filename: string, fallback?: string) {
