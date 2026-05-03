@@ -5,7 +5,7 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : PDF/OFX/XLSX Itaú 100% funcionais (BUG.7 resolvido); Deduplicação otimizada; Feature Toggle amarrado (o motor agora só executa parsers de bancos ativos); Enums removidos do DB para estabilidade. UX Transações precisa navegação de ciclo com setas e opção "Todas".
+STATUS     : PDF/OFX/XLSX Itaú 100% funcionais (BUG.7 resolvido); Deduplicação otimizada; Feature Toggle 100% funcional — imports.py filename corrigido + bank_id adicionado em C6/Nubank/Inter; Enums removidos do DB para estabilidade. UX Transações precisa navegação de ciclo com setas e opção "Todas".
 BRANCH     : develop
 PRÓXIMA    : BUG.2 — Conformidade visual [G] · ou · BUG.3 — Modais/popovers [M]
 CLAIMS     : nenhum

@@ -23,6 +23,7 @@ def _decode(content: bytes) -> str:
 
 
 class NubankCSVParser(BaseParser):
+    bank_id = "nubank"
 
     def can_parse(self, filename: str, content: bytes) -> float:
         if not filename.lower().endswith(".csv"):

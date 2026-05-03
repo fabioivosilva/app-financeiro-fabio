@@ -19,6 +19,7 @@ def _decode(content: bytes) -> str:
 
 
 class InterCSVParser(BaseParser):
+    bank_id = "inter"
 
     def can_parse(self, filename: str, content: bytes) -> float:
         fname = filename.lower()

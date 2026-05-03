@@ -37,6 +37,7 @@ def _has_c6_headers(first_line: str) -> bool:
 
 
 class C6CSVParser(BaseParser):
+    bank_id = "c6"
 
     def can_parse(self, filename: str, content: bytes) -> float:
         if not filename.lower().endswith(".csv"):
