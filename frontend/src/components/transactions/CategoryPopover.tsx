@@ -41,43 +41,38 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
   }, [onClose])
 
   return (
-    <div ref={popoverRef} style={popoverStyle}>
-      {/* Busca */}
-      <div style={searchStyle}>
-        <Icon name="search" size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+    <div ref={popoverRef} className="cat-popover">
+      <div className="cat-popover-search">
+        <Icon name="search" size={14} className="t-muted" />
         <input
           autoFocus
           placeholder="Buscar categoria..."
           value={busca}
           onChange={e => setBusca(e.target.value)}
-          style={inputStyle}
         />
       </div>
 
-      {/* Grid de categorias */}
-      <div className="inbox-cat-grid" style={{ padding: '6px 8px' }}>
+      <div className="cat-popover-grid">
         {filtered.map(cat => (
           <button
             key={cat.id}
-            className={`inbox-cat ${cat.id === currentId ? 'inbox-cat-suggest' : ''}`}
+            className={`cat-popover-item ${cat.id === currentId ? 'cat-popover-item-on' : ''}`}
             onClick={() => { onSelect(cat.id); onClose() }}
           >
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color ?? '#888', flexShrink: 0, display: 'inline-block' }} />
-            <span style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.name}</span>
+            <span className="cat-popover-dot" style={{ background: cat.color ?? '#888' }} />
+            <span>{cat.name}</span>
           </button>
         ))}
         {filtered.length === 0 && (
-          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '12px 0', color: 'var(--text-muted)', fontSize: 12 }}>
+          <div className="cat-popover-empty">
             Nenhuma categoria encontrada
           </div>
         )}
       </div>
 
-      {/* Criar regra automática */}
-      <div style={{ padding: '8px', borderTop: '1px solid rgba(192,132,252,0.08)' }}>
+      <div className="cat-popover-foot">
         <button
           className="btn-ghost"
-          style={{ width: '100%', justifyContent: 'center', fontSize: 11 }}
           onClick={() => { onCreateRule(); onClose() }}
         >
           <Icon name="rule" size={14} />
@@ -86,36 +81,4 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
       </div>
     </div>
   )
-}
-
-const popoverStyle: React.CSSProperties = {
-  position: 'absolute',
-  zIndex: 50,
-  top: 'calc(100% + 6px)',
-  left: 0,
-  minWidth: 280,
-  background: 'rgba(28, 20, 50, 0.98)',
-  backdropFilter: 'blur(40px)',
-  border: '1px solid rgba(192, 132, 252, 0.18)',
-  borderRadius: 10,
-  boxShadow: '0 12px 32px -8px rgba(0,0,0,0.5)',
-  animation: 'ddOpen 0.12s ease-out',
-}
-
-const searchStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  padding: '8px 10px',
-  borderBottom: '1px solid rgba(192,132,252,0.08)',
-}
-
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  background: 'transparent',
-  border: 'none',
-  outline: 'none',
-  color: 'var(--text)',
-  font: 'inherit',
-  fontSize: 13,
 }
