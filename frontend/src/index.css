@@ -841,9 +841,10 @@ body::before {
   transition: background 0.15s, border-color 0.15s;
 }
 .cfg-grupo-on { background: rgba(130,10,209,0.18); border-color: var(--primary-2); }
-.cfg-cat-group { display: flex; flex-direction: column; gap: 12px; }
-.cfg-cat-group-head { display: flex; align-items: center; gap: 10px; padding: 0 4px; }
-.cfg-cat-group-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; }
+.cfg-cat-group { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.cfg-cat-group + .cfg-cat-group { margin-top: 24px; }
+.cfg-cat-group-head { display: flex; align-items: center; gap: 10px; padding: 4px 4px 8px; border-bottom: 1px solid rgba(192,132,252,0.07); }
+.cfg-cat-group-icon { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
 .cfg-cat-group-title { font-size: 14px; font-weight: 600; flex: 1; }
 .cfg-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
 .cfg-cat-card {
