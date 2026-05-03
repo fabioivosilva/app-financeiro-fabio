@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : T2.1 + T2.2 concluídos. Regras com vínculo cartão→pessoa funcional.
+STATUS     : T2 completo. Iniciando T3.1 — Tela de Metas.
 BRANCH     : develop
-PRÓXIMA    : T3.1 — Tela de Metas [M]
-CLAIMS     : nenhum
+PRÓXIMA    : T3.2 — Aporte Manual [M]
+CLAIMS     : 🔒 [FABIO] T3.1 — Tela de Metas (cards + progresso + new/delete)
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 QUANDO LER MAIS:
@@ -109,7 +109,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 3 — Metas & Cofrinho *(depende T0+T2)*
 
-- [ ] `[M]` **T3.1 — Tela de Metas** · *qualquer um*
+- [ ] `[M]` 🔒 **T3.1 — Tela de Metas** · *Fabio*
   Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria
   **Ref visual:** `07_UX_REFERENCE.md` → seção "Metas"
 
