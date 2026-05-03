@@ -13,8 +13,9 @@ export interface Person {
 export interface Card {
   id: number
   name: string
+  last4?: string
   person_id: number
-  limit: number
+  limit_value?: number
 }
 
 export interface Transaction {

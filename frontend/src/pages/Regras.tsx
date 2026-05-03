@@ -7,9 +7,11 @@ import { CategoryChip } from '../components/ui/Badge'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import { useRegras } from '../hooks/useRegras'
+import { useCards } from '../hooks/useCards'
 
 export function Regras() {
   const { rules, categories, persons, loading, error, refetch, deleteRule } = useRegras()
+  const { cards, updateCard } = useCards()
   const [busca, setBusca] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
@@ -28,13 +30,47 @@ export function Regras() {
     <div className="page">
       <PageHeader
         title="Regras"
-        subtitle={`${rules.length} regras de categorização automática`}
+        subtitle={`${rules.length} regras · ${cards.length} cartões vinculados`}
         right={
           <Button variant="primary" iconLeft="add" onClick={() => setShowNew(true)}>
             Nova Regra
           </Button>
         }
       />
+
+      {/* Vínculo cartão → pessoa */}
+      {cards.length > 0 && (
+        <Glass>
+          <div className="section-header" style={{ marginBottom: 12 }}>
+            <div className="section-title">Vínculo de Cartões</div>
+            <span className="t-xs t-muted">Cartão → Titular</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {cards.map(card => (
+                <div key={card.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+                    <Icon name="credit_card" size={16} style={{ color: 'var(--primary-2)' }} />
+                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}>
+                      {card.name}{card.last4 && <span style={{ color: 'var(--text-muted)' }}> ···· {card.last4}</span>}
+                    </span>
+                  </div>
+                  <Icon name="arrow_forward" size={14} style={{ color: 'var(--text-muted-2)' }} />
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {persons.map(p => (
+                      <button
+                        key={p.id}
+                        className={`inbox-person ${card.person_id === p.id ? 'inbox-cat-suggest' : ''}`}
+                        onClick={() => updateCard(card.id, p.id)}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+            ))}
+          </div>
+        </Glass>
+      )}
 
       {/* Busca */}
       <Glass padded={false}>
