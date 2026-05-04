@@ -607,6 +607,19 @@ body::before {
   display: flex; flex-direction: column; gap: 2px;
   animation: ddOpen 0.12s ease-out;
 }
+.filter-dd-search {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 3px; padding: 7px 9px;
+  border-radius: 7px;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(192,132,252,0.08);
+}
+.filter-dd-search input {
+  min-width: 0; flex: 1;
+  background: transparent; border: 0; outline: 0;
+  color: var(--text); font: inherit; font-size: 12px;
+}
+.filter-dd-search input::placeholder { color: var(--text-muted-2); }
 .filter-dd-opt {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px; border-radius: 6px;
@@ -617,6 +630,10 @@ body::before {
 .filter-dd-opt span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .filter-dd-opt:hover { background: rgba(192, 132, 252, 0.08); }
 .filter-dd-opt-on { color: #C084FC; background: rgba(130, 10, 209, 0.12); }
+.filter-dd-empty {
+  padding: 10px; color: var(--text-muted);
+  font-size: 12px; text-align: center;
+}
 .day-group { border-bottom: 1px solid rgba(192,132,252,0.06); }
 .day-group:last-child { border-bottom: none; }
 .day-header {

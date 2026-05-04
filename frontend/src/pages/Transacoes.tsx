@@ -46,10 +46,16 @@ export function Transacoes() {
     tab === 'inbox' ? { status: 'pendente' } : filters
   )
 
+  const categoryFilterIds = useMemo(
+    () => filtroCat ? collectCategoryTreeIds(filtroCat, categories) : new Set<number>(),
+    [filtroCat, categories],
+  )
+  const parentCategoryOptions = useMemo(() => buildParentCategoryOptions(categories), [categories])
+
   const filtered = useMemo(() => {
     let list = [...transactions]
     if (tab === 'pendentes') list = list.filter(isTransactionPending)
-    if (filtroCat) list = list.filter(t => t.category_id === filtroCat)
+    if (filtroCat) list = list.filter(t => t.category_id && categoryFilterIds.has(t.category_id))
     if (filtroPessoa) list = list.filter(t => t.person_id === filtroPessoa)
     if (filtroValor === 'entradas') list = list.filter(t => t.amount > 0)
     if (filtroValor === 'saidas') list = list.filter(t => t.amount < 0)
@@ -80,7 +86,7 @@ export function Transacoes() {
     if (ordem === 'valor-desc') list.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
     if (ordem === 'valor-asc') list.sort((a, b) => Math.abs(a.amount) - Math.abs(b.amount))
     return list
-  }, [transactions, tab, filtroCat, filtroPessoa, filtroValor, filtroData, filtroStatus, busca, ordem])
+  }, [transactions, tab, filtroCat, categoryFilterIds, filtroPessoa, filtroValor, filtroData, filtroStatus, busca, ordem])
 
   const grupos = useMemo(() => (
     ordem.startsWith('data') ? groupByDate(filtered) : [['__flat', filtered] as [string, typeof filtered]]
@@ -219,8 +225,10 @@ export function Transacoes() {
               icon="category"
               label="Categoria"
               value={filtroCat ?? null}
-              options={categories.map(cat => ({ v: cat.id, l: cat.name }))}
+              options={parentCategoryOptions}
               onChange={value => setFiltroCat(value ?? undefined)}
+              searchable
+              searchPlaceholder="Buscar categoria..."
             />
             <FilterDropdown<number | null>
               icon="person"
@@ -300,6 +308,7 @@ export function Transacoes() {
 interface FilterOption<T> {
   v: NonNullable<T>
   l: string
+  searchText?: string
 }
 
 interface FilterDropdownProps<T> {
@@ -309,12 +318,29 @@ interface FilterDropdownProps<T> {
   options: FilterOption<T>[]
   onChange: (value: T) => void
   dismissable?: boolean
+  searchable?: boolean
+  searchPlaceholder?: string
 }
 
-function FilterDropdown<T>({ icon, label, value, options, onChange, dismissable = true }: FilterDropdownProps<T>) {
+function FilterDropdown<T>({
+  icon,
+  label,
+  value,
+  options,
+  onChange,
+  dismissable = true,
+  searchable = false,
+  searchPlaceholder = 'Buscar...',
+}: FilterDropdownProps<T>) {
   const [open, setOpen] = useState(false)
+  const [menuSearch, setMenuSearch] = useState('')
   const ref = useRef<HTMLDivElement>(null)
   const selected = options.find(option => option.v === value)
+  const visibleOptions = useMemo(() => {
+    const query = normalizeText(menuSearch.trim())
+    if (!query) return options
+    return options.filter(option => normalizeText(`${option.l} ${option.searchText ?? ''}`).includes(query))
+  }, [menuSearch, options])
 
   useEffect(() => {
     if (!open) return
@@ -323,6 +349,10 @@ function FilterDropdown<T>({ icon, label, value, options, onChange, dismissable 
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) setMenuSearch('')
   }, [open])
 
   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -344,20 +374,70 @@ function FilterDropdown<T>({ icon, label, value, options, onChange, dismissable 
       </button>
       {open && (
         <div className="filter-dd-menu">
-          {options.map(option => (
+          {searchable && (
+            <div className="filter-dd-search">
+              <Icon name="search" size={14} className="t-muted" />
+              <input
+                value={menuSearch}
+                onChange={event => setMenuSearch(event.target.value)}
+                placeholder={searchPlaceholder}
+                autoFocus
+              />
+            </div>
+          )}
+          {visibleOptions.map(option => (
             <button
               key={String(option.v)}
               className={`filter-dd-opt ${option.v === value ? 'filter-dd-opt-on' : ''}`}
-              onClick={() => { onChange(option.v as T); setOpen(false) }}
+              onClick={() => { onChange(option.v as T); setOpen(false); setMenuSearch('') }}
             >
               {option.v === value && <Icon name="check" size={14} />}
               <span style={{ marginLeft: option.v === value ? 0 : 22 }}>{option.l}</span>
             </button>
           ))}
+          {visibleOptions.length === 0 && (
+            <div className="filter-dd-empty">Nenhuma categoria encontrada</div>
+          )}
         </div>
       )}
     </div>
   )
+}
+
+function buildParentCategoryOptions(categories: Category[]): FilterOption<number | null>[] {
+  const childrenByParent = new Map<number, Category[]>()
+  for (const category of categories) {
+    if (!category.parent_id) continue
+    const children = childrenByParent.get(category.parent_id) ?? []
+    children.push(category)
+    childrenByParent.set(category.parent_id, children)
+  }
+
+  return categories
+    .filter(category => !category.parent_id)
+    .map(category => {
+      const children = childrenByParent.get(category.id) ?? []
+      return {
+        v: category.id,
+        l: category.name,
+        searchText: children.map(child => child.name).join(' '),
+      }
+    })
+}
+
+function collectCategoryTreeIds(rootId: number, categories: Category[]): Set<number> {
+  const ids = new Set<number>([rootId])
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const category of categories) {
+      if (category.parent_id && ids.has(category.parent_id) && !ids.has(category.id)) {
+        ids.add(category.id)
+        changed = true
+      }
+    }
+  }
+  return ids
 }
 
 interface PendingInboxProps {
