@@ -326,47 +326,71 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
           </div>
         ) : (
           <div className="prov-list">
-            {[...m.items].sort((a: any, b: any) => a.day - b.day).map((p: any) => {
-              const cat = categories.find(c => c.id === p.category_id)
-              const person = persons.find(pe => pe.id === p.person_id)
-              const done = p.day <= today && sel === 0
-              return (
-                <div key={p.id + sel} className={`prov-row${done ? ' prov-row-done' : ''}`}>
-                  <div className="prov-day">
-                    <div className="prov-day-num">{p.day}</div>
-                    <div className="prov-day-mes">{m.label.split('/')[0]}</div>
-                  </div>
-                  <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888', position: 'relative' }}>
-                    <Icon name={(cat as any)?.icon ?? 'event'} size={18} />
-                    {(p.type === 'parcela' || p.virtual) && (
-                      <span style={{ position: 'absolute', bottom: -3, right: -3, background: 'var(--glass-bg, #1e1a2e)', borderRadius: 4, width: 14, height: 14, display: 'grid', placeItems: 'center' }}>
-                        <Icon name="credit_card" size={10} style={{ color: '#64748B' }} />
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="t-sm">{p.description}{p.parcelaLabel ? ` (${p.parcelaLabel})` : ''}</div>
-                    <div className="prov-row-meta">
-                      {cat && <CategoryChip label={cat.name} color={cat.color} />}
-                      {person && <span className="t-xs t-muted">{person.name}</span>}
-                      {p.virtual && <span className="t-xs t-muted">Cartão</span>}
-                      <span className="t-xs t-muted">{p.type === 'mensal' ? 'Mensal' : 'Parcela'}</span>
+            {(() => {
+              const sorted = [...m.items].sort((a: any, b: any) => a.day - b.day)
+              const receitas = sorted.filter((p: any) => p.amount > 0)
+              const despesas = sorted.filter((p: any) => p.amount <= 0)
+              const renderRow = (p: any) => {
+                const cat = categories.find(c => c.id === p.category_id)
+                const person = persons.find(pe => pe.id === p.person_id)
+                const done = p.day <= today && sel === 0
+                const borderColor = p.amount > 0 ? '#22C55E' : '#F472B6'
+                return (
+                  <div key={p.id + sel} className={`prov-row${done ? ' prov-row-done' : ''}`} style={{ borderLeft: `3px solid ${borderColor}20` }}>
+                    <div className="prov-day">
+                      <div className="prov-day-num">{p.day}</div>
+                      <div className="prov-day-mes">{m.label.split('/')[0]}</div>
+                    </div>
+                    <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888', position: 'relative' }}>
+                      <Icon name={(cat as any)?.icon ?? 'event'} size={18} />
+                      {(p.type === 'parcela' || p.virtual) && (
+                        <span style={{ position: 'absolute', bottom: -3, right: -3, background: 'var(--glass-bg, #1e1a2e)', borderRadius: 4, width: 14, height: 14, display: 'grid', placeItems: 'center' }}>
+                          <Icon name="credit_card" size={10} style={{ color: '#64748B' }} />
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="t-sm">{p.description}{p.parcelaLabel ? ` (${p.parcelaLabel})` : ''}</div>
+                      <div className="prov-row-meta">
+                        {cat && <CategoryChip label={cat.name} color={cat.color} />}
+                        {person && <span className="t-xs t-muted">{person.name}</span>}
+                        {p.virtual && <span className="t-xs t-muted">Cartão</span>}
+                        <span className="t-xs t-muted">{p.type === 'mensal' ? 'Mensal' : 'Parcela'}</span>
+                      </div>
+                    </div>
+                    <div className={`prov-val${p.amount > 0 ? ' tx-val-pos' : ''}`}>{brl(p.amount)}</div>
+                    <div className="prov-status">
+                      {done
+                        ? <span className="prov-tag prov-tag-done"><Icon name="check_circle" size={14} /> Realizada</span>
+                        : p.virtual
+                          ? <span className="prov-tag" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748B' }}>Auto</span>
+                          : <button className="btn-ghost btn-ghost-sm" onClick={() => onEdit(p as Provision)}><Icon name="edit" size={14} /> Editar</button>
+                      }
                     </div>
                   </div>
-                  <div className={`prov-val${p.amount > 0 ? ' tx-val-pos' : ''}`}>{brl(p.amount)}</div>
-                  <div className="prov-status">
-                    {done
-                      ? <span className="prov-tag prov-tag-done"><Icon name="check_circle" size={14} /> Realizada</span>
-                      : !p.virtual && (
-                        <button className="btn-ghost btn-ghost-sm" onClick={() => onEdit(p as Provision)}>
-                          <Icon name="edit" size={14} /> Editar
-                        </button>
-                      )
-                    }
-                  </div>
-                </div>
+                )
+              }
+              return (
+                <>
+                  {receitas.length > 0 && (
+                    <>
+                      <div className="prov-group-header" style={{ color: '#22C55E' }}>
+                        <Icon name="arrow_upward" size={12} /> Receitas
+                      </div>
+                      {receitas.map(renderRow)}
+                    </>
+                  )}
+                  {despesas.length > 0 && (
+                    <>
+                      <div className="prov-group-header" style={{ color: '#F472B6' }}>
+                        <Icon name="arrow_downward" size={12} /> Despesas
+                      </div>
+                      {despesas.map(renderRow)}
+                    </>
+                  )}
+                </>
               )
-            })}
+            })()}
           </div>
         )}
       </Glass>
@@ -518,6 +542,8 @@ function ProvisaoModal({ categories, persons, rules, editing, onClose, onSaved }
   const [personId, setPersonId] = useState<number | null>(editing?.person_id ?? null)
   const [parcelas, setParcelas] = useState(editing?.installment_total ?? 12)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Filtra categorias pelo tipo selecionado
   const catsFiltradas = categories.filter(c => {
@@ -542,6 +568,16 @@ function ProvisaoModal({ categories, persons, rules, editing, onClose, onSaved }
   const amount = tipo === 'receita'
     ? Math.abs(parseFloat(valor.replace(',', '.')) || 0)
     : -(Math.abs(parseFloat(valor.replace(',', '.')) || 0))
+
+  async function handleDelete() {
+    if (!editing) return
+    setDeleting(true)
+    try {
+      await api.delete(`/provisions/${editing.id}`)
+      toast(`Provisão "${editing.description}" removida`, undefined, 'info')
+      onSaved()
+    } finally { setDeleting(false) }
+  }
 
   async function handleSave() {
     if (!desc || !valor) return
@@ -574,12 +610,27 @@ function ProvisaoModal({ categories, persons, rules, editing, onClose, onSaved }
       onClose={onClose}
       title={isEdit ? 'Editar provisão' : 'Nova provisão'}
       footer={
-        <>
-          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
-          <Button variant="primary" onClick={handleSave} disabled={!desc || !valor || saving}>
-            {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Criar provisão'}
-          </Button>
-        </>
+        confirmDelete ? (
+          <>
+            <span className="t-sm t-muted" style={{ marginRight: 'auto' }}>Excluir esta provisão?</span>
+            <Button variant="ghost" onClick={() => setConfirmDelete(false)} disabled={deleting}>Não, manter</Button>
+            <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+              <Icon name="delete_outline" size={15} /> {deleting ? 'Excluindo...' : 'Sim, excluir'}
+            </Button>
+          </>
+        ) : (
+          <>
+            {isEdit && (
+              <Button variant="ghost" onClick={() => setConfirmDelete(true)} style={{ color: '#F472B6', marginRight: 'auto' }}>
+                <Icon name="delete_outline" size={15} /> Excluir
+              </Button>
+            )}
+            <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+            <Button variant="primary" onClick={handleSave} disabled={!desc || !valor || saving}>
+              {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Criar provisão'}
+            </Button>
+          </>
+        )
       }
     >
       <div className="cfg-field">
