@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
@@ -109,6 +109,10 @@ export function Provisoes() {
   const [togglingActive, setTogglingActive] = useState<number | null>(null)
   const [importing, setImporting] = useState(false)
   const [reinforcing, setReinforcing] = useState(false)
+
+  useEffect(() => {
+    api.post('/provisions/reinforce-auto', {}).then(refetch).catch(() => {})
+  }, [])
 
   async function handleReinforceAuto() {
     setReinforcing(true)
@@ -237,6 +241,7 @@ export function Provisoes() {
           meses={meses} sel={selMes} onSel={setSelMes}
           categories={categories} persons={persons}
           importing={importing} onImport={handleImportInstallments}
+          reinforcing={reinforcing} onReinforce={handleReinforceAuto}
           onAdd={() => setShowModal(true)} onEdit={openEdit}
         />
       )}
@@ -268,10 +273,10 @@ export function Provisoes() {
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
-function TimelineView({ meses, sel, onSel, categories, persons, importing, onImport, onAdd, onEdit }: {
+function TimelineView({ meses, sel, onSel, categories, persons, importing, reinforcing, onImport, onReinforce, onAdd, onEdit }: {
   meses: any[]; sel: number; onSel: (i: number) => void
-  categories: Category[]; persons: Person[]; importing: boolean; onImport: () => void
-  onAdd: () => void; onEdit: (p: Provision) => void
+  categories: Category[]; persons: Person[]; importing: boolean; reinforcing: boolean
+  onImport: () => void; onReinforce: () => void; onAdd: () => void; onEdit: (p: Provision) => void
 }) {
   const m = meses[sel]
   const today = new Date().getDate()
@@ -306,6 +311,10 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
           hint={`${m?.items.length ?? 0} ocorrências · saldo ${m?.total >= 0 ? '+' : ''}${brl(m?.total ?? 0)}`}
           right={
             <div className="section-actions">
+              <button className="btn-ghost" onClick={onReinforce} disabled={reinforcing} title="Re-calcula provisões de todas as transações categorizadas">
+                <Icon name={reinforcing ? 'hourglass_empty' : 'autorenew'} size={14} />
+                {reinforcing ? 'Sincronizando...' : 'Sincronizar'}
+              </button>
               <button className="btn-ghost" onClick={onImport} disabled={importing}>
                 <Icon name={importing ? 'hourglass_empty' : 'credit_card'} size={14} />
                 {importing ? 'Importando...' : 'Importar parcelas pendentes'}
