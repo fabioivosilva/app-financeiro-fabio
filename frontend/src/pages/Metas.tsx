@@ -405,17 +405,33 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
         </div>
       </div>
 
-      <div className="grid-2">
-        <div className="cfg-field">
-          <label className="cfg-label">Prazo</label>
-          <input className="cfg-input" type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
-        </div>
-        <div className="cfg-field">
-          <label className="cfg-label">Categoria vinculada</label>
-          <select className="cfg-input" value={categoryId ?? ''} onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : undefined)}>
-            <option value="">Sem categoria</option>
-            {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-          </select>
+      <div className="cfg-field">
+        <label className="cfg-label">Prazo</label>
+        <input className="cfg-input" type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+      </div>
+
+      <div className="cfg-field">
+        <label className="cfg-label">Categoria vinculada</label>
+        <div className="modal-cat-grid">
+          <button
+            type="button"
+            className={`inbox-cat${!categoryId ? ' inbox-cat-suggest' : ''}`}
+            onClick={() => setCategoryId(undefined)}
+          >
+            <Icon name="label" size={16} />
+            <span>Sem categoria</span>
+          </button>
+          {categories.filter(c => !(c as any).parent_id).map(c => (
+            <button
+              key={c.id}
+              type="button"
+              className={`inbox-cat${categoryId === c.id ? ' inbox-cat-suggest' : ''}`}
+              onClick={() => setCategoryId(categoryId === c.id ? undefined : c.id)}
+            >
+              <Icon name={(c as any).icon ?? 'label'} size={16} style={{ color: c.color ?? '#888' }} />
+              <span>{c.name}</span>
+            </button>
+          ))}
         </div>
       </div>
 
