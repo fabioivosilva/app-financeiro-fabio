@@ -387,3 +387,11 @@ def import_history(db: Session = Depends(get_db)):
     pendentes = db.query(Transaction).filter(Transaction.status == "pendente").count()
     confirmadas = db.query(Transaction).filter(Transaction.status == "confirmado").count()
     return {"total": total, "pendentes": pendentes, "confirmadas": confirmadas}
+
+
+@router.delete("/history", status_code=200)
+def clear_import_history(db: Session = Depends(get_db)):
+    """Remove o histórico de fingerprints para permitir reimportar os mesmos arquivos."""
+    deleted = db.query(ImportRecord).delete()
+    db.commit()
+    return {"deleted": deleted}

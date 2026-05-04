@@ -119,6 +119,14 @@ def update_provision(id: int, data: ProvisionIn, db: Session = Depends(get_db)):
     return p
 
 
+@router.delete("/", status_code=200)
+def clear_all_provisions(db: Session = Depends(get_db)):
+    """Remove todas as provisões manuais. Provisões virtuais (do motor) somem junto."""
+    deleted = db.query(Provision).delete()
+    db.commit()
+    return {"deleted": deleted}
+
+
 @router.delete("/{id}", status_code=204)
 def delete_provision(id: int, db: Session = Depends(get_db)):
     p = db.query(Provision).get(id)

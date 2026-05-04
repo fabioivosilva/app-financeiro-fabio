@@ -757,11 +757,13 @@ function ZonaPerigoSection() {
     setClearing(true)
     try {
       await api.delete('/transactions/')
+      await api.delete('/provisions/')
+      await api.delete('/imports/history')
       setConfirmando(false)
       setTexto('')
-      toast('Transações apagadas', 'Banco de dados limpo', 'info')
+      toast('Base limpa', 'Transações, provisões e histórico de importação removidos', 'info')
     } catch {
-      toast('Erro ao apagar transações', undefined, 'error')
+      toast('Erro ao limpar base', undefined, 'error')
     } finally {
       setClearing(false)
     }
@@ -778,10 +780,10 @@ function ZonaPerigoSection() {
       <div className="cfg-danger-card">
         <div className="cfg-danger-icon"><Icon name="delete_forever" size={24} /></div>
         <div style={{ flex: 1 }}>
-          <div className="cfg-danger-h">Limpar todas as transações e faturas</div>
+          <div className="cfg-danger-h">Limpar base e histórico de importação</div>
           <div className="cfg-danger-p">
-            Remove permanentemente todos os extratos importados, faturas, categorizações e vínculos.{' '}
-            <strong>Pessoas, cartões, categorias e regras serão preservados.</strong>{' '}
+            Remove permanentemente todas as transações, provisões manuais e o histórico de arquivos importados (permitindo reimportar os mesmos arquivos).{' '}
+            <strong>Pessoas, cartões, categorias, regras e metas serão preservados.</strong>{' '}
             Esta ação não pode ser desfeita.
           </div>
           {!confirmando ? (
