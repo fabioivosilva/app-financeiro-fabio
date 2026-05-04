@@ -9,7 +9,7 @@ STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, BUG.ICON1, T0.4, T3.2 f
              T3.2: aporte manual em metas (modal + POST /goals/{id}/deposit).
 BRANCH     : develop
 PRÓXIMA    : T1.3 — Importação Assistida [M] (T_SYNC.1 para o fim)
-CLAIMS     : nenhum
+CLAIMS     : CODEX em T1.3
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -58,7 +58,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*Nenhum claim ativo no momento.*
+*Ativo: 🔒 [CODEX] T1.3 — Importação Assistida.*
 
 ---
 
@@ -151,7 +151,7 @@ Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 
 ### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
 
-- [ ] `[M]` **T1.3 — Importação Assistida** · *qualquer um · depende T1.2*
+- [ ] `[M]` **T1.3 — Importação Assistida** · *🔒 [CODEX] · depende T1.2*
   Pasta padrão configurável · lista arquivos não importados · 1 clique para importar
 
 ---
