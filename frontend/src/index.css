@@ -669,6 +669,23 @@ body::before {
 .cat-popover-foot .btn-ghost {
   width: 100%; justify-content: center; font-size: 11px;
 }
+.regras-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid rgba(192,132,252,0.08);
+}
+.regras-search input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--text); font: inherit; font-size: 13px;
+}
+.regras-search input::placeholder { color: var(--text-muted-2); }
+.regras-group-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; background: rgba(192,132,252,0.04);
+  border-top: 1px solid rgba(192,132,252,0.07);
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.regras-group-header .t-xs { text-transform: none; font-weight: 400; letter-spacing: 0; margin-left: auto; }
 .cat-create-form {
   padding: 10px 12px; border-top: 1px solid rgba(192,132,252,0.1);
   background: rgba(130,10,209,0.05); display: flex; flex-direction: column; gap: 7px;

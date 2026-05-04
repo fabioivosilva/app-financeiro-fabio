@@ -15,6 +15,7 @@ export function Regras() {
   const [deleting, setDeleting] = useState<number | null>(null)
   const [applying, setApplying] = useState(false)
   const [applyResult, setApplyResult] = useState<number | null>(null)
+  const [busca, setBusca] = useState('')
 
   async function handleDelete(id: number) {
     setDeleting(id)
@@ -73,49 +74,96 @@ export function Regras() {
 
       {!loading && !error && (
         <Glass padded={false}>
-          <div className="lista-prov">
-            <div className="lista-prov-head lista-regras-grid">
-              <div>Quando descrição contém</div>
-              <div>Categorizar como</div>
-              <div>Aplicada em</div>
-              <div />
-            </div>
-
-            {rules.length === 0 && (
-              <div className="empty-state-mini">
-                <Icon name="rule" size={40} style={{ color: 'var(--text-muted-2)' }} />
-                <div style={{ fontSize: 14, fontWeight: 500 }}>Nenhuma regra encontrada</div>
-                <div className="t-sm t-muted">Crie uma regra para categorizar transações automaticamente</div>
-              </div>
+          {/* Busca */}
+          <div className="regras-search">
+            <Icon name="search" size={15} className="t-muted" />
+            <input
+              placeholder="Buscar por keyword ou categoria..."
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+            />
+            {busca && (
+              <button onClick={() => setBusca('')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--text-muted)' }}>
+                <Icon name="close" size={14} />
+              </button>
             )}
-
-            {rules.map(rule => {
-              const cat = categories.find(c => c.id === rule.category_id)
-              const person = persons.find(p => p.id === rule.person_id)
-              return (
-                <div key={rule.id} className="lista-prov-row lista-regras-grid">
-                  <div className="t-sm" style={{ fontFamily: 'ui-monospace, monospace' }}>"{rule.keyword}"</div>
-                  <div>
-                    {cat
-                      ? <CategoryChip label={cat.name} color={cat.color} />
-                      : <CategoryChip label="" empty />
-                    }
-                  </div>
-                  <div className="t-xs t-muted">{person?.name ?? 'Todas'}</div>
-                  <div>
-                    <button
-                      className="btn-icon"
-                      onClick={() => handleDelete(rule.id)}
-                      disabled={deleting === rule.id}
-                      title="Excluir regra"
-                    >
-                      <Icon name={deleting === rule.id ? 'hourglass_empty' : 'more_vert'} size={16} />
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
+            <span className="t-xs t-muted" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+              {rules.length} regra{rules.length !== 1 ? 's' : ''}
+            </span>
           </div>
+
+          {rules.length === 0 ? (
+            <div className="empty-state-mini">
+              <Icon name="rule" size={40} style={{ color: 'var(--text-muted-2)' }} />
+              <div style={{ fontSize: 14, fontWeight: 500 }}>Nenhuma regra encontrada</div>
+              <div className="t-sm t-muted">Crie uma regra para categorizar transações automaticamente</div>
+            </div>
+          ) : (() => {
+            const q = busca.toLowerCase()
+            const filtered = busca
+              ? rules.filter(r => {
+                  const cat = categories.find(c => c.id === r.category_id)
+                  return r.keyword.toLowerCase().includes(q) || cat?.name.toLowerCase().includes(q)
+                })
+              : rules
+
+            if (filtered.length === 0) return (
+              <div className="empty-state-mini">
+                <Icon name="search_off" size={32} style={{ color: 'var(--text-muted-2)' }} />
+                <div className="t-sm t-muted">Nenhuma regra para "{busca}"</div>
+              </div>
+            )
+
+            // Group by category
+            const groups: { catId: number | null; catName: string; color?: string; rules: typeof rules }[] = []
+            const seen = new Set<number | null>()
+            filtered.forEach(r => {
+              const key = r.category_id ?? null
+              if (!seen.has(key)) {
+                seen.add(key)
+                const cat = categories.find(c => c.id === key)
+                groups.push({ catId: key, catName: cat?.name ?? 'Sem categoria', color: cat?.color, rules: [] })
+              }
+              groups.find(g => g.catId === key)!.rules.push(r)
+            })
+            groups.sort((a, b) => a.catName.localeCompare(b.catName))
+
+            return (
+              <div className="lista-prov">
+                <div className="lista-prov-head lista-regras-grid">
+                  <div>Keyword</div>
+                  <div>Categoria</div>
+                  <div>Pessoa</div>
+                  <div />
+                </div>
+                {groups.map(g => (
+                  <div key={g.catId ?? 'null'}>
+                    <div className="regras-group-header">
+                      <span className="cat-popover-dot" style={{ background: g.color ?? '#666' }} />
+                      <span>{g.catName}</span>
+                      <span className="t-xs t-muted">{g.rules.length} regra{g.rules.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    {g.rules.map(rule => {
+                      const cat = categories.find(c => c.id === rule.category_id)
+                      const person = persons.find(p => p.id === rule.person_id)
+                      return (
+                        <div key={rule.id} className="lista-prov-row lista-regras-grid">
+                          <div className="t-sm" style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text)' }}>"{rule.keyword}"</div>
+                          <div>{cat ? <CategoryChip label={cat.name} color={cat.color} /> : <CategoryChip label="" empty />}</div>
+                          <div className="t-xs t-muted">{person?.name ?? 'Todas'}</div>
+                          <div>
+                            <button className="btn-icon" onClick={() => handleDelete(rule.id)} disabled={deleting === rule.id} title="Excluir">
+                              <Icon name={deleting === rule.id ? 'hourglass_empty' : 'delete_outline'} size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </Glass>
       )}
 
