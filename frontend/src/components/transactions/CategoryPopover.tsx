@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
 import { api } from '../../api/client'
+import { toast } from '../ui/Toast'
 import type { Category } from '../../api/types'
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
   onClose: () => void
   anchorRef: React.RefObject<HTMLElement>
   onCategoryCreated?: (cat: Category) => void
+  txKeyword?: string  // keyword da transação atual para criar regra automática
 }
 
-export function CategoryPopover({ categories, currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated }: Props) {
+export function CategoryPopover({ categories, currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
   const [busca, setBusca] = useState('')
   const popoverRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
@@ -73,17 +75,26 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
     if (!newName.trim()) return
     setSaving(true)
     try {
+      // 1. Cria categoria
       const created = await api.post<Category>('/categories/', {
         name: newName.trim(),
         parent_id: newParentId ?? null,
-        color: null,
-        icon: null,
-        exclude_totals: false,
+        color: null, icon: null, exclude_totals: false,
       })
-      await api.post('/rules/apply', {})
+      // 2. Cria regra ligando keyword da transação à nova categoria
+      const keyword = txKeyword ?? newName.trim().split(/\s+/).slice(0, 2).join(' ')
+      await api.post('/rules/', {
+        keyword, category_id: created.id, person_id: null, origin: null, goal_id: null,
+      })
+      // 3. Aplica em massa em todas as transações existentes
+      const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
       onCategoryCreated?.(created)
+      // 4. Seleciona na transação atual
       onSelect(created.id)
       onClose()
+      // 5. Navega para Config para o usuário ver categoria criada
+      const sub = updated > 0 ? `+${updated} transação${updated > 1 ? 'ões' : ''} categorizadas automaticamente` : undefined
+      toast(`Categoria "${created.name}" criada`, sub)
       navigate('/config')
     } finally {
       setSaving(false)
