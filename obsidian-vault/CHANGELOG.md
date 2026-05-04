@@ -4,6 +4,14 @@
 
 
 
+## Sessão 2026-05-04 (continuação)
+
+- ✅ **BUG.D1 — Dashboard filtra pelo ciclo 27→26** · *Claude Code · baixa em 2026-05-04*
+  Dashboard.tsx chamava `useTransacoes({})` sem filtro de data, exibindo todas as transações do histórico.
+  Fix: importar `getCycleInfo` de `CycleProgress.tsx` e filtrar `transactions` para o ciclo atual antes
+  de qualquer cálculo (receitas, gastos, top gastos, pendentes). `provisoesRestantes` conectado à API
+  real `/provisions/` via `useEffect`. Apenas `frontend/src/pages/Dashboard.tsx` alterado; build ok.
+
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
 - ✅ **CFG.SUB.COLOR — Subcategorias herdam cor do pai automaticamente** · *Claude.ai · baixa em 2026-05-04*
   CategoryModal: seletor de cor escondido em subcategorias (mostra hint "Cor herdada da categoria pai" + dot).

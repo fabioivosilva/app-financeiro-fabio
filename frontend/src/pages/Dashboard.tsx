@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
-import { CycleProgress } from '../components/layout/CycleProgress'
+import { CycleProgress, getCycleInfo } from '../components/layout/CycleProgress'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
 import { useTransacoes } from '../hooks/useTransacoes'
 import { useMetas } from '../hooks/useMetas'
+import { api } from '../api/client'
 
 const META_COLORS = ['#820AD1', '#22C55E', '#F59E0B', '#3B82F6', '#EC4899', '#14B8A6']
 const META_ICONS = ['savings', 'home', 'directions_car', 'flight', 'laptop', 'beach_access']
@@ -25,8 +26,19 @@ export function Dashboard() {
   const { transactions = [], categories = [] } = useTransacoes({})
   const { goals } = useMetas()
 
+  const { inicio, fim } = getCycleInfo()
+
+  const [provisions, setProvisions] = useState<{ id: number; active: boolean }[]>([])
+  useEffect(() => {
+    api.get<{ id: number; active: boolean }[]>('/provisions/').then(p => setProvisions(p || []))
+  }, [])
+
   const { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas } = useMemo(() => {
-    const ok = transactions.filter(t => t.status === 'confirmado')
+    const ciclo = transactions.filter(t => {
+      const d = new Date(t.date + 'T00:00:00')
+      return d >= inicio && d <= fim
+    })
+    const ok = ciclo.filter(t => t.status === 'confirmado')
     const receitas = ok.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
     const gastos = -ok.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
 
@@ -43,7 +55,7 @@ export function Dashboard() {
       .sort((a, b) => b.valor - a.valor)
 
     const topGastos = ok.filter(t => t.amount < 0).sort((a, b) => a.amount - b.amount).slice(0, 5)
-    const pendentes = transactions.filter(t => t.status === 'pendente' || !t.category_id).length
+    const pendentes = ciclo.filter(t => t.status === 'pendente' || !t.category_id).length
 
     const alertas = categories
       .filter(c => c.limit_value && c.limit_value > 0)
@@ -55,11 +67,11 @@ export function Dashboard() {
       .filter(a => a.pct >= 0.85)
 
     return { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas }
-  }, [transactions, categories])
+  }, [transactions, categories, inicio, fim])
 
   const saldoAtual = receitas - gastos
   const saldoProjetado = saldoAtual // simplified projection
-  const provisoesRestantes: any[] = [] // TODO: connect to real provisões
+  const provisoesRestantes = provisions.filter(p => p.active)
   const receitaRestante = 0
   const compromissoRestante = 0
 

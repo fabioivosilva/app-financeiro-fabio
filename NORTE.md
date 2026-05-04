@@ -5,10 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.3 fechado (Codex). BUG.2 reduzido a Dashboard + reauditoria.
-             Bugs ativos do Dashboard (D1) e Provisões (PR1) registrados como prioridade alta.
+STATUS     : Sessão 2026-05-04. BUG.D1 fechado (Claude Code). Dashboard agora filtra pelo ciclo
+             27→26 via getCycleInfo(); provisoesRestantes conectado à API real.
+             BUG.PR1 (Provisões) é o próximo item de alta prioridade.
 BRANCH     : develop
-PRÓXIMA    : BUG.D1 — Dashboard não respeita ciclo dia 27→26 [M]
+PRÓXIMA    : BUG.PR1 — Tela de Provisões com pendências [M]
 CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
@@ -134,11 +135,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
 - **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
 - **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
-
-- [ ] `[M]` **BUG.D1 — Dashboard não filtra pelo ciclo selecionado** · *qualquer um · ALTA prioridade*
-  Dashboard exibe valores que não respeitam o ciclo dia 27→26 do MonthSelector. Auditar:
-  `frontend/src/pages/Dashboard.tsx` linha ~62 (`provisoesRestantes: any[] = []` — ainda mock)
-  e o agrupamento de transações por ciclo. Conferir com `useTransacoes` se filtro de mês está aplicado.
 
 - [ ] `[M]` **BUG.PR1 — Tela de Provisões com pendências** · *qualquer um · ALTA prioridade*
   Vários pontos pendentes na tela de Provisões — Fabio relatou em 2026-05-04.
