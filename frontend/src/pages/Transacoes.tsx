@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
-import { CategoryChip } from '../components/ui/Badge'
-import { CATEGORY_ICONS, TransacaoRow } from '../components/transactions/TransacaoRow'
+import { TransacaoRow } from '../components/transactions/TransacaoRow'
+import { CategoryPopover } from '../components/transactions/CategoryPopover'
 import { api } from '../api/client'
 import type { Category, Person, Rule, Transaction } from '../api/types'
 import { useTransacoes, groupByDate, formatDate, formatCurrency, isTransactionPending } from '../hooks/useTransacoes'
@@ -369,84 +369,72 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
   const tx = pending[0]
   const [selectedCat, setSelectedCat] = useState<number | null>(null)
   const [selectedPerson, setSelectedPerson] = useState<number | null>(null)
-  const [createRule, setCreateRule] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showPicker, setShowPicker] = useState(false)
+  const pickerAnchorRef = useRef<HTMLButtonElement>(null)
   const reviewed = Math.min(doneIds.length, transactions.length)
 
   useEffect(() => {
     if (!tx) return
     setSelectedCat(suggestCategory(tx, categories, rules)?.id ?? null)
     setSelectedPerson(tx.person_id ?? null)
-    setCreateRule(true)
-  }, [tx, categories])
+    setShowPicker(false)
+  }, [tx?.id])
 
-  if (loading) {
-    return (
-      <div className="page page-inbox">
-        <Glass className="inbox-done">
-          <Icon name="hourglass_empty" size={40} className="t-muted" />
-          <div className="inbox-done-title">Carregando pendentes...</div>
-        </Glass>
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="page page-inbox">
+      <Glass className="inbox-done">
+        <Icon name="hourglass_empty" size={40} className="t-muted" />
+        <div className="inbox-done-title">Carregando pendentes...</div>
+      </Glass>
+    </div>
+  )
 
-  if (error) {
-    return (
-      <div className="page page-inbox">
-        <Glass className="inbox-done">
-          <Icon name="error_outline" size={40} style={{ color: '#F87171' }} />
-          <div className="inbox-done-title">Erro ao carregar transações</div>
-          <div className="inbox-done-sub">{error}</div>
-          <button className="btn-primary" onClick={onClose}>Voltar para transações</button>
-        </Glass>
-      </div>
-    )
-  }
+  if (error) return (
+    <div className="page page-inbox">
+      <Glass className="inbox-done">
+        <Icon name="error_outline" size={40} style={{ color: '#F87171' }} />
+        <div className="inbox-done-title">Erro ao carregar</div>
+        <div className="inbox-done-sub">{error}</div>
+        <button className="btn-primary" onClick={onClose}>Voltar</button>
+      </Glass>
+    </div>
+  )
 
-  if (!tx) {
-    return (
-      <div className="page page-inbox-done">
-        <Glass className="inbox-done">
-          <div className="inbox-done-icon">
-            <Icon name="task_alt" size={48} />
-          </div>
-          <div className="inbox-done-title">Tudo categorizado!</div>
-          <div className="inbox-done-sub">{transactions.length} transações revisadas. Seu dashboard está atualizado.</div>
-          <button className="btn-primary" onClick={onClose}>Voltar para transações</button>
-        </Glass>
-      </div>
-    )
-  }
+  if (!tx) return (
+    <div className="page page-inbox-done">
+      <Glass className="inbox-done">
+        <div className="inbox-done-icon"><Icon name="task_alt" size={48} /></div>
+        <div className="inbox-done-title">Tudo categorizado!</div>
+        <div className="inbox-done-sub">{transactions.length} transações revisadas. Dashboard atualizado.</div>
+        <button className="btn-primary" onClick={onClose}>Voltar para transações</button>
+      </Glass>
+    </div>
+  )
 
-  const suggestion = categories.find(cat => cat.id === selectedCat)
+  const selectedCatObj = categories.find(c => c.id === selectedCat)
   const keyword = ruleKeyword(tx.description)
+  const similares = pending.filter(t =>
+    t.id !== tx.id && normalizeText(t.description).includes(normalizeText(keyword))
+  ).length
 
-  function next() {
-    setDoneIds(prev => [...prev, tx.id])
-  }
+  function skip() { setDoneIds(prev => [...prev, tx.id]) }
 
   async function categorize() {
     if (!selectedCat) return
     setSaving(true)
     try {
       await api.put<Transaction>(`/transactions/${tx.id}`, {
-        ...tx,
-        category_id: selectedCat,
-        person_id: selectedPerson,
-        status: 'confirmado',
+        ...tx, category_id: selectedCat, person_id: selectedPerson, status: 'confirmado',
       })
-      if (createRule) {
-        await api.post('/rules/', {
-          keyword,
-          category_id: selectedCat,
-          person_id: selectedPerson,
-          origin: null,
-          goal_id: null,
-        })
-        await api.post('/rules/apply', {})
-      }
-      next()
+      await api.post('/rules/', {
+        keyword, category_id: selectedCat, person_id: selectedPerson, origin: null, goal_id: null,
+      })
+      await api.post('/rules/apply', {})
+      const similarIds = pending
+        .filter(t => t.id !== tx.id && normalizeText(t.description).includes(normalizeText(keyword)))
+        .map(t => t.id)
+      setDoneIds(prev => [...prev, tx.id, ...similarIds])
       onUpdated()
     } finally {
       setSaving(false)
@@ -478,28 +466,44 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
           {tx.amount > 0 ? '+' : '-'}{formatCurrency(tx.amount)}
         </div>
 
-        <div className="inbox-suggest">
-          <div className="t-xs t-muted">SUGESTÃO DO APP</div>
-          <div className="inbox-suggest-row">
-            {suggestion
-              ? <CategoryChip label={suggestion.name} color={suggestion.color} icon={CATEGORY_ICONS[suggestion.name] ?? 'category'} />
-              : <CategoryChip label="" empty />}
-            <span className="t-xs t-muted">baseado em descrições parecidas</span>
-          </div>
-        </div>
-
-        <div className="inbox-grid-label">OU ESCOLHA UMA CATEGORIA</div>
-        <div className="inbox-cat-grid">
-          {categories.map(cat => (
+        <div className="inbox-cat-section">
+          <div className="t-xs t-muted" style={{ marginBottom: 8 }}>CATEGORIA</div>
+          {selectedCatObj ? (
+            <div className="inbox-cat-chosen">
+              <span className="cat-popover-dot" style={{ background: selectedCatObj.color ?? '#888', width: 10, height: 10 }} />
+              <span style={{ fontWeight: 600, fontSize: 14 }}>{selectedCatObj.name}</span>
+              <button
+                ref={pickerAnchorRef}
+                className="btn-ghost"
+                style={{ marginLeft: 'auto', fontSize: 12, padding: '3px 8px' }}
+                onClick={() => setShowPicker(v => !v)}
+              >
+                Trocar <Icon name="expand_more" size={13} />
+              </button>
+            </div>
+          ) : (
             <button
-              key={cat.id}
-              className={`inbox-cat ${cat.id === selectedCat ? 'inbox-cat-suggest' : ''}`}
-              onClick={() => setSelectedCat(cat.id)}
+              ref={pickerAnchorRef}
+              className="inbox-cat-empty-btn"
+              onClick={() => setShowPicker(v => !v)}
             >
-              <Icon name={CATEGORY_ICONS[cat.name] ?? 'category'} size={18} style={{ color: cat.color ?? 'var(--primary-2)' }} />
-              <span>{cat.name}</span>
+              <Icon name="category" size={16} className="t-muted" />
+              <span className="t-muted">Escolher categoria...</span>
+              <Icon name="expand_more" size={14} className="t-muted" style={{ marginLeft: 'auto' }} />
             </button>
-          ))}
+          )}
+          {showPicker && (
+            <div style={{ position: 'relative' }}>
+              <CategoryPopover
+                categories={categories}
+                currentId={selectedCat ?? undefined}
+                onSelect={id => { setSelectedCat(id); setShowPicker(false) }}
+                onCreateRule={() => {}}
+                onClose={() => setShowPicker(false)}
+                anchorRef={pickerAnchorRef as React.RefObject<HTMLElement>}
+              />
+            </div>
+          )}
         </div>
 
         <div className="inbox-people">
@@ -509,7 +513,7 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
               <button
                 key={person.id}
                 className={`inbox-person ${selectedPerson === person.id ? 'inbox-cat-suggest' : ''}`}
-                onClick={() => setSelectedPerson(person.id)}
+                onClick={() => setSelectedPerson(p => p === person.id ? null : person.id)}
               >
                 <span className="pessoa-avatar" style={avatarStyle(person.id)}>{initials(person.name)}</span>
                 {person.name}
@@ -518,19 +522,22 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
           </div>
         </div>
 
-        <div className="inbox-foot">
-          <label className="inbox-rule">
-            <input type="checkbox" checked={createRule} onChange={e => setCreateRule(e.target.checked)} />
-            <span>Criar regra automática para "{keyword}"</span>
-          </label>
-          <div className="inbox-actions">
-            <button className="btn-ghost" onClick={next} disabled={saving}>
-              <Icon name="skip_next" size={16} /> Pular
-            </button>
-            <button className="btn-primary" onClick={categorize} disabled={!selectedCat || saving}>
-              Categorizar e próxima <Icon name="arrow_forward" size={16} />
-            </button>
-          </div>
+        <div className="inbox-rule-hint">
+          <Icon name="auto_awesome" size={13} style={{ color: '#C084FC' }} />
+          <span>
+            Regra criada para <strong>"{keyword}"</strong>
+            {similares > 0 && <> · <span style={{ color: '#C084FC' }}>+{similares} similar{similares > 1 ? 'es' : ''} categorizad{similares > 1 ? 'as' : 'a'} automaticamente</span></>}
+          </span>
+        </div>
+
+        <div className="inbox-actions">
+          <button className="btn-ghost" onClick={skip} disabled={saving}>
+            <Icon name="skip_next" size={16} /> Pular
+          </button>
+          <button className="btn-primary" onClick={categorize} disabled={!selectedCat || saving}>
+            {saving ? 'Salvando...' : similares > 0 ? `Categorizar +${similares + 1}` : 'Categorizar'}
+            <Icon name="arrow_forward" size={16} />
+          </button>
         </div>
       </Glass>
     </div>

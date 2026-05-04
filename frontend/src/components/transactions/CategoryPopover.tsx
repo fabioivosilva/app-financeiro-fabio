@@ -19,10 +19,17 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
   const parents = categories.filter(c => !c.parent_id)
   const children = categories.filter(c => !!c.parent_id)
 
-  // Default: all groups open
-  const [open, setOpen] = useState<Record<number, boolean>>(() =>
-    Object.fromEntries(parents.map(p => [p.id, true]))
-  )
+  const [open, setOpen] = useState<Record<number, boolean>>({})
+
+  // Populate open state once parents are available
+  useEffect(() => {
+    if (parents.length === 0) return
+    setOpen(prev => {
+      const next = { ...prev }
+      parents.forEach(p => { if (!(p.id in next)) next[p.id] = true })
+      return next
+    })
+  }, [parents.length])
 
   const toggle = (id: number) => setOpen(o => ({ ...o, [id]: !o[id] }))
 
@@ -81,7 +88,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
         ) : (
           parents.map(parent => {
             const subs = children.filter(c => c.parent_id === parent.id)
-            const isOpen = open[parent.id] ?? true
+            const isOpen = parent.id in open ? open[parent.id] : true
             const isActive = parent.id === currentId
             return (
               <div key={parent.id} className="cat-group">
