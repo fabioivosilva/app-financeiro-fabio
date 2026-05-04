@@ -6,7 +6,7 @@ from typing import Optional
 from datetime import date
 from app.database import get_db
 from app.models import Goal, Transaction
-from app.models.transaction import TransactionStatus
+from app.models.transaction import TransactionStatus, Category
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
@@ -25,10 +25,18 @@ class GoalOut(GoalIn):
     model_config = {"from_attributes": True}
 
 
+def _category_ids(category_id: int, db: Session) -> list[int]:
+    """Retorna a categoria e todas as suas subcategorias (1 nível)."""
+    children = [r[0] for r in db.query(Category.id).filter(Category.parent_id == category_id).all()]
+    return [category_id] + children
+
+
 def _calculated_current(goal: Goal, db: Session) -> float:
     filters = [Transaction.goal_id == goal.id]
     if goal.category_id:
-        filters.append(Transaction.category_id == goal.category_id)
+        # Inclui a categoria vinculada E todas as suas subcategorias
+        cat_ids = _category_ids(goal.category_id, db)
+        filters.append(Transaction.category_id.in_(cat_ids))
 
     tx_total = (
         db.query(func.coalesce(func.sum(func.abs(Transaction.amount)), 0.0))
