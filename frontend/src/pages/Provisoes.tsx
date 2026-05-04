@@ -16,7 +16,7 @@ const brlCompact = (v: number) => {
   if (a >= 1000) return (v / 1000).toFixed(1) + 'k'
   return brl(v)
 }
-const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
 type ProvisionView = Provision & {
   virtual?: boolean
@@ -30,7 +30,7 @@ function stripInstallmentSuffix(description: string) {
 function normalizeInstallmentKey(description: string) {
   return stripInstallmentSuffix(description)
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/\s+/g, ' ')
     .toLowerCase()
     .trim()
@@ -74,7 +74,7 @@ function buildCardInstallmentProvisions(transactions: Transaction[], provisions:
     const existingKey = `${normalizeInstallmentKey(description)}|${next}|${total}|${latest.person_id ?? 'sem-pessoa'}|${amountKey(latest.amount)}`
     if (existing.has(existingKey)) return []
 
-    const day = Math.min(Math.max(Number(latest.date.slice(8, 10)) || 1, 1), 28)
+    const day = Math.min(Math.max(Number(latest.date.slice(8, 10)) || 1, 1), 31)
     const avgAmount = items.reduce((sum, tx) => sum + tx.amount, 0) / items.length
 
     return [{
@@ -104,7 +104,9 @@ export function Provisoes() {
   const [view, setView] = useState<'timeline' | 'calendario' | 'lista'>('timeline')
   const [selMes, setSelMes] = useState(0)
   const [showModal, setShowModal] = useState(false)
+  const [editingProvision, setEditingProvision] = useState<Provision | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [togglingActive, setTogglingActive] = useState<number | null>(null)
   const [importing, setImporting] = useState(false)
 
   const projectedInstallments = useMemo(
@@ -139,6 +141,19 @@ export function Provisoes() {
     finally { setDeleting(null) }
   }
 
+  async function handleToggleActive(p: Provision) {
+    setTogglingActive(p.id)
+    try {
+      await api.put(`/provisions/${p.id}`, { ...p, active: !p.active })
+      toast(
+        !p.active ? `"${p.description}" reativada` : `"${p.description}" desativada`,
+        undefined,
+        !p.active ? 'success' : 'info',
+      )
+      refetch()
+    } finally { setTogglingActive(null) }
+  }
+
   async function handleImportInstallments() {
     setImporting(true)
     try {
@@ -150,6 +165,18 @@ export function Provisoes() {
       setImporting(false)
     }
   }
+
+  function openEdit(p: Provision) {
+    setEditingProvision(p)
+    setShowModal(true)
+  }
+
+  function closeModal() {
+    setShowModal(false)
+    setEditingProvision(null)
+  }
+
+  const inativas = provisions.filter(p => !p.active).length
 
   if (loading) return <div className="page"><Glass><div style={{ padding: 40, textAlign: 'center' }}><Icon name="hourglass_empty" size={32} className="t-muted" /></div></Glass></div>
   if (error) return <div className="page"><Glass><div style={{ padding: 20, color: '#F87171' }}>{error}</div></Glass></div>
@@ -178,7 +205,10 @@ export function Provisoes() {
         <Glass className="stat-card">
           <div className="stat-label">PROVISÕES ATIVAS</div>
           <div className="stat-val">{allProvisions.filter(p => p.active).length}</div>
-          <div className="t-xs t-muted">{allProvisions.filter(p => p.type === 'parcela').length} parcelas · {projectedInstallments.length} do cartão</div>
+          <div className="t-xs t-muted">
+            {allProvisions.filter(p => p.type === 'parcela').length} parcelas · {projectedInstallments.length} do cartão
+            {inativas > 0 && <span style={{ color: 'var(--text-muted)' }}> · {inativas} inativa{inativas > 1 ? 's' : ''}</span>}
+          </div>
         </Glass>
         <Glass className="stat-card">
           <div className="stat-label">COMPROMETIDO / MÊS</div>
@@ -192,17 +222,33 @@ export function Provisoes() {
         </Glass>
       </div>
 
-      {view === 'timeline' && <TimelineView meses={meses} sel={selMes} onSel={setSelMes} categories={categories} persons={persons} importing={importing} onImport={handleImportInstallments} onAdd={() => setShowModal(true)} />}
+      {view === 'timeline' && (
+        <TimelineView
+          meses={meses} sel={selMes} onSel={setSelMes}
+          categories={categories} persons={persons}
+          importing={importing} onImport={handleImportInstallments}
+          onAdd={() => setShowModal(true)} onEdit={openEdit}
+        />
+      )}
       {view === 'calendario' && <CalendarView mes={meses[0]} categories={categories} />}
-      {view === 'lista' && <ListaView provisions={allProvisions} categories={categories} persons={persons} deleting={deleting} importing={importing} onImport={handleImportInstallments} onDelete={handleDelete} onAdd={() => setShowModal(true)} />}
+      {view === 'lista' && (
+        <ListaView
+          provisions={allProvisions} categories={categories} persons={persons}
+          deleting={deleting} togglingActive={togglingActive}
+          importing={importing} onImport={handleImportInstallments}
+          onDelete={handleDelete} onAdd={() => setShowModal(true)}
+          onEdit={openEdit} onToggleActive={handleToggleActive}
+        />
+      )}
 
       {showModal && (
-        <NovaProvisaoModal
+        <ProvisaoModal
           categories={categories}
           persons={persons}
           rules={rules}
-          onClose={() => setShowModal(false)}
-          onSaved={() => { setShowModal(false); refetch() }}
+          editing={editingProvision}
+          onClose={closeModal}
+          onSaved={() => { closeModal(); refetch() }}
         />
       )}
     </div>
@@ -211,9 +257,10 @@ export function Provisoes() {
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
-function TimelineView({ meses, sel, onSel, categories, persons, importing, onImport, onAdd }: {
+function TimelineView({ meses, sel, onSel, categories, persons, importing, onImport, onAdd, onEdit }: {
   meses: any[]; sel: number; onSel: (i: number) => void
-  categories: Category[]; persons: Person[]; importing: boolean; onImport: () => void; onAdd: () => void
+  categories: Category[]; persons: Person[]; importing: boolean; onImport: () => void
+  onAdd: () => void; onEdit: (p: Provision) => void
 }) {
   const m = meses[sel]
   const today = new Date().getDate()
@@ -284,7 +331,11 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
                   <div className="prov-status">
                     {done
                       ? <span className="prov-tag prov-tag-done"><Icon name="check_circle" size={14} /> Realizada</span>
-                      : <button className="btn-ghost btn-ghost-sm"><Icon name="link" size={14} /> Vincular</button>
+                      : !p.virtual && (
+                        <button className="btn-ghost btn-ghost-sm" onClick={() => onEdit(p as Provision)}>
+                          <Icon name="edit" size={14} /> Editar
+                        </button>
+                      )
                     }
                   </div>
                 </div>
@@ -344,9 +395,11 @@ function CalendarView({ mes, categories }: { mes: any; categories: Category[] })
 
 // ─── Lista ────────────────────────────────────────────────────────────────────
 
-function ListaView({ provisions, categories, persons, deleting, importing, onImport, onDelete, onAdd }: {
+function ListaView({ provisions, categories, persons, deleting, togglingActive, importing, onImport, onDelete, onAdd, onEdit, onToggleActive }: {
   provisions: ProvisionView[]; categories: Category[]; persons: Person[]
-  deleting: number | null; importing: boolean; onImport: () => void; onDelete: (id: number) => void; onAdd: () => void
+  deleting: number | null; togglingActive: number | null; importing: boolean
+  onImport: () => void; onDelete: (id: number) => void; onAdd: () => void
+  onEdit: (p: Provision) => void; onToggleActive: (p: Provision) => void
 }) {
   return (
     <Glass padded={false}>
@@ -372,20 +425,38 @@ function ListaView({ provisions, categories, persons, deleting, importing, onImp
         ) : provisions.map(p => {
           const cat = categories.find(c => c.id === p.category_id)
           const person = persons.find(pe => pe.id === (p as any).person_id)
+          const inactive = !p.active
           return (
-            <div key={p.id} className="lista-prov-row lista-prov-grid">
-              <div className="t-sm">{p.description}{person ? <span className="t-xs t-muted" style={{ marginLeft: 6 }}>· {person.name}</span> : null}</div>
+            <div key={p.id} className="lista-prov-row lista-prov-grid" style={inactive ? { opacity: 0.45 } : undefined}>
+              <div className="t-sm">
+                {p.description}
+                {person ? <span className="t-xs t-muted" style={{ marginLeft: 6 }}>· {person.name}</span> : null}
+                {inactive && <span className="t-xs t-muted" style={{ marginLeft: 6 }}>(inativa)</span>}
+              </div>
               <div>{cat ? <CategoryChip label={cat.name} color={cat.color} /> : <span className="t-xs t-muted">—</span>}</div>
               <div className="t-xs t-muted">{p.type === 'parcela' ? `${p.installment_current}/${p.installment_total}${p.virtual ? ' · cartão' : ''}` : 'Mensal'}</div>
               <div className="t-xs t-muted">dia {p.day}</div>
               <div className={`t-sm${p.amount > 0 ? ' tx-val-pos' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{brl(p.amount)}</div>
-              <div>
+              <div style={{ display: 'flex', gap: 2 }}>
                 {p.virtual ? (
                   <span className="t-xs t-muted"><Icon name="credit_card" size={14} /></span>
                 ) : (
-                  <button className="btn-icon" onClick={() => onDelete(p.id)} disabled={deleting === p.id}>
-                    <Icon name={deleting === p.id ? 'hourglass_empty' : 'delete_outline'} size={16} />
-                  </button>
+                  <>
+                    <button className="btn-icon" title="Editar" onClick={() => onEdit(p as Provision)}>
+                      <Icon name="edit" size={15} />
+                    </button>
+                    <button
+                      className="btn-icon"
+                      title={p.active ? 'Desativar' : 'Reativar'}
+                      onClick={() => onToggleActive(p as Provision)}
+                      disabled={togglingActive === p.id}
+                    >
+                      <Icon name={togglingActive === p.id ? 'hourglass_empty' : p.active ? 'pause_circle' : 'play_circle'} size={15} />
+                    </button>
+                    <button className="btn-icon" title="Excluir" onClick={() => onDelete(p.id)} disabled={deleting === p.id}>
+                      <Icon name={deleting === p.id ? 'hourglass_empty' : 'delete_outline'} size={15} />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -396,23 +467,40 @@ function ListaView({ provisions, categories, persons, deleting, importing, onImp
   )
 }
 
-// ─── Modal Nova Provisão ──────────────────────────────────────────────────────
+// ─── Modal Provisão (criar e editar) ─────────────────────────────────────────
 
-function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
+function ProvisaoModal({ categories, persons, rules, editing, onClose, onSaved }: {
   categories: Category[]; persons: Person[]; rules: Rule[]
+  editing?: Provision | null
   onClose: () => void; onSaved: () => void
 }) {
-  const [tipo, setTipo] = useState<'despesa' | 'receita'>('despesa')
-  const [recorrencia, setRecorrencia] = useState<'mensal' | 'parcela'>('mensal')
-  const [desc, setDesc] = useState('')
-  const [valor, setValor] = useState('')
-  const [dia, setDia] = useState(5)
-  const [catId, setCatId] = useState<number | null>(null)
-  const [personId, setPersonId] = useState<number | null>(null)
-  const [parcelas, setParcelas] = useState(12)
+  const isEdit = !!editing
+
+  const [tipo, setTipo] = useState<'despesa' | 'receita'>(() =>
+    editing ? (editing.amount > 0 ? 'receita' : 'despesa') : 'despesa'
+  )
+  const [recorrencia, setRecorrencia] = useState<'mensal' | 'parcela'>(() =>
+    editing ? (editing.type as 'mensal' | 'parcela') : 'mensal'
+  )
+  const [desc, setDesc] = useState(editing?.description ?? '')
+  const [valor, setValor] = useState(editing ? String(Math.abs(editing.amount).toFixed(2)).replace('.', ',') : '')
+  const [dia, setDia] = useState(editing?.day ?? 5)
+  const [catId, setCatId] = useState<number | null>(editing?.category_id ?? null)
+  const [personId, setPersonId] = useState<number | null>(editing?.person_id ?? null)
+  const [parcelas, setParcelas] = useState(editing?.installment_total ?? 12)
   const [saving, setSaving] = useState(false)
 
-  // Auto-sugestão: ao digitar desc, busca regra que bata
+  // Filtra categorias pelo tipo selecionado
+  const catsFiltradas = categories.filter(c => {
+    if ((c as any).parent_id) return false
+    const t = (c as any).type ?? ''
+    if (tipo === 'receita') return t === 'receita'
+    return t === 'fixa' || t === 'variavel' || t === ''
+  })
+
+  // Limpa categoria selecionada se não estiver na lista filtrada
+  const catValida = catsFiltradas.some(c => c.id === catId)
+
   function handleDescChange(val: string) {
     setDesc(val)
     if (val.length < 3) return
@@ -430,30 +518,46 @@ function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
     if (!desc || !valor) return
     setSaving(true)
     try {
-      await api.post('/provisions/', {
+      const payload = {
         description: desc, amount, day: dia, type: recorrencia,
-        category_id: catId, active: true,
+        category_id: catValida ? catId : null,
         person_id: personId,
-        installment_current: recorrencia === 'parcela' ? 1 : null,
+        installment_current: recorrencia === 'parcela' ? (editing?.installment_current ?? 1) : null,
         installment_total: recorrencia === 'parcela' ? parcelas : null,
-      })
-      toast(`Provisão "${desc}" criada`)
+      }
+      if (isEdit && editing) {
+        await api.put(`/provisions/${editing.id}`, { ...payload, active: editing.active })
+        toast(`Provisão "${desc}" atualizada`, undefined, 'success')
+      } else {
+        await api.post('/provisions/', { ...payload, active: true })
+        toast(`Provisão "${desc}" criada`, undefined, 'success')
+      }
       onSaved()
     } finally { setSaving(false) }
   }
 
-  const previewCat = categories.find(c => c.id === catId)
+  const previewCat = catValida ? categories.find(c => c.id === catId) : undefined
   const ruleMatch = desc.length >= 3 ? rules.find(r => normalize(desc).includes(normalize(r.keyword)) || normalize(r.keyword).includes(normalize(desc))) : null
 
   return (
-    <Modal open onClose={onClose} title="Nova provisão"
-      footer={<><Button variant="ghost" onClick={onClose}>Cancelar</Button><Button variant="primary" onClick={handleSave} disabled={!desc || !valor || saving}>{saving ? 'Salvando...' : 'Criar provisão'}</Button></>}
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? 'Editar provisão' : 'Nova provisão'}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button variant="primary" onClick={handleSave} disabled={!desc || !valor || saving}>
+            {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Criar provisão'}
+          </Button>
+        </>
+      }
     >
       <div className="cfg-field">
         <label className="cfg-label">Tipo</label>
         <div className="seg-control" style={{ alignSelf: 'start' }}>
-          <button className={tipo === 'despesa' ? 'seg-on' : ''} onClick={() => setTipo('despesa')}><Icon name="trending_down" size={14} /> Despesa</button>
-          <button className={tipo === 'receita' ? 'seg-on' : ''} onClick={() => setTipo('receita')}><Icon name="trending_up" size={14} /> Receita</button>
+          <button className={tipo === 'despesa' ? 'seg-on' : ''} onClick={() => { setTipo('despesa'); setCatId(null) }}><Icon name="trending_down" size={14} /> Despesa</button>
+          <button className={tipo === 'receita' ? 'seg-on' : ''} onClick={() => { setTipo('receita'); setCatId(null) }}><Icon name="trending_up" size={14} /> Receita</button>
         </div>
       </div>
 
@@ -475,7 +579,7 @@ function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
         </div>
         <div className="cfg-field" style={{ flex: '0 0 90px' }}>
           <label className="cfg-label">Dia do mês</label>
-          <input type="number" min={1} max={28} className="cfg-input cfg-input-num" value={dia} onChange={e => setDia(Number(e.target.value))} />
+          <input type="number" min={1} max={31} className="cfg-input cfg-input-num" value={dia} onChange={e => setDia(Number(e.target.value))} />
         </div>
       </div>
 
@@ -497,12 +601,15 @@ function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
       <div className="cfg-field">
         <label className="cfg-label">Categoria</label>
         <div className="modal-cat-grid">
-          {categories.filter(c => !c.parent_id).map(c => (
+          {catsFiltradas.map(c => (
             <button key={c.id} className={`inbox-cat${catId === c.id ? ' inbox-cat-suggest' : ''}`} onClick={() => setCatId(catId === c.id ? null : c.id)}>
               <Icon name={(c as any).icon ?? 'label'} size={16} style={{ color: c.color ?? '#888' }} />
               <span>{c.name}</span>
             </button>
           ))}
+          {catsFiltradas.length === 0 && (
+            <div className="t-xs t-muted">Nenhuma categoria de {tipo} cadastrada.</div>
+          )}
         </div>
       </div>
 
