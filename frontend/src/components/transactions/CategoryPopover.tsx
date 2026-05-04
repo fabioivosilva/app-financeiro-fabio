@@ -74,7 +74,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
         )}
       </div>
 
-      <div className="cat-popover-body">
+      <div className="cat-popover-body" onMouseDown={e => e.stopPropagation()}>
         {searching ? (
           flat.length > 0 ? (
             <div className="cat-popover-grid">
@@ -92,7 +92,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
             const isActive = parent.id === currentId
             return (
               <div key={parent.id} className="cat-group">
-                <div className="cat-group-header" onClick={() => subs.length > 0 ? toggle(parent.id) : (onSelect(parent.id), onClose())}>
+                <div className="cat-group-header" onMouseDown={e => e.stopPropagation()} onClick={() => subs.length > 0 ? toggle(parent.id) : (onSelect(parent.id), onClose())}>
                   <span className="cat-popover-dot" style={{ background: parent.color ?? '#888' }} />
                   <span className="cat-group-name">{parent.name}</span>
                   {isActive && <span className="cat-group-active-dot" />}
