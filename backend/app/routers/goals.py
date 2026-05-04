@@ -18,6 +18,7 @@ class GoalIn(BaseModel):
     deadline: Optional[date] = None
     category_id: Optional[int] = None
     keyword: Optional[str] = None
+    icon: Optional[str] = None
 
 
 class GoalOut(GoalIn):

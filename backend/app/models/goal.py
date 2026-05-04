@@ -13,6 +13,7 @@ class Goal(Base):
     deadline = Column(Date, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     keyword = Column(String, nullable=True)
+    icon = Column(String, nullable=True)
 
     transactions = relationship("Transaction", foreign_keys="Transaction.goal_id")
     rules = relationship("Rule", foreign_keys="Rule.goal_id")

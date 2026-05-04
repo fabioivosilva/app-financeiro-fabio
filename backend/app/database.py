@@ -75,6 +75,13 @@ def _migrate():
     # Atualiza ícones das categorias conhecidas (icon='label' = padrão sem escolha)
     _migrate_icons()
 
+    if 'goals' in inspector.get_table_names():
+        goal_cols = [c['name'] for c in inspector.get_columns('goals')]
+        if 'icon' not in goal_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE goals ADD COLUMN icon VARCHAR"))
+                conn.commit()
+
     # Torna person_id nullable em cards (recria tabela se necessário)
     if 'cards' in inspector.get_table_names():
         col_info = {c['name']: c for c in inspector.get_columns('cards')}

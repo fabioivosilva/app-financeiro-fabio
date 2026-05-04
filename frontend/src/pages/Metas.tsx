@@ -14,6 +14,7 @@ type GoalPayload = {
   deadline: string | null
   category_id: number | null
   keyword: string | null
+  icon: string | null
 }
 
 const goalIcons = ['shield', 'flight', 'laptop_mac', 'savings', 'flag', 'home']
@@ -328,12 +329,15 @@ interface GoalFormProps {
   onSaved: () => void
 }
 
+const GOAL_ICONS = ['savings', 'home', 'flight', 'shield', 'laptop_mac', 'directions_car', 'school', 'beach_access', 'flag', 'favorite']
+
 function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: GoalFormProps) {
   const [name, setName] = useState(goal?.name ?? '')
   const [target, setTarget] = useState(goal?.target ? String(goal.target) : '')
   const [current, setCurrent] = useState(goal?.current ? String(goal.current) : '0')
   const [deadline, setDeadline] = useState(goal?.deadline ?? '')
   const [categoryId, setCategoryId] = useState<number | undefined>(goal?.category_id)
+  const [icon, setIcon] = useState<string | undefined>((goal as any)?.icon ?? undefined)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -343,6 +347,7 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
     setTarget(goal?.target ? String(goal.target) : '')
     setCurrent(goal?.current ? String(goal.current) : '0')
     setDeadline(goal?.deadline ?? '')
+    setIcon((goal as any)?.icon ?? undefined)
     setCategoryId(goal?.category_id)
     setErr(null)
   }, [goal, open])
@@ -359,6 +364,7 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
       deadline: deadline || null,
       category_id: categoryId ?? null,
       keyword: goal?.keyword ?? null,
+      icon: icon ?? null,
     }
 
     setSaving(true)
@@ -411,6 +417,27 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
       </div>
 
       <div className="cfg-field">
+        <label className="cfg-label">Ícone</label>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {GOAL_ICONS.map(ic => (
+            <button
+              key={ic} type="button"
+              onClick={() => setIcon(icon === ic ? undefined : ic)}
+              style={{
+                width: 38, height: 38, borderRadius: 10, border: '1px solid',
+                borderColor: icon === ic ? 'var(--primary)' : 'rgba(255,255,255,0.08)',
+                background: icon === ic ? 'rgba(130,10,209,0.2)' : 'rgba(255,255,255,0.04)',
+                color: icon === ic ? 'var(--primary)' : 'var(--text-muted)',
+                display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              <Icon name={ic} size={18} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="cfg-field">
         <label className="cfg-label">Categoria vinculada</label>
         <div className="modal-cat-grid">
           <button
@@ -444,7 +471,7 @@ function getGoalVisual(goal: Goal, categories: Category[], index: number) {
   const category = categories.find(cat => cat.id === goal.category_id)
   return {
     color: category?.color ?? goalColors[Math.max(index, 0) % goalColors.length],
-    icon: goalIcons[Math.max(index, 0) % goalIcons.length],
+    icon: (goal as any).icon ?? goalIcons[Math.max(index, 0) % goalIcons.length],
   }
 }
 
