@@ -10,14 +10,13 @@ interface Props {
   persons?: Person[]
   currentId?: number
   onSelect: (categoryId: number) => void
-  onCreateRule: () => void
   onClose: () => void
   anchorRef: React.RefObject<HTMLElement>
   onCategoryCreated?: (cat: Category) => void
   txKeyword?: string
 }
 
-export function CategoryPopover({ categories, persons = [], currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
+export function CategoryPopover({ categories, persons = [], currentId, onSelect, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
   const [busca, setBusca] = useState('')
   const popoverRef = useRef<HTMLDivElement>(null)
 

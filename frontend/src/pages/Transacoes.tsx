@@ -498,7 +498,7 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
                 categories={categories}
                 currentId={selectedCat ?? undefined}
                 onSelect={id => { setSelectedCat(id); setShowPicker(false) }}
-                onCreateRule={() => {}}
+
                 onClose={() => setShowPicker(false)}
                 anchorRef={pickerAnchorRef as React.RefObject<HTMLElement>}
               />

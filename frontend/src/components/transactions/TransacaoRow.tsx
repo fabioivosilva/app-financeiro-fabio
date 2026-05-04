@@ -104,7 +104,7 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
                   persons={persons}
                   currentId={tx.category_id}
                   onSelect={handleSelectCategory}
-                  onCreateRule={() => setShowRuleModal(true)}
+
                   onClose={() => setShowPopover(false)}
                   anchorRef={chipRef as React.RefObject<HTMLElement>}
                   txKeyword={tx.description.trim().split(/\s+/).slice(0, 2).join(' ')}
