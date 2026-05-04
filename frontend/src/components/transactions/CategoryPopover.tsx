@@ -62,8 +62,9 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
 
   useEffect(() => {
     if (creating) {
-      // Pre-fill with search term and focus
       setNewName(busca)
+      // If search matched exactly one parent, pre-select it as parent
+      if (flatParents.length === 1) setNewParentId(flatParents[0].id)
       setTimeout(() => newInputRef.current?.focus(), 50)
     }
   }, [creating])
@@ -163,7 +164,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
             <div className="cat-popover-empty">
               <span>Nenhum resultado para "<strong>{busca}</strong>"</span>
               {!creating && (
-                <button className="btn-ghost" style={{ marginTop: 6, fontSize: 12 }} onClick={() => setCreating(true)}>
+                <button className="btn-ghost" style={{ marginTop: 6, fontSize: 12 }} onMouseDown={e => e.stopPropagation()} onClick={() => setCreating(true)}>
                   <Icon name="add" size={14} /> Criar "{busca}"
                 </button>
               )}
@@ -227,14 +228,14 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
         </div>
       )}
 
-      <div className="cat-popover-foot">
+      <div className="cat-popover-foot" onMouseDown={e => e.stopPropagation()}>
         {!creating && (
-          <button className="btn-ghost" onClick={() => setCreating(true)}>
+          <button className="btn-ghost" onMouseDown={e => e.stopPropagation()} onClick={() => setCreating(true)}>
             <Icon name="add_circle" size={14} />
             Nova categoria
           </button>
         )}
-        <button className="btn-ghost" onClick={() => { onCreateRule(); onClose() }}>
+        <button className="btn-ghost" onMouseDown={e => e.stopPropagation()} onClick={() => { onCreateRule(); onClose() }}>
           <Icon name="rule" size={14} />
           Criar regra automática
         </button>
