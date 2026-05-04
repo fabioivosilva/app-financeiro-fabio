@@ -59,10 +59,12 @@ def _find_recurrent_provision(
         Provision.type == "mensal",
     )
     if person_id is not None:
-        q = q.filter(Provision.person_id == person_id)
-    else:
-        q = q.filter(Provision.person_id.is_(None))
-    return q.first()
+        exact = q.filter(Provision.person_id == person_id).first()
+        if exact:
+            return exact
+        # Fallback: sem pessoa — evita duplicar quando regra atribuiu pessoa depois
+        return q.filter(Provision.person_id.is_(None)).first()
+    return q.filter(Provision.person_id.is_(None)).first()
 
 
 def _add_months(base: date, months: int) -> date:
@@ -79,6 +81,14 @@ def _add_months(base: date, months: int) -> date:
 # Handlers por behavior
 # ──────────────────────────────────────────────────────────────
 
+def _best_description(txs: list[Transaction], cat: Category) -> str:
+    """Usa a descrição da transação mais recente como nome da provisão."""
+    if not txs:
+        return cat.name
+    latest = max(txs, key=lambda t: (t.date, t.id))
+    return latest.description or cat.name
+
+
 def _handle_recurrent(
     db: Session, tx: Transaction, cat: Category
 ) -> Optional[Provision]:
@@ -89,18 +99,20 @@ def _handle_recurrent(
 
     avg_amt = round(_avg_amount(txs), 2)
     avg_d   = _avg_day(txs)
+    desc    = _best_description(txs, cat)
 
     existing = _find_recurrent_provision(db, cat.id, tx.person_id)
     if existing:
-        existing.amount = avg_amt
-        existing.day    = avg_d
-        existing.active = True
+        existing.amount      = avg_amt
+        existing.day         = avg_d
+        existing.description = desc
+        existing.active      = True
         db.commit()
         db.refresh(existing)
         return existing
 
     prov = Provision(
-        description=cat.name,
+        description=desc,
         amount=avg_amt,
         day=avg_d,
         type="mensal",
