@@ -8,7 +8,7 @@ import { CategoryChip } from '../components/ui/Badge'
 import { api } from '../api/client'
 import { toast } from '../components/ui/Toast'
 import { useProvisoes, type Provision } from '../hooks/useProvisoes'
-import type { Category, Person, Rule } from '../api/types'
+import type { Category, Person, Rule, Transaction } from '../api/types'
 
 const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 const brlCompact = (v: number) => {
@@ -16,7 +16,83 @@ const brlCompact = (v: number) => {
   if (a >= 1000) return (v / 1000).toFixed(1) + 'k'
   return brl(v)
 }
-const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+const normalize = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+type ProvisionView = Provision & {
+  virtual?: boolean
+  source?: 'card-installment'
+}
+
+function stripInstallmentSuffix(description: string) {
+  return description.trim().replace(/\s+\d{1,3}\/\d{1,3}\s*$/, '').trim()
+}
+
+function normalizeInstallmentKey(description: string) {
+  return stripInstallmentSuffix(description)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .trim()
+}
+
+function amountKey(amount: number) {
+  return Math.round(Math.abs(amount) * 100)
+}
+
+function buildCardInstallmentProvisions(transactions: Transaction[], provisions: Provision[]): ProvisionView[] {
+  const groups = new Map<string, Transaction[]>()
+  transactions
+    .filter(tx => tx.installment_current && tx.installment_total && tx.installment_current < tx.installment_total)
+    .forEach(tx => {
+      const key = [
+        normalizeInstallmentKey(tx.description),
+        tx.installment_total,
+        amountKey(tx.amount),
+        tx.card_id ?? 'sem-cartao',
+        tx.person_id ?? 'sem-pessoa',
+      ].join('|')
+      groups.set(key, [...(groups.get(key) ?? []), tx])
+    })
+
+  const existing = new Set(
+    provisions
+      .filter(p => p.type === 'parcela')
+      .map(p => `${normalizeInstallmentKey(p.description)}|${p.installment_current ?? ''}|${p.installment_total ?? ''}|${p.person_id ?? 'sem-pessoa'}|${amountKey(p.amount)}`)
+  )
+
+  return Array.from(groups.values()).flatMap((items, index) => {
+    const latest = [...items].sort((a, b) =>
+      (b.installment_current ?? 0) - (a.installment_current ?? 0) || b.date.localeCompare(a.date) || b.id - a.id
+    )[0]
+    const maxCurrent = Math.max(...items.map(tx => tx.installment_current ?? 0))
+    const total = latest.installment_total ?? 0
+    const next = maxCurrent + 1
+    if (!total || next > total) return []
+
+    const description = stripInstallmentSuffix(latest.description)
+    const existingKey = `${normalizeInstallmentKey(description)}|${next}|${total}|${latest.person_id ?? 'sem-pessoa'}|${amountKey(latest.amount)}`
+    if (existing.has(existingKey)) return []
+
+    const day = Math.min(Math.max(Number(latest.date.slice(8, 10)) || 1, 1), 28)
+    const avgAmount = items.reduce((sum, tx) => sum + tx.amount, 0) / items.length
+
+    return [{
+      id: -100000 - index,
+      description,
+      amount: -Math.abs(avgAmount),
+      day,
+      type: 'parcela' as const,
+      category_id: latest.category_id,
+      person_id: latest.person_id,
+      active: true,
+      installment_current: next,
+      installment_total: total,
+      virtual: true,
+      source: 'card-installment' as const,
+    }]
+  })
+}
 
 function getMonthInfo(offset: number) {
   const now = new Date()
@@ -24,17 +100,27 @@ function getMonthInfo(offset: number) {
 }
 
 export function Provisoes() {
-  const { provisions, categories, persons, rules, loading, error, refetch } = useProvisoes()
+  const { provisions, categories, persons, rules, transactions, loading, error, refetch } = useProvisoes()
   const [view, setView] = useState<'timeline' | 'calendario' | 'lista'>('timeline')
   const [selMes, setSelMes] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
   const [importing, setImporting] = useState(false)
 
+  const projectedInstallments = useMemo(
+    () => buildCardInstallmentProvisions(transactions, provisions),
+    [transactions, provisions],
+  )
+
+  const allProvisions = useMemo<ProvisionView[]>(
+    () => [...provisions, ...projectedInstallments],
+    [provisions, projectedInstallments],
+  )
+
   const meses = useMemo(() => Array.from({ length: 6 }, (_, i) => {
     const d = getMonthInfo(i)
     const label = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '')
-    const items = provisions.filter(p => {
+    const items = allProvisions.filter(p => {
       if (!p.active) return false
       if (p.type === 'parcela') return (p.installment_current ?? 1) + i <= (p.installment_total ?? 1)
       return true
@@ -45,7 +131,7 @@ export function Provisoes() {
     const compromisso = -items.filter(p => p.amount < 0).reduce((s, p) => s + p.amount, 0)
     const receita = items.filter(p => p.amount > 0).reduce((s, p) => s + p.amount, 0)
     return { label, items, compromisso, receita, total: receita - compromisso, date: d }
-  }), [provisions])
+  }), [allProvisions])
 
   async function handleDelete(id: number) {
     setDeleting(id)
@@ -91,8 +177,8 @@ export function Provisoes() {
       <div className="grid-3">
         <Glass className="stat-card">
           <div className="stat-label">PROVISÕES ATIVAS</div>
-          <div className="stat-val">{provisions.filter(p => p.active).length}</div>
-          <div className="t-xs t-muted">{provisions.filter(p => p.type === 'parcela').length} parcelas · {provisions.filter(p => p.type === 'mensal').length} mensais</div>
+          <div className="stat-val">{allProvisions.filter(p => p.active).length}</div>
+          <div className="t-xs t-muted">{allProvisions.filter(p => p.type === 'parcela').length} parcelas · {projectedInstallments.length} do cartão</div>
         </Glass>
         <Glass className="stat-card">
           <div className="stat-label">COMPROMETIDO / MÊS</div>
@@ -108,7 +194,7 @@ export function Provisoes() {
 
       {view === 'timeline' && <TimelineView meses={meses} sel={selMes} onSel={setSelMes} categories={categories} persons={persons} importing={importing} onImport={handleImportInstallments} onAdd={() => setShowModal(true)} />}
       {view === 'calendario' && <CalendarView mes={meses[0]} categories={categories} />}
-      {view === 'lista' && <ListaView provisions={provisions} categories={categories} persons={persons} deleting={deleting} importing={importing} onImport={handleImportInstallments} onDelete={handleDelete} onAdd={() => setShowModal(true)} />}
+      {view === 'lista' && <ListaView provisions={allProvisions} categories={categories} persons={persons} deleting={deleting} importing={importing} onImport={handleImportInstallments} onDelete={handleDelete} onAdd={() => setShowModal(true)} />}
 
       {showModal && (
         <NovaProvisaoModal
@@ -190,6 +276,7 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
                     <div className="prov-row-meta">
                       {cat && <CategoryChip label={cat.name} color={cat.color} />}
                       {person && <span className="t-xs t-muted">{person.name}</span>}
+                      {p.virtual && <span className="t-xs t-muted">Cartão</span>}
                       <span className="t-xs t-muted">{p.type === 'mensal' ? 'Mensal' : 'Parcela'}</span>
                     </div>
                   </div>
@@ -258,7 +345,7 @@ function CalendarView({ mes, categories }: { mes: any; categories: Category[] })
 // ─── Lista ────────────────────────────────────────────────────────────────────
 
 function ListaView({ provisions, categories, persons, deleting, importing, onImport, onDelete, onAdd }: {
-  provisions: Provision[]; categories: Category[]; persons: Person[]
+  provisions: ProvisionView[]; categories: Category[]; persons: Person[]
   deleting: number | null; importing: boolean; onImport: () => void; onDelete: (id: number) => void; onAdd: () => void
 }) {
   return (
@@ -289,13 +376,17 @@ function ListaView({ provisions, categories, persons, deleting, importing, onImp
             <div key={p.id} className="lista-prov-row lista-prov-grid">
               <div className="t-sm">{p.description}{person ? <span className="t-xs t-muted" style={{ marginLeft: 6 }}>· {person.name}</span> : null}</div>
               <div>{cat ? <CategoryChip label={cat.name} color={cat.color} /> : <span className="t-xs t-muted">—</span>}</div>
-              <div className="t-xs t-muted">{p.type === 'parcela' ? `${p.installment_current}/${p.installment_total}` : 'Mensal'}</div>
+              <div className="t-xs t-muted">{p.type === 'parcela' ? `${p.installment_current}/${p.installment_total}${p.virtual ? ' · cartão' : ''}` : 'Mensal'}</div>
               <div className="t-xs t-muted">dia {p.day}</div>
               <div className={`t-sm${p.amount > 0 ? ' tx-val-pos' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{brl(p.amount)}</div>
               <div>
-                <button className="btn-icon" onClick={() => onDelete(p.id)} disabled={deleting === p.id}>
-                  <Icon name={deleting === p.id ? 'hourglass_empty' : 'delete_outline'} size={16} />
-                </button>
+                {p.virtual ? (
+                  <span className="t-xs t-muted"><Icon name="credit_card" size={14} /></span>
+                ) : (
+                  <button className="btn-icon" onClick={() => onDelete(p.id)} disabled={deleting === p.id}>
+                    <Icon name={deleting === p.id ? 'hourglass_empty' : 'delete_outline'} size={16} />
+                  </button>
+                )}
               </div>
             </div>
           )
