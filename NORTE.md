@@ -71,6 +71,14 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
+- [ ] `[M]` **FEAT.PROV.AUTO.FIXA — Auto-provisão para categorias fixas** · *qualquer um*
+  `auto_provision.py` hoje só age em `category.type == "receita"`. Estender para `type == "fixa"`:
+  ao categorizar uma transação de despesa fixa (Aluguel, Condomínio, Plano de saúde, etc.)
+  com 2+ ocorrências em meses distintos → cria/atualiza provisão mensal automaticamente
+  com valor médio e dia médio, igual ao fluxo de receitas.
+  **Cuidado:** ignorar type="interna" e type="variavel" — só fixas fazem sentido para provisão automática.
+  Arquivo a editar: `backend/app/services/auto_provision.py` (linha 42: condição `category.type != "receita"`).
+
 - [ ] `[P]` **FEAT.META.ICON — Seletor de ícone no cadastro de meta** · *qualquer um*
   Modal "Nova meta" / "Editar meta" não permite escolher ícone — usa fallback por índice.
   Adicionar campo `icon` ao modelo `Goal` (backend + migration), expor no `GoalIn`/`GoalOut`,
