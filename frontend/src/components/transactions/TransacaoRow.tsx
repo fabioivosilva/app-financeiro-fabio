@@ -60,15 +60,17 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
     ? `${tx.installment_current}/${tx.installment_total}`
     : null
 
-  async function handleSelectCategory(categoryId: number) {
+  async function handleSelectCategory(categoryId: number, silent = false) {
     try {
       const chosenCat = categories.find(c => c.id === categoryId)
       await api.put(`/transactions/${tx.id}`, { ...tx, category_id: categoryId, status: 'confirmado' })
       const keyword = tx.description.trim().split(/\s+/).slice(0, 2).join(' ')
       await api.post('/rules/', { keyword, category_id: categoryId, person_id: tx.person_id ?? null, origin: null, goal_id: null })
       const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
-      const sub = updated > 1 ? `+${updated - 1} transação semelhante categorizada` : undefined
-      toast(`Categoria salva: ${chosenCat?.name ?? ''}`, sub)
+      if (!silent && chosenCat) {
+        const sub = updated > 1 ? `+${updated - 1} transação semelhante categorizada` : undefined
+        toast(`Categoria salva: ${chosenCat.name}`, sub)
+      }
       onUpdated?.()
     } catch {
       toast('Erro ao salvar categoria', undefined, 'error')

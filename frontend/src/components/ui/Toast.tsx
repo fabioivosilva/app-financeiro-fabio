@@ -36,7 +36,7 @@ export function ToastProvider() {
   const emit = useCallback((message: string, sub?: string, type: ToastType = 'success') => {
     const id = ++counter
     setToasts(prev => [...prev, { id, message, sub, type }])
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2800)
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000)
   }, [])
 
   useEffect(() => {
