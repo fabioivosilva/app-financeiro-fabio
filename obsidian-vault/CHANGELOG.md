@@ -6,6 +6,10 @@
 
 ## Sessão 2026-05-04 (continuação 4)
 
+- ✅ **BUG.ICON1 — Duplicatas na biblioteca de ícones ao pesquisar** · *Claude.ai · baixa em 2026-05-04*
+  Validado que `frontend/src/components/ui/IconPicker.tsx` não possui mais `id` duplicado em
+  `FINANCIAL_ICONS`; item removido do NORTE.md conforme fluxo de fila viva.
+
 - ✅ **T0.4 — Onboarding de Perfil** · *Claude Code · baixa em 2026-05-04*
   Wizard 3-passos no primeiro acesso: nome → dia do ciclo → bancos.
   Backend: `GET /perfil/` (retorna null se não existe), `POST /perfil/` (salva `data/perfil.json`).

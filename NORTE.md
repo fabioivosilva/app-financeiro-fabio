@@ -5,9 +5,8 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, T0.4, T3.2 fechados (Claude Code).
+STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, BUG.ICON1, T0.4, T3.2 fechados.
              T3.2: aporte manual em metas (modal + POST /goals/{id}/deposit).
-             Novo bug registrado: BUG.ICON1 — duplicatas na biblioteca de ícones.
 BRANCH     : develop
 PRÓXIMA    : T1.3 — Importação Assistida [M] (T_SYNC.1 para o fim)
 CLAIMS     : nenhum
@@ -53,7 +52,7 @@ QUANDO LER MAIS:
 ## 🔒 Claims — Quem está em quê
 
 > Antes de iniciar: marcar `🔒 [NOME]` no item e commitar.
-> Ao fechar: remover 🔒, marcar `[x]`, commitar + push.
+> Ao fechar: remover o item do NORTE.md, registrar no CHANGELOG, commitar + push.
 
 ```bash
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
@@ -67,7 +66,8 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ## 🔴 BUGS BLOQUEANTES — LER ANTES DAS TRILHAS
 
-Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**. O trabalho de amanhã começa em BUG.1.
+Regra de status: item fechado sai do NORTE.md e vai para `obsidian-vault/CHANGELOG.md`.
+Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
@@ -84,11 +84,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Adicionar campo `icon` ao modelo `Goal` (backend + migration), expor no `GoalIn`/`GoalOut`,
   e incluir `<IconPicker>` no `GoalFormModal` (mesmo componente já usado em Configurações).
   `getGoalVisual()` passa a usar `goal.icon` quando preenchido, caindo no fallback por índice só se vazio.
-
-- [ ] `[P]` **BUG.ICON1 — Duplicatas na biblioteca de ícones ao pesquisar** · *qualquer um*
-  Ao digitar no campo de busca do IconPicker (ex: "plr"), o mesmo ícone aparece múltiplas vezes.
-  Causa: `FINANCIAL_ICONS` em `IconPicker.tsx` tem entradas duplicadas (ex: `pets` aparece duas vezes).
-  Fix: deduplicar o array por `id` em `IconPicker.tsx` e remover entradas duplicadas do `FINANCIAL_ICONS`.
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
@@ -221,4 +216,3 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [ ] `[M]` **T8.4** — Hardening desktop (porta aleatória, remoção de debug)
 
 ---
-
