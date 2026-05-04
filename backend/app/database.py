@@ -46,6 +46,22 @@ def _migrate():
                 conn.commit()
         _seed_missing_categories()
 
+    if 'provisions' in inspector.get_table_names():
+        prov_cols = [c['name'] for c in inspector.get_columns('provisions')]
+        with engine.connect() as conn:
+            changed = False
+            if 'person_id' not in prov_cols:
+                conn.execute(text("ALTER TABLE provisions ADD COLUMN person_id INTEGER"))
+                changed = True
+            if 'installment_current' not in prov_cols:
+                conn.execute(text("ALTER TABLE provisions ADD COLUMN installment_current INTEGER"))
+                changed = True
+            if 'installment_total' not in prov_cols:
+                conn.execute(text("ALTER TABLE provisions ADD COLUMN installment_total INTEGER"))
+                changed = True
+            if changed:
+                conn.commit()
+
     # Corrige tipo das categorias existentes (SAEnum → String permite novos tipos)
     with engine.connect() as conn:
         conn.execute(text("UPDATE categories SET type='receita' WHERE name IN ('Receitas','Salário','Freelance','CLT','13°/Bônus','Projetos')"))

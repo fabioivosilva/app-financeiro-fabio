@@ -5,20 +5,14 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04 (3). Provisões 100%: Timeline+Calendário+Lista+Modal
-             com auto-sugestão por regra + pessoa + seg-control da referência.
-             Backend: modelo Provision com person_id + router CRUD completo.
-             PRÓXIMA TAREFA: T_PROV.1 — importar parcelas do cartão como provisões futuras.
+STATUS     : Sessão 2026-05-04 (4). T_PROV.1 concluído: backend importa parcelas
+             pendentes de cartão como provisões futuras, com migration SQLite para
+             `provisions.person_id` e botão/toast na tela Provisões.
+             Ajuste visual extra: alinhamento do botão/contador pendente em Transações.
 BRANCH     : develop
-PRÓXIMA    : T_PROV.1 — Auto-importar parcelas pendentes como provisões [M]
-CLAIMS     : 🔒 [CODEX] T_PROV.1
-BLOCKER    : Tela Provisões mostra "Erro ao carregar provisões". Causa provável: tabela
-             `provisions` no SQLite não tem coluna `person_id` (adicionada depois da criação
-             inicial). Fix: reiniciar o backend — o `init_db()` no startup chama
-             `Base.metadata.create_all()` mas NÃO faz ALTER TABLE em colunas novas.
-             Solução: deletar `data/finance.db` e reiniciar (perde dados locais), OU rodar
-             migration manual: `ALTER TABLE provisions ADD COLUMN person_id INTEGER`.
-             Codex deve resolver isso ANTES de começar T_PROV.1.
+PRÓXIMA    : BUG.2 — Conformidade 100% da referência visual [G]
+CLAIMS     : Nenhum claim ativo no momento.
+BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -86,7 +80,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
 
-- [ ] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** 🔒 [CODEX]
+- [x] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** · *Codex · CONCLUÍDO 2026-05-04*
   **Objetivo:** detectar transações parceladas já importadas e gerar provisões para as parcelas restantes.
 
   **Lógica:**
@@ -113,6 +107,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   - `backend/app/routers/provisions.py` — adicionar rota import-installments
   - `frontend/src/pages/Provisoes.tsx` — botão no header + chamada API + toast
   - `frontend/src/hooks/useProvisoes.ts` — já tem transactions disponível
+  **Resultado Codex:** migration idempotente adiciona `person_id`, `installment_current`
+  e `installment_total` em `provisions`; `POST /provisions/import-installments`
+  agrupa compras parceladas por descrição normalizada, cria a próxima provisão futura
+  sem duplicar e preserva categoria/pessoa; tela Provisões ganhou botão
+  "Importar parcelas pendentes" com toast e refetch.
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint

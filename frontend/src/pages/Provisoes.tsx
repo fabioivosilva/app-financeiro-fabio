@@ -29,6 +29,7 @@ export function Provisoes() {
   const [selMes, setSelMes] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [importing, setImporting] = useState(false)
 
   const meses = useMemo(() => Array.from({ length: 6 }, (_, i) => {
     const d = getMonthInfo(i)
@@ -50,6 +51,18 @@ export function Provisoes() {
     setDeleting(id)
     try { await api.delete(`/provisions/${id}`); toast('Provisão removida'); refetch() }
     finally { setDeleting(null) }
+  }
+
+  async function handleImportInstallments() {
+    setImporting(true)
+    try {
+      const result = await api.post<{ created: number; skipped: number }>('/provisions/import-installments', {})
+      const sub = result.skipped > 0 ? `${result.skipped} compra${result.skipped > 1 ? 's' : ''} já estava${result.skipped > 1 ? 'm' : ''} provisionada${result.skipped > 1 ? 's' : ''}` : undefined
+      toast(`${result.created} provisão${result.created === 1 ? '' : 'es'} criada${result.created === 1 ? '' : 's'}`, sub, result.created > 0 ? 'success' : 'info')
+      refetch()
+    } finally {
+      setImporting(false)
+    }
   }
 
   if (loading) return <div className="page"><Glass><div style={{ padding: 40, textAlign: 'center' }}><Icon name="hourglass_empty" size={32} className="t-muted" /></div></Glass></div>
@@ -93,9 +106,9 @@ export function Provisoes() {
         </Glass>
       </div>
 
-      {view === 'timeline' && <TimelineView meses={meses} sel={selMes} onSel={setSelMes} categories={categories} persons={persons} onAdd={() => setShowModal(true)} />}
+      {view === 'timeline' && <TimelineView meses={meses} sel={selMes} onSel={setSelMes} categories={categories} persons={persons} importing={importing} onImport={handleImportInstallments} onAdd={() => setShowModal(true)} />}
       {view === 'calendario' && <CalendarView mes={meses[0]} categories={categories} />}
-      {view === 'lista' && <ListaView provisions={provisions} categories={categories} persons={persons} deleting={deleting} onDelete={handleDelete} onAdd={() => setShowModal(true)} />}
+      {view === 'lista' && <ListaView provisions={provisions} categories={categories} persons={persons} deleting={deleting} importing={importing} onImport={handleImportInstallments} onDelete={handleDelete} onAdd={() => setShowModal(true)} />}
 
       {showModal && (
         <NovaProvisaoModal
@@ -112,9 +125,9 @@ export function Provisoes() {
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
-function TimelineView({ meses, sel, onSel, categories, persons, onAdd }: {
+function TimelineView({ meses, sel, onSel, categories, persons, importing, onImport, onAdd }: {
   meses: any[]; sel: number; onSel: (i: number) => void
-  categories: Category[]; persons: Person[]; onAdd: () => void
+  categories: Category[]; persons: Person[]; importing: boolean; onImport: () => void; onAdd: () => void
 }) {
   const m = meses[sel]
   const today = new Date().getDate()
@@ -142,7 +155,15 @@ function TimelineView({ meses, sel, onSel, categories, persons, onAdd }: {
         <SectionHeader
           title={`Eventos em ${m?.label}`}
           hint={`${m?.items.length ?? 0} ocorrências · saldo ${m?.total >= 0 ? '+' : ''}${brl(m?.total ?? 0)}`}
-          right={<button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>}
+          right={
+            <div className="section-actions">
+              <button className="btn-ghost" onClick={onImport} disabled={importing}>
+                <Icon name={importing ? 'hourglass_empty' : 'credit_card'} size={14} />
+                {importing ? 'Importando...' : 'Importar parcelas pendentes'}
+              </button>
+              <button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>
+            </div>
+          }
         />
         {!m?.items.length ? (
           <div className="empty-state-mini">
@@ -236,15 +257,21 @@ function CalendarView({ mes, categories }: { mes: any; categories: Category[] })
 
 // ─── Lista ────────────────────────────────────────────────────────────────────
 
-function ListaView({ provisions, categories, persons, deleting, onDelete, onAdd }: {
+function ListaView({ provisions, categories, persons, deleting, importing, onImport, onDelete, onAdd }: {
   provisions: Provision[]; categories: Category[]; persons: Person[]
-  deleting: number | null; onDelete: (id: number) => void; onAdd: () => void
+  deleting: number | null; importing: boolean; onImport: () => void; onDelete: (id: number) => void; onAdd: () => void
 }) {
   return (
     <Glass padded={false}>
       <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(192,132,252,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="t-sm" style={{ fontWeight: 600 }}>Todas as provisões</span>
-        <button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>
+        <div className="section-actions">
+          <button className="btn-ghost" onClick={onImport} disabled={importing}>
+            <Icon name={importing ? 'hourglass_empty' : 'credit_card'} size={14} />
+            {importing ? 'Importando...' : 'Importar parcelas pendentes'}
+          </button>
+          <button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>
+        </div>
       </div>
       <div className="lista-prov">
         <div className="lista-prov-head lista-prov-grid">

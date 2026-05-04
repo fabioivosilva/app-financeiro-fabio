@@ -9,6 +9,7 @@ export interface Provision {
   day: number
   type: 'mensal' | 'parcela'
   category_id?: number
+  person_id?: number
   active: boolean
   installment_current?: number
   installment_total?: number
