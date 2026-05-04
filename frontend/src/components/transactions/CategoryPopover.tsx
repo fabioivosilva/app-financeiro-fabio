@@ -266,10 +266,6 @@ export function CategoryPopover({ categories, persons = [], currentId, onSelect,
             Nova categoria
           </button>
         )}
-        <button className="btn-ghost" onMouseDown={e => e.stopPropagation()} onClick={() => { onCreateRule(); onClose() }}>
-          <Icon name="rule" size={14} />
-          Criar regra automática
-        </button>
       </div>
     </div>
   )
