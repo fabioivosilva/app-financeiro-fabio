@@ -5,11 +5,12 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.D1 fechado (Claude Code). Dashboard agora filtra pelo ciclo
-             27→26 via getCycleInfo(); provisoesRestantes conectado à API real.
-             BUG.PR1 (Provisões) é o próximo item de alta prioridade.
+STATUS     : Sessão 2026-05-04. BUG.D1 e BUG.PR1 fechados (Claude Code).
+             Provisões: editar, desativar, filtro por tipo, vincular removido, dia 1-31.
+             Dashboard: filtro de ciclo corrigido, provisoesRestantes conectado.
+             Bugs de Config resolvidos: ícones de categoria e toast duplicado.
 BRANCH     : develop
-PRÓXIMA    : BUG.PR1 — Tela de Provisões com pendências [M]
+PRÓXIMA    : T_SYNC.1 — Auto-sync regras/categorias Fabio↔Thiago [M]
 CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
@@ -135,11 +136,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
 - **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
 - **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
-
-- [ ] `[M]` **BUG.PR1 — Tela de Provisões com pendências** · *qualquer um · ALTA prioridade*
-  Vários pontos pendentes na tela de Provisões — Fabio relatou em 2026-05-04.
-  Auditar `frontend/src/pages/Provisoes.tsx` (544 linhas) contra a referência visual e
-  comportamento esperado: criação, recorrência, vinculação a transações, exibição.
 
 ### TRILHA 0 — Fundação
 

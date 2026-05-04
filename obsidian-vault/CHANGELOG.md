@@ -4,6 +4,17 @@
 
 
 
+## Sessão 2026-05-04 (continuação 2)
+
+- ✅ **BUG.PR1 — Tela de Provisões completa** · *Claude Code · baixa em 2026-05-04*
+  - Editar provisão: modal `ProvisaoModal` reutilizado com dados pré-preenchidos; chama `PUT /provisions/{id}`
+  - Desativar/reativar: botão na lista, toggle do campo `active`; inativas ficam opacidade 0.45 + "(inativa)"
+  - Filtro de categorias por tipo: despesa → fixa/variavel, receita → receita; troca de tipo limpa seleção
+  - Botão "Vincular" removido (sem FK provision→transaction); substituído por "Editar" na timeline
+  - Limite de dia corrigido: 1–31 no input e no backend `import-installments` (era 1–28)
+  - Stats card mostra inativas quando > 0
+  - Files: `frontend/src/pages/Provisoes.tsx`, `backend/app/routers/provisions.py`
+
 ## Sessão 2026-05-04 (continuação)
 
 - ✅ **BUG.D1 — Dashboard filtra pelo ciclo 27→26** · *Claude Code · baixa em 2026-05-04*
