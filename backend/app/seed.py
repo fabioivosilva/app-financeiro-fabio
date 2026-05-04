@@ -33,19 +33,19 @@ def seed():
 
     # Categorias fixas
     cats_fixas = [
-        Category(name="Moradia",    color="#6366f1", limit_value=3000.0, type="fixa"),
-        Category(name="Transporte", color="#8b5cf6", limit_value=800.0,  type="fixa"),
-        Category(name="Saúde",      color="#ec4899", limit_value=500.0,  type="fixa"),
-        Category(name="Educação",   color="#14b8a6", limit_value=600.0,  type="fixa"),
+        Category(name="Moradia",    color="#6366f1", limit_value=3000.0, type="fixa",    icon="home"),
+        Category(name="Transporte", color="#8b5cf6", limit_value=800.0,  type="fixa",    icon="directions_car"),
+        Category(name="Saúde",      color="#ec4899", limit_value=500.0,  type="fixa",    icon="health_and_safety"),
+        Category(name="Educação",   color="#14b8a6", limit_value=600.0,  type="fixa",    icon="school"),
     ]
     # Categorias variáveis
     cats_var = [
-        Category(name="Alimentação", color="#f97316", limit_value=1200.0, type="variavel"),
-        Category(name="iFood",       color="#ef4444", limit_value=400.0,  type="variavel"),
-        Category(name="Mercado",     color="#22c55e", limit_value=800.0,  type="variavel"),
-        Category(name="Farmácia",    color="#06b6d4", limit_value=200.0,  type="variavel"),
-        Category(name="Lazer",       color="#a855f7", limit_value=500.0,  type="variavel"),
-        Category(name="Outros",      color="#78716c", limit_value=None,   type="variavel"),
+        Category(name="Alimentação", color="#f97316", limit_value=1200.0, type="variavel", icon="restaurant"),
+        Category(name="iFood",       color="#ef4444", limit_value=400.0,  type="variavel", icon="local_pizza"),
+        Category(name="Mercado",     color="#22c55e", limit_value=800.0,  type="variavel", icon="shopping_basket"),
+        Category(name="Farmácia",    color="#06b6d4", limit_value=200.0,  type="variavel", icon="medication"),
+        Category(name="Lazer",       color="#a855f7", limit_value=500.0,  type="variavel", icon="sports_esports"),
+        Category(name="Outros",      color="#78716c", limit_value=None,   type="variavel", icon="help"),
     ]
     db.add_all(cats_fixas + cats_var)
     db.flush()

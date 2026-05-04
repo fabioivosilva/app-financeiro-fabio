@@ -72,6 +72,9 @@ def _migrate():
         conn.execute(text("UPDATE categories SET type='interna', exclude_totals=1 WHERE name IN ('Transferência','Entre contas','Cofrinho')"))
         conn.commit()
 
+    # Atualiza ícones das categorias conhecidas (icon='label' = padrão sem escolha)
+    _migrate_icons()
+
     # Torna person_id nullable em cards (recria tabela se necessário)
     if 'cards' in inspector.get_table_names():
         col_info = {c['name']: c for c in inspector.get_columns('cards')}
@@ -92,6 +95,74 @@ def _migrate():
                 conn.commit()
 
 
+_ICON_MAP: dict[str, str] = {
+    # Principais
+    'Moradia':        'home',
+    'Transporte':     'directions_car',
+    'Saúde':          'health_and_safety',
+    'Educação':       'school',
+    'Alimentação':    'restaurant',
+    'iFood':          'local_pizza',
+    'Mercado':        'shopping_basket',
+    'Farmácia':       'medication',
+    'Lazer':          'sports_esports',
+    'Outros':         'help',
+    # Receitas
+    'Receitas':       'attach_money',
+    'Salário':        'attach_money',
+    'CLT':            'work',
+    '13°/Bônus':      'card_giftcard',
+    'Freelance':      'work',
+    'Projetos':       'work',
+    # Internas
+    'Transferência':  'account_balance',
+    'Entre contas':   'account_balance',
+    'Cofrinho':       'savings',
+    # Subcategorias Moradia
+    'Aluguel':        'home',
+    'Condomínio':     'apartment',
+    'Luz':            'bolt',
+    'Internet/TV':    'wifi',
+    # Subcategorias Saúde
+    'Plano de saúde': 'medical_services',
+    'Academia':       'fitness_center',
+    # Subcategorias Educação
+    'Cursos online':  'menu_book',
+    # Assinaturas
+    'Assinaturas':    'credit_card',
+    'Streaming':      'movie',
+    'Música':         'music_note',
+    'Software':       'devices',
+    # Subcategorias Alimentação
+    'Restaurante':    'lunch_dining',
+    'Delivery':       'fastfood',
+    'Café/Lanche':    'coffee',
+    # Subcategorias Mercado
+    'Supermercado':   'shopping_basket',
+    'Feira':          'shopping_basket',
+    'Padaria':        'coffee',
+    # Subcategorias Transporte
+    'Apps':           'local_taxi',
+    'Combustível':    'local_gas_station',
+    'Estacionamento': 'local_parking',
+    # Subcategorias Lazer
+    'Cinema/Teatro':  'movie',
+    'Viagem':         'flight',
+    'Hobbies':        'park',
+}
+
+
+def _migrate_icons():
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        for name, icon in _ICON_MAP.items():
+            conn.execute(
+                text("UPDATE categories SET icon=:icon WHERE name=:name AND (icon IS NULL OR icon='label')"),
+                {'icon': icon, 'name': name},
+            )
+        conn.commit()
+
+
 def _seed_missing_categories():
     """Insere categorias faltantes (Receitas, Internas e subcategorias) sem duplicar."""
     from sqlalchemy import text
@@ -106,10 +177,11 @@ def _seed_missing_categories():
                 row = conn.execute(text("SELECT id FROM categories WHERE name=:n"), {"n": parent_name}).fetchone()
                 if row:
                     parent_id = row[0]
+            icon = _ICON_MAP.get(name, 'label')
             conn.execute(text(
-                "INSERT INTO categories (name, color, type, limit_value, parent_id, exclude_totals) "
-                "VALUES (:name, :color, :type, :limit, :parent, :excl)"
-            ), {"name": name, "color": color, "type": type_, "limit": limit, "parent": parent_id, "excl": 1 if exclude else 0})
+                "INSERT INTO categories (name, color, type, limit_value, parent_id, exclude_totals, icon) "
+                "VALUES (:name, :color, :type, :limit, :parent, :excl, :icon)"
+            ), {"name": name, "color": color, "type": type_, "limit": limit, "parent": parent_id, "excl": 1 if exclude else 0, "icon": icon})
             existing.add(name)
 
         # ── Receitas ──────────────────────────────────────────────────────────

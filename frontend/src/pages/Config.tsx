@@ -39,18 +39,16 @@ export function Config() {
 
   const [bancosAtivos, setBancosAtivos] = useState<string[]>(loadBancosAtivos)
   function toggleBanco(id: string) {
-    setBancosAtivos(prev => {
-      const ativando = !prev.includes(id)
-      const next = ativando ? [...prev, id] : prev.filter(b => b !== id)
-      localStorage.setItem(BANKS_STORAGE_KEY, JSON.stringify(next))
-      const banco = BANCOS_DISPONIVEIS.find(b => b.id === id)
-      toast(
-        ativando ? `${banco?.label ?? id} ativado` : `${banco?.label ?? id} desativado`,
-        ativando ? 'Formatos de importação habilitados' : 'Removido da importação',
-        ativando ? 'success' : 'info'
-      )
-      return next
-    })
+    const ativando = !bancosAtivos.includes(id)
+    const next = ativando ? [...bancosAtivos, id] : bancosAtivos.filter(b => b !== id)
+    localStorage.setItem(BANKS_STORAGE_KEY, JSON.stringify(next))
+    setBancosAtivos(next)
+    const banco = BANCOS_DISPONIVEIS.find(b => b.id === id)
+    toast(
+      ativando ? `${banco?.label ?? id} ativado` : `${banco?.label ?? id} desativado`,
+      ativando ? 'Formatos de importação habilitados' : 'Removido da importação',
+      ativando ? 'success' : 'info'
+    )
   }
 
   const [personModal, setPersonModal] = useState<{ open: boolean; editing?: Person }>({ open: false })
