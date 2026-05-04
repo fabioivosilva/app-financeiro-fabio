@@ -134,6 +134,7 @@ export function Metas() {
             setSelected(null)
           }}
           onDelete={deleteGoal}
+          onAported={refresh}
         />
       )}
 
@@ -167,12 +168,14 @@ interface DetailProps {
   goalIndex: number
   onClose: () => void
   onEdit: () => void
+  onAported: () => void
   onDelete: (id: number) => Promise<void>
 }
 
-function MetaDetailModal({ goal, categories, goalIndex, onClose, onEdit, onDelete }: DetailProps) {
+function MetaDetailModal({ goal, categories, goalIndex, onClose, onEdit, onDelete, onAported }: DetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showAporte, setShowAporte] = useState(false)
   const [aportes, setAportes] = useState<{ id: number; date: string; amount: number; description: string }[]>([])
   const visual = getGoalVisual(goal, categories, goalIndex)
 
@@ -264,10 +267,24 @@ function MetaDetailModal({ goal, categories, goalIndex, onClose, onEdit, onDelet
             </div>
           )}
 
-          <button className="meta-add-aporte" type="button">
+          <button className="meta-add-aporte" type="button" onClick={() => setShowAporte(true)}>
             <Icon name="add_circle" size={18} />
             <span>Fazer aporte manual</span>
           </button>
+
+          {showAporte && (
+            <AporteModal
+              goal={goal}
+              onClose={() => setShowAporte(false)}
+              onSaved={() => {
+                setShowAporte(false)
+                onAported()
+                api.get<{ id: number; date: string; amount: number; description: string }[]>(
+                  `/transactions/?goal_id=${goal.id}`
+                ).then(txs => setAportes((txs ?? []).slice(0, 8)))
+              }}
+            />
+          )}
         </div>
 
         <div className="modal-foot modal-foot-split">
@@ -449,4 +466,48 @@ function monthsUntil(value?: string) {
   const target = new Date(value + 'T00:00:00')
   const months = (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth()
   return Math.max(months, 0)
+}
+
+function AporteModal({ goal, onClose, onSaved }: { goal: Goal; onClose: () => void; onSaved: () => void }) {
+  const [valor, setValor] = useState('')
+  const [desc, setDesc] = useState('Aporte Manual')
+  const [data, setData] = useState(new Date().toISOString().slice(0, 10))
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    const amount = parseFloat(valor.replace(',', '.'))
+    if (!amount || amount <= 0) return
+    setSaving(true)
+    try {
+      await api.post(`/goals/${goal.id}/deposit`, { amount, description: desc || 'Aporte Manual', date: data })
+      onSaved()
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <Modal open onClose={onClose} title="Registrar aporte"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button variant="primary" onClick={handleSave} disabled={saving || !valor}>
+            {saving ? 'Salvando...' : 'Registrar'}
+          </Button>
+        </>
+      }
+    >
+      <div className="cfg-field">
+        <label className="cfg-label">Valor (R$)</label>
+        <input autoFocus className="cfg-input" placeholder="0,00" value={valor}
+          onChange={e => setValor(e.target.value)} style={{ fontFamily: 'ui-monospace, monospace' }} />
+      </div>
+      <div className="cfg-field">
+        <label className="cfg-label">Descrição</label>
+        <input className="cfg-input" value={desc} onChange={e => setDesc(e.target.value)} />
+      </div>
+      <div className="cfg-field">
+        <label className="cfg-label">Data</label>
+        <input type="date" className="cfg-input" value={data} onChange={e => setData(e.target.value)} />
+      </div>
+    </Modal>
+  )
 }

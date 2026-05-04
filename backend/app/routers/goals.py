@@ -77,6 +77,30 @@ def update_goal(id: int, data: GoalIn, db: Session = Depends(get_db)):
     return _goal_out(goal, db)
 
 
+class DepositIn(BaseModel):
+    amount: float
+    description: str = "Aporte Manual"
+    date: Optional[date] = None
+
+
+@router.post("/{id}/deposit", response_model=GoalOut, status_code=201)
+def deposit(id: int, data: DepositIn, db: Session = Depends(get_db)):
+    goal = db.query(Goal).get(id)
+    if not goal:
+        raise HTTPException(404)
+    tx = Transaction(
+        date=data.date or date.today(),
+        description=data.description,
+        amount=abs(data.amount),
+        goal_id=id,
+        origin="Aporte Manual",
+        status="confirmado",
+    )
+    db.add(tx)
+    db.commit()
+    return _goal_out(goal, db)
+
+
 @router.delete("/{id}", status_code=204)
 def delete_goal(id: int, db: Session = Depends(get_db)):
     goal = db.query(Goal).get(id)
