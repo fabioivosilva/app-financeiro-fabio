@@ -555,13 +555,33 @@ function SistemaSection() {
           <div className="cfg-field">
             <label className="cfg-label"><Icon name="folder" size={16} /> Pasta de importação padrão</label>
             <div className="cfg-hint">Caminho onde o app procura novos extratos automaticamente</div>
-            <input
-              className="cfg-input"
-              value={pasta}
-              onChange={e => setPasta(e.target.value)}
-              placeholder="C:\Users\...\Financeiro\Importacoes"
-              style={{ userSelect: 'text', pointerEvents: 'auto' }}
-            />
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                className="cfg-input"
+                value={pasta}
+                onChange={e => setPasta(e.target.value)}
+                placeholder="C:\Users\...\Financeiro\Importacoes"
+                style={{ userSelect: 'text', pointerEvents: 'auto' }}
+              />
+              <button
+                className="btn-ghost"
+                style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                onClick={async () => {
+                  try {
+                    // @ts-ignore — File System Access API
+                    const dir = await window.showDirectoryPicker({ mode: 'read' })
+                    // Browser não expõe caminho completo — pré-preenche o nome para o usuário completar
+                    if (!pasta) setPasta(dir.name)
+                    else setPasta(p => p.endsWith('\\') || p.endsWith('/') ? p + dir.name : p + '\\' + dir.name)
+                  } catch {
+                    // usuário cancelou
+                  }
+                }}
+              >
+                <Icon name="folder_open" size={15} />
+                Procurar
+              </button>
+            </div>
           </div>
           <div className="cfg-field">
             <label className="cfg-label"><Icon name="event" size={16} /> Dia de início do ciclo</label>
