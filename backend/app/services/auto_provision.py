@@ -19,7 +19,7 @@ def _safe_day(transactions: list[Transaction]) -> int:
     if not transactions:
         return 1
     avg = sum(t.date.day for t in transactions) / len(transactions)
-    return max(1, min(28, round(avg)))
+    return max(1, min(31, round(avg)))
 
 
 def _avg_amount(transactions: list[Transaction]) -> float:
