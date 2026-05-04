@@ -25,7 +25,7 @@ Role mais abaixo so se precisar do detalhe do item escolhido.
 - UI/componentes: abrir primeiro `C:\Users\fabio\Downloads\App-financeiro`
 - Resumo UI: `obsidian-vault/07_UX_REFERENCE.md`
 - Parsers: `obsidian-vault/08_PARSERS.md`
-- Onboarding Thiago: `obsidian-vault/THIAGO_SETUP.md`
+- Itens concluídos: `obsidian-vault/CHANGELOG.md`
 
 ## Fechamento
 
