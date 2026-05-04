@@ -121,20 +121,35 @@ export function Config() {
 
   async function deletePerson(id: number) {
     if (!confirm('Remover pessoa?')) return
-    await api.delete(`/persons/${id}`)
-    load()
+    try {
+      await api.delete(`/persons/${id}`)
+      toast('Pessoa removida', undefined, 'info')
+      load()
+    } catch {
+      toast('Erro ao remover pessoa', undefined, 'error')
+    }
   }
 
   async function deleteCard(id: number) {
     if (!confirm('Remover cartão?')) return
-    await api.delete(`/cards/${id}`)
-    load()
+    try {
+      await api.delete(`/cards/${id}`)
+      toast('Cartão removido', undefined, 'info')
+      load()
+    } catch {
+      toast('Erro ao remover cartão', undefined, 'error')
+    }
   }
 
   async function deleteCategory(id: number) {
     if (!confirm('Remover categoria?')) return
-    await api.delete(`/categories/${id}`)
-    load()
+    try {
+      await api.delete(`/categories/${id}`)
+      toast('Categoria removida', undefined, 'info')
+      load()
+    } catch {
+      toast('Erro ao remover categoria', undefined, 'error')
+    }
   }
 
   const navItems = [
@@ -541,11 +556,12 @@ function SistemaSection() {
 
   function handleSave() {
     localStorage.setItem('importFolder', pasta)
-    const day = String(Math.min(28, Math.max(1, diaCiclo)))
+    const day = String(Math.min(31, Math.max(1, diaCiclo)))
     localStorage.setItem('cycleDayStart', day)
     window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: day }))
     setJustSaved(true)
     setTimeout(() => setJustSaved(false), 2000)
+    toast('Configurações salvas', `Pasta e ciclo (dia ${day}) atualizados`)
   }
 
   return (
@@ -629,6 +645,9 @@ function ZonaPerigoSection() {
       await api.delete('/transactions/')
       setConfirmando(false)
       setTexto('')
+      toast('Transações apagadas', 'Banco de dados limpo', 'info')
+    } catch {
+      toast('Erro ao apagar transações', undefined, 'error')
     } finally {
       setClearing(false)
     }
@@ -704,9 +723,16 @@ function PersonModal({ open, editing, onClose, onSaved }: { open: boolean; editi
     if (!name.trim()) return
     setSaving(true)
     try {
-      if (editing) await api.put(`/persons/${editing.id}`, { name: name.trim() })
-      else await api.post('/persons/', { name: name.trim() })
+      if (editing) {
+        await api.put(`/persons/${editing.id}`, { name: name.trim() })
+        toast('Pessoa atualizada', name.trim())
+      } else {
+        await api.post('/persons/', { name: name.trim() })
+        toast('Pessoa criada', name.trim())
+      }
       onSaved(); onClose()
+    } catch {
+      toast('Erro ao salvar pessoa', undefined, 'error')
     } finally { setSaving(false) }
   }
 
@@ -745,9 +771,16 @@ function CardModal({ open, editing, persons, onClose, onSaved }: { open: boolean
     setSaving(true)
     try {
       const payload = { name: name.trim(), last4: last4.trim() || null, person_id: Number(personId) || null, limit_value: limitValue ? Number(limitValue) : null }
-      if (editing) await api.put(`/cards/${editing.id}`, payload)
-      else await api.post('/cards/', payload)
+      if (editing) {
+        await api.put(`/cards/${editing.id}`, payload)
+        toast('Cartão atualizado', name.trim())
+      } else {
+        await api.post('/cards/', payload)
+        toast('Cartão criado', name.trim())
+      }
       onSaved(); onClose()
+    } catch {
+      toast('Erro ao salvar cartão', undefined, 'error')
     } finally { setSaving(false) }
   }
 
@@ -811,9 +844,16 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
         limit_value: limitValue ? Number(limitValue) : null,
         parent_id: parentId ?? editing?.parent_id ?? null,
       }
-      if (editing) await api.put(`/categories/${editing.id}`, payload)
-      else await api.post('/categories/', payload)
+      if (editing) {
+        await api.put(`/categories/${editing.id}`, payload)
+        toast('Categoria atualizada', name.trim())
+      } else {
+        await api.post('/categories/', payload)
+        toast('Categoria criada', name.trim())
+      }
       onSaved(); onClose()
+    } catch {
+      toast('Erro ao salvar categoria', undefined, 'error')
     } finally { setSaving(false) }
   }
 

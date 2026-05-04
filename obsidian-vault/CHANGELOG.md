@@ -5,6 +5,12 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **CFG.TOAST — Feedback de salvamento em todas as ações de Configurações** · *Claude.ai · baixa em 2026-05-04*
+  Adicionado toast em: deletePerson, deleteCard, deleteCategory, PersonModal/CardModal/CategoryModal save,
+  SistemaSection save (pasta+ciclo), Zona de Perigo (apagar transações). Erros também notificados.
+  Fix bonus: SistemaSection.handleSave estava com clamp Math.min(28) — corrigido para 31 alinhado ao
+  fix do input em BUG.CFG.1.
+
 - ✅ **AUTO.RECEITA — Receitas recorrentes viram provisão automaticamente** · *Claude.ai · baixa em 2026-05-04*
   Ao categorizar uma transação em subcategoria de receita (`type='receita'`), o backend detecta
   recorrência por (categoria, dono) e cria/atualiza provisão mensal automaticamente. Mínimo 2
