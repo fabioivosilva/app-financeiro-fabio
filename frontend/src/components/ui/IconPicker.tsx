@@ -90,8 +90,6 @@ export const FINANCIAL_ICONS: IconOption[] = [
   { id: 'shield',              keywords: 'seguro proteção' },
   { id: 'description',         keywords: 'documento contrato' },
 
-  // Outros
-  { id: 'pets',                keywords: 'pet animal' },
   { id: 'volunteer_activism',  keywords: 'doação caridade' },
   { id: 'baby_changing_station', keywords: 'bebê filho criança' },
   { id: 'cake',                keywords: 'aniversário comemoração' },
