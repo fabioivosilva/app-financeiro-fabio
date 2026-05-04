@@ -40,6 +40,10 @@ export function Transacoes() {
   const filters = { month: cycle.month, year: cycle.year }
 
   const { transactions, categories, persons, rules, loading, error, refetch } = useTransacoes(filters)
+  // Inbox sempre carrega TODAS as pendentes, sem filtro de ciclo
+  const { transactions: allPending, loading: loadingInbox, error: errorInbox } = useTransacoes(
+    tab === 'inbox' ? { status: 'pendente' } : filters
+  )
 
   const filtered = useMemo(() => {
     let list = [...transactions]
@@ -81,10 +85,12 @@ export function Transacoes() {
     ordem.startsWith('data') ? groupByDate(filtered) : [['__flat', filtered] as [string, typeof filtered]]
   ), [filtered, ordem])
   const pendingTransactions = useMemo(
-    () => transactions.filter(isTransactionPending).sort((a, b) => b.date.localeCompare(a.date)),
-    [transactions],
+    () => allPending.filter(isTransactionPending).sort((a, b) => b.date.localeCompare(a.date)),
+    [allPending],
   )
-  const pendentes = pendingTransactions.length
+  // Contador de pendentes usa todas as transações sem filtro de ciclo
+  const { transactions: allTx } = useTransacoes({})
+  const pendentes = useMemo(() => allTx.filter(isTransactionPending).length, [allTx])
   const totalGastos = filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
   const filtrosAtivos = [filtroCat, filtroPessoa, filtroValor, filtroData, filtroStatus].filter(Boolean).length
 
@@ -95,8 +101,8 @@ export function Transacoes() {
         categories={categories}
         persons={persons}
         rules={rules}
-        loading={loading}
-        error={error}
+        loading={loadingInbox}
+        error={errorInbox}
         onClose={() => setTab('todas')}
         onUpdated={refetch}
       />
