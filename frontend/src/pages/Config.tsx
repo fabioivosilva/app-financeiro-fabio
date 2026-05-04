@@ -523,17 +523,23 @@ function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
 // ─── Sistema ────────────────────────────────────────────────────────────────���──
 
 function SistemaSection() {
-  const [pasta, setPasta] = useState(() => localStorage.getItem('importFolder') ?? '')
-  const [diaCiclo, setDiaCiclo] = useState(() => Number(localStorage.getItem('cycleDayStart') ?? '27'))
-  const [saved, setSaved] = useState(false)
+  const savedPasta = localStorage.getItem('importFolder') ?? ''
+  const savedDia = Number(localStorage.getItem('cycleDayStart') ?? '27')
+
+  const [pasta, setPasta] = useState(savedPasta)
+  const [diaCiclo, setDiaCiclo] = useState(savedDia)
+  const [justSaved, setJustSaved] = useState(false)
+
+  const dirty = pasta !== (localStorage.getItem('importFolder') ?? '') ||
+                diaCiclo !== Number(localStorage.getItem('cycleDayStart') ?? '27')
 
   function handleSave() {
     localStorage.setItem('importFolder', pasta)
     const day = String(Math.min(28, Math.max(1, diaCiclo)))
     localStorage.setItem('cycleDayStart', day)
     window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: day }))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2000)
   }
 
   return (
@@ -549,14 +555,13 @@ function SistemaSection() {
           <div className="cfg-field">
             <label className="cfg-label"><Icon name="folder" size={16} /> Pasta de importação padrão</label>
             <div className="cfg-hint">Caminho onde o app procura novos extratos automaticamente</div>
-            <div className="cfg-input-row">
-              <input
-                className="cfg-input"
-                value={pasta}
-                onChange={e => setPasta(e.target.value)}
-                placeholder="C:\Users\...\Financeiro\Importacoes"
-              />
-            </div>
+            <input
+              className="cfg-input"
+              value={pasta}
+              onChange={e => setPasta(e.target.value)}
+              placeholder="C:\Users\...\Financeiro\Importacoes"
+              style={{ userSelect: 'text', pointerEvents: 'auto' }}
+            />
           </div>
           <div className="cfg-field">
             <label className="cfg-label"><Icon name="event" size={16} /> Dia de início do ciclo</label>
@@ -567,8 +572,14 @@ function SistemaSection() {
             </div>
           </div>
           <div className="cfg-form-foot">
-            <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px' }} onClick={handleSave}>
-              <Icon name={saved ? 'check' : 'save'} size={14} /> {saved ? 'Salvo!' : 'Salvar alterações'}
+            <button
+              className="btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px', opacity: dirty || justSaved ? 1 : 0.4 }}
+              onClick={handleSave}
+              disabled={!dirty && !justSaved}
+            >
+              <Icon name={justSaved ? 'check' : 'save'} size={14} />
+              {justSaved ? 'Salvo!' : 'Salvar alterações'}
             </button>
           </div>
         </div>
