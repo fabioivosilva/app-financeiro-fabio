@@ -96,14 +96,19 @@ export function Config() {
     }
     const target = map[id]?.current
     if (!target) return
-    // Scroll the nearest scrollable ancestor (.app-main), not just the element
-    const container = target.closest('.app-main') as HTMLElement | null
-    if (container) {
-      const offset = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 16
-      container.scrollTo({ top: offset, behavior: 'smooth' })
-    } else {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // Walk up the DOM to find the scrollable container and accumulate offsetTop
+    let el: HTMLElement | null = target
+    let offsetTop = 0
+    while (el && el !== document.body) {
+      offsetTop += el.offsetTop
+      const parent = el.offsetParent as HTMLElement | null
+      if (parent && getComputedStyle(parent).overflowY !== 'visible') {
+        parent.scrollTo({ top: offsetTop - 16, behavior: 'smooth' })
+        return
+      }
+      el = parent
     }
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   async function deletePerson(id: number) {
