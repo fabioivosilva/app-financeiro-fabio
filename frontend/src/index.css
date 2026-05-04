@@ -640,12 +640,24 @@ body::before {
   color: var(--text-muted); font-size: 12px;
 }
 .cat-popover-foot {
-  padding: 8px;
-  border-top: 1px solid rgba(192,132,252,0.08);
+  padding: 6px 8px; border-top: 1px solid rgba(192,132,252,0.08);
+  display: flex; flex-direction: column; gap: 2px;
 }
 .cat-popover-foot .btn-ghost {
   width: 100%; justify-content: center; font-size: 11px;
 }
+.cat-create-form {
+  padding: 10px 12px; border-top: 1px solid rgba(192,132,252,0.1);
+  background: rgba(130,10,209,0.05); display: flex; flex-direction: column; gap: 7px;
+}
+.cat-create-input, .cat-create-select {
+  width: 100%; padding: 7px 10px; border-radius: 8px;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(192,132,252,0.2);
+  color: var(--text); font: inherit; font-size: 12px; outline: none;
+}
+.cat-create-input:focus, .cat-create-select:focus { border-color: rgba(192,132,252,0.5); }
+.cat-create-select option { background: #1c1433; }
+.cat-create-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .empty-state-mini {
   padding: 60px 20px; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
