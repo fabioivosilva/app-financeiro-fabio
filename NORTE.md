@@ -138,6 +138,12 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 6 — Configurações & Sync
 
+- [ ] `[G]` **T_SYNC.2 — Sync automático de regras via repositório** · *qualquer um*
+  Ao criar/editar regra ou categoria, gravar `data/sync_rules.json` e commitar no repo automaticamente.
+  Outros usuários fazem `git pull` ou clicam "Sync" e o app aplica regras novas sem sobrescrever categorizações manuais.
+  Pré-req: base de categorias com nomes idênticos entre usuários. Ganho: categorização de um beneficia todos.
+  Config mostra apenas data/hora do último sync (tapume atual já entregue).
+
 - [ ] `[P]` **FEAT.CFG.CARDS.UX — UX da lista de cartões com muitos itens** · *qualquer um*
   Muitos cartões → lista imensa. Adicionar busca/filtro ou colapso para listas longas.
 
