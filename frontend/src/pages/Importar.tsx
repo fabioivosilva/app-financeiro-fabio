@@ -255,9 +255,9 @@ export function Importar() {
 
       {/* Modal de senha para PDF protegido */}
       {pendingPdfFiles && (
-        <div className="modal-overlay" onClick={() => setPendingPdfFiles(null)}>
+        <div className="modal-backdrop" onClick={() => setPendingPdfFiles(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+            <div className="modal-head">
               <span className="modal-title">PDF protegido por senha</span>
               <button className="btn-icon" onClick={() => setPendingPdfFiles(null)}>
                 <Icon name="close" size={20} />
@@ -269,7 +269,7 @@ export function Importar() {
               </div>
               <input
                 type="password"
-                className="input"
+                className="cfg-input"
                 placeholder="Senha do PDF"
                 value={pdfPassword}
                 onChange={e => setPdfPassword(e.target.value)}
@@ -278,10 +278,10 @@ export function Importar() {
               />
               {passwordError && <div className="t-sm" style={{ color: '#F87171' }}>{passwordError}</div>}
             </div>
-            <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setPendingPdfFiles(null)}>Cancelar</button>
+            <div className="modal-foot">
+              <button className="btn-ghost" onClick={() => setPendingPdfFiles(null)}>Cancelar</button>
               <button
-                className="btn btn-primary"
+                className="btn-primary"
                 onClick={handlePasswordSubmit}
                 disabled={!pdfPassword.trim() || uploading}
               >

@@ -197,7 +197,7 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
                   <div className="prov-status">
                     {done
                       ? <span className="prov-tag prov-tag-done"><Icon name="check_circle" size={14} /> Realizada</span>
-                      : <span className="t-xs t-muted">pendente</span>
+                      : <button className="btn-ghost btn-ghost-sm"><Icon name="link" size={14} /> Vincular</button>
                     }
                   </div>
                 </div>
@@ -405,7 +405,7 @@ function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
 
       <div className="cfg-field">
         <label className="cfg-label">Categoria</label>
-        <div className="inbox-cat-grid">
+        <div className="modal-cat-grid">
           {categories.filter(c => !c.parent_id).map(c => (
             <button key={c.id} className={`inbox-cat${catId === c.id ? ' inbox-cat-suggest' : ''}`} onClick={() => setCatId(catId === c.id ? null : c.id)}>
               <Icon name={(c as any).icon ?? 'label'} size={16} style={{ color: c.color ?? '#888' }} />
@@ -433,6 +433,9 @@ function NovaProvisaoModal({ categories, persons, rules, onClose, onSaved }: {
           <div className="t-xs t-muted">PRÉ-VISUALIZAÇÃO</div>
           <div className="modal-preview-row">
             <div className="prov-day"><div className="prov-day-num">{dia}</div><div className="prov-day-mes">de cada mês</div></div>
+            <div className="prov-icon" style={{ background: (previewCat?.color ?? '#888') + '20', color: previewCat?.color ?? '#888' }}>
+              <Icon name={(previewCat as any)?.icon ?? 'event'} size={18} />
+            </div>
             <div style={{ flex: 1 }}>
               <div className="t-sm">{desc}</div>
               <div className="prov-row-meta">

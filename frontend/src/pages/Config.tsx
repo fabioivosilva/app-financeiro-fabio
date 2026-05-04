@@ -146,7 +146,7 @@ export function Config() {
   ]
 
   return (
-    <div className="page">
+    <div className="page page-config">
       <PageHeader title="Configurações" subtitle="Pessoas, cartões, categorias e ajustes do sistema" />
 
       {loading ? (
@@ -227,7 +227,7 @@ export function Config() {
                       const owner = persons.find(p => p.id === c.person_id)
                       const cor = owner ? personColor(owner.id) : '#820AD1'
                       return (
-                        <div key={c.id} className="cartao-mini" style={{ position: 'relative' }}>
+                        <div key={c.id} className="cartao-mini">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                             <div className="cartao-mini-bandeira">CARTÃO</div>
                             <div style={{ display: 'flex', gap: 2, opacity: 0.7 }}>
@@ -384,9 +384,8 @@ function CategoriaSection({ categories, rules, onEdit, onDelete, onAdd, onAddSub
         </button>
       </div>
 
-      <Glass style={{ padding: 0 }}>
-        <div className="cfg-cat-toolbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.2)', borderRadius: 8, padding: '7px 12px', flex: 1, minWidth: 160 }}>
+      <Glass padded={false} className="cfg-cat-toolbar">
+          <div className="search-wrap" style={{ flex: 1, minWidth: 180 }}>
             <Icon name="search" size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input
               value={busca}
@@ -415,7 +414,6 @@ function CategoriaSection({ categories, rules, onEdit, onDelete, onAdd, onAddSub
               )
             })}
           </div>
-        </div>
       </Glass>
 
       {GRUPOS.filter(g => grouped[g.id]?.length).map(g => (

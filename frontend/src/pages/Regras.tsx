@@ -252,7 +252,7 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
 
       <div className="cfg-field">
         <label className="cfg-label">Categoria</label>
-        <div className="inbox-cat-grid">
+        <div className="modal-cat-grid">
           {categories.map(cat => (
             <button
               key={cat.id}

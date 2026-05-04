@@ -73,7 +73,7 @@ export function RuleModal({ open, onClose, description, categoryId, categories, 
 
       <div className="cfg-field">
         <label className="cfg-label">Classificar como categoria</label>
-        <div className="inbox-cat-grid">
+        <div className="modal-cat-grid">
           {categories.map(cat => (
             <button
               key={cat.id}

@@ -516,7 +516,9 @@ body::before {
   background: rgba(192,132,252,0.06); color: var(--text-muted);
   border: 1px solid rgba(192,132,252,0.1);
   font: inherit; font-size: 12px; cursor: pointer;
+  max-width: 260px;
 }
+.chip-filter > span:not(.chip-x) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip-filter-on { background: rgba(130, 10, 209, 0.2); color: var(--text); border-color: var(--primary-2); }
 .chip-x {
   display: inline-flex; align-items: center; padding: 2px;
@@ -553,6 +555,7 @@ body::before {
   font: inherit; font-size: 13px; text-align: left; cursor: pointer;
   transition: background 0.1s;
 }
+.filter-dd-opt span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .filter-dd-opt:hover { background: rgba(192, 132, 252, 0.08); }
 .filter-dd-opt-on { color: #C084FC; background: rgba(130, 10, 209, 0.12); }
 .day-group { border-bottom: 1px solid rgba(192,132,252,0.06); }
@@ -594,6 +597,8 @@ body::before {
   position: absolute; z-index: 50;
   top: calc(100% + 6px); left: 0;
   width: 348px; max-width: min(348px, calc(100vw - 48px));
+  max-height: min(560px, calc(100vh - 96px));
+  display: flex; flex-direction: column;
   background: rgba(28, 20, 50, 0.98);
   backdrop-filter: blur(40px);
   border: 1px solid rgba(192, 132, 252, 0.18);
@@ -614,7 +619,7 @@ body::before {
   color: var(--text); font: inherit; font-size: 13px;
 }
 .cat-popover-search input::placeholder { color: var(--text-muted-2); }
-.cat-popover-body { max-height: 360px; overflow-y: auto; }
+.cat-popover-body { flex: 1; min-height: 0; overflow-y: auto; }
 .cat-group { border-bottom: 1px solid rgba(192,132,252,0.06); }
 .cat-group:last-child { border-bottom: none; }
 .cat-group-header {
@@ -769,6 +774,36 @@ body::before {
 .timeline-bar-in  { background: #22C55E; }
 .timeline-month-total { font-size: 11px; font-weight: 600; font-feature-settings: "tnum"; }
 
+/* ===== Cartao ===== */
+.cartao-card { padding: 0; overflow: hidden; }
+.cartao-bg {
+  min-height: 210px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.24), transparent 28%),
+    linear-gradient(135deg, #820AD1, #2d0a55 58%, #0f071a);
+  padding: 24px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.cartao-net { font-size: 16px; font-weight: 700; letter-spacing: 0.1em; align-self: end; }
+.cartao-num { font-size: 22px; font-family: ui-monospace, monospace; letter-spacing: 0.08em; }
+.cartao-foot { display: flex; gap: 32px; justify-content: space-between; align-items: end; }
+.cartao-info { padding: 22px; }
+.cartao-val { font-size: 28px; font-weight: 600; font-feature-settings: "tnum"; margin: 4px 0; }
+.cartao-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; margin-top: 12px; overflow: hidden; }
+.cartao-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-2)); border-radius: 3px; }
+.cartao-summary-list { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+.cartao-summary-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 8px; background: rgba(0,0,0,0.15);
+}
+.cartao-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+.cartao-tx-list { display: flex; flex-direction: column; }
+.cartao-tx-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-top: 1px solid rgba(192,132,252,0.05);
+}
+.cartao-tx-row:hover { background: rgba(192,132,252,0.03); }
+
 .prov-list { display: flex; flex-direction: column; }
 .prov-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(192,132,252,0.05); transition: background 0.12s; }
 .prov-row:hover { background: rgba(192,132,252,0.03); }
@@ -828,12 +863,14 @@ body::before {
 }
 .inbox-cat {
   display: flex; align-items: center; gap: 6px;
+  min-width: 0;
   padding: 9px 12px; border-radius: 10px;
   background: rgba(0,0,0,0.2); border: 1px solid rgba(192,132,252,0.08);
   font: inherit; font-size: 12px; color: var(--text);
   cursor: pointer; text-align: left;
   transition: border-color 0.15s, background 0.15s;
 }
+.inbox-cat span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .inbox-cat:hover { background: rgba(192,132,252,0.06); border-color: rgba(192,132,252,0.18); }
 .inbox-cat-suggest {
   border-color: var(--primary-2);

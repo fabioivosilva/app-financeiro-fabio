@@ -5,10 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04 (4). T_PROV.1 concluído: backend importa parcelas
-             pendentes de cartão como provisões futuras, com migration SQLite para
-             `provisions.person_id` e botão/toast na tela Provisões.
-             Ajuste visual extra: alinhamento do botão/contador pendente em Transações.
+STATUS     : Sessão 2026-05-04 (5). BUG.2/BUG.3 em andamento por Codex.
+             Entregue primeira fatia: Cartão saiu de placeholder e foi portado para
+             estrutura da referência; modais/popovers/dropdowns receberam fixes de
+             grid modal, preview, ellipsis e altura/HTML válido.
 BRANCH     : develop
 PRÓXIMA    : BUG.2 + BUG.3 — Conformidade visual e modais/popovers [G/M]
 CLAIMS     : 🔒 [CODEX] BUG.2 · 🔒 [CODEX] BUG.3
@@ -79,6 +79,10 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
+  - Fatia Codex 2026-05-04: Cartão deixou de ser placeholder e usa `page-cartao`,
+    `cartao-card`, `cartao-bg`, `cartao-info`, `cartao-bar`; Config ganhou
+    `page-config` e toolbar de categorias com `cfg-cat-toolbar`/`search-wrap`;
+    Provisões recuperou ação visual `Vincular` no status futuro.
 
 - [x] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** · *Codex · CONCLUÍDO 2026-05-04*
   **Objetivo:** detectar transações parceladas já importadas e gerar provisões para as parcelas restantes.
@@ -133,6 +137,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 - [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
   Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
+  - Fatia Codex 2026-05-04: grids de categorias em modais trocados para
+    `modal-cat-grid`; preview da Nova Provisão voltou a ter `prov-icon`;
+    popover de categoria saiu de dentro de `<span>` e ganhou limite de altura;
+    chips/dropdowns ganharam ellipsis; modal de senha PDF usa `modal-backdrop`,
+    `modal-head`, `modal-foot` e `cfg-input`.
 
 - [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
   Importar: substituído sampleImports por localStorage (loadHistory/saveHistory). Histórico persiste entre sessões, começa vazio, empty state adicionado. Nenhum dado fake restante identificado nas demais telas funcionais.

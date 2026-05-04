@@ -100,19 +100,18 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
                 ? <CategoryChip label={cat.name} color={cat.color} icon={iconName} />
                 : <CategoryChip label="" empty />
               }
-              {showPopover && (
-                <CategoryPopover
-                  categories={categories}
-                  persons={persons}
-                  currentId={tx.category_id}
-                  onSelect={handleSelectCategory}
-
-                  onClose={() => setShowPopover(false)}
-                  anchorRef={chipRef as React.RefObject<HTMLElement>}
-                  txKeyword={tx.description.trim().split(/\s+/).slice(0, 2).join(' ')}
-                />
-              )}
             </span>
+            {showPopover && (
+              <CategoryPopover
+                categories={categories}
+                persons={persons}
+                currentId={tx.category_id}
+                onSelect={handleSelectCategory}
+                onClose={() => setShowPopover(false)}
+                anchorRef={chipRef as React.RefObject<HTMLElement>}
+                txKeyword={tx.description.trim().split(/\s+/).slice(0, 2).join(' ')}
+              />
+            )}
 
             {person && <span className="t-xs t-muted">{person.name}</span>}
             {tx.origin !== 'Débito' && <span className="t-xs t-muted">{tx.origin}</span>}
