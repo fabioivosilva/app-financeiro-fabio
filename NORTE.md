@@ -81,6 +81,13 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
 
+- [ ] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** · *qualquer um*
+  Ao entrar em Provisões, detectar transações com `installment_current < installment_total`
+  (parcelas ainda em andamento). Para cada uma, calcular as parcelas restantes e sugerir
+  criação automática de provisões mensais até a última parcela. Ex: "Compra em 6x, já vieram
+  3 — sugerir 3 provisões futuras no mesmo dia/valor/categoria".
+  Botão "Importar parcelas pendentes" na tela de Provisões.
+
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
   de "sync snapshot" (regras + categorias) que o Thiago pode puxar via `GET /sync/rules-categories`.

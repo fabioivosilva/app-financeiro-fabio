@@ -15,6 +15,7 @@ class ProvisionIn(BaseModel):
     type: str = "mensal"
     category_id: Optional[int] = None
     active: bool = True
+    person_id: Optional[int] = None
     installment_current: Optional[int] = None
     installment_total: Optional[int] = None
 

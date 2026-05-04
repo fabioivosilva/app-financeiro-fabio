@@ -12,5 +12,6 @@ class Provision(Base):
     type = Column(String, default="mensal")         # "mensal" | "parcela"
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     active = Column(Boolean, default=True)
+    person_id = Column(Integer, ForeignKey("persons.id"), nullable=True)
     installment_current = Column(Integer, nullable=True)
     installment_total = Column(Integer, nullable=True)
