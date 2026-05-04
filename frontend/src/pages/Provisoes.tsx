@@ -108,6 +108,16 @@ export function Provisoes() {
   const [deleting, setDeleting] = useState<number | null>(null)
   const [togglingActive, setTogglingActive] = useState<number | null>(null)
   const [importing, setImporting] = useState(false)
+  const [reinforcing, setReinforcing] = useState(false)
+
+  async function handleReinforceAuto() {
+    setReinforcing(true)
+    try {
+      const result = await api.post<{ processed: number; provisions_affected: number }>('/provisions/reinforce-auto', {})
+      toast(`${result.provisions_affected} provisão(ões) criadas/atualizadas`, `${result.processed} transações verificadas`, result.provisions_affected > 0 ? 'success' : 'info')
+      refetch()
+    } finally { setReinforcing(false) }
+  }
 
   const projectedInstallments = useMemo(
     () => buildCardInstallmentProvisions(transactions, provisions),
@@ -187,16 +197,22 @@ export function Provisoes() {
         title="Provisões"
         subtitle="Receitas e despesas recorrentes que ainda vão acontecer"
         right={
-          <div className="seg-control">
-            <button className={view === 'timeline' ? 'seg-on' : ''} onClick={() => setView('timeline')}>
-              <Icon name="timeline" size={16} /> Timeline
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="btn-ghost" onClick={handleReinforceAuto} disabled={reinforcing} title="Re-dispara provisão automática em todas as transações categorizadas">
+              <Icon name={reinforcing ? 'hourglass_empty' : 'autorenew'} size={14} />
+              {reinforcing ? 'Atualizando...' : 'Sincronizar provisões'}
             </button>
-            <button className={view === 'calendario' ? 'seg-on' : ''} onClick={() => setView('calendario')}>
-              <Icon name="calendar_month" size={16} /> Calendário
-            </button>
-            <button className={view === 'lista' ? 'seg-on' : ''} onClick={() => setView('lista')}>
-              <Icon name="list" size={16} /> Lista
-            </button>
+            <div className="seg-control">
+              <button className={view === 'timeline' ? 'seg-on' : ''} onClick={() => setView('timeline')}>
+                <Icon name="timeline" size={16} /> Timeline
+              </button>
+              <button className={view === 'calendario' ? 'seg-on' : ''} onClick={() => setView('calendario')}>
+                <Icon name="calendar_month" size={16} /> Calendário
+              </button>
+              <button className={view === 'lista' ? 'seg-on' : ''} onClick={() => setView('lista')}>
+                <Icon name="list" size={16} /> Lista
+              </button>
+            </div>
           </div>
         }
       />
@@ -315,8 +331,13 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
                     <div className="prov-day-num">{p.day}</div>
                     <div className="prov-day-mes">{m.label.split('/')[0]}</div>
                   </div>
-                  <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888' }}>
+                  <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888', position: 'relative' }}>
                     <Icon name={(cat as any)?.icon ?? 'event'} size={18} />
+                    {(p.type === 'parcela' || p.virtual) && (
+                      <span style={{ position: 'absolute', bottom: -3, right: -3, background: 'var(--glass-bg, #1e1a2e)', borderRadius: 4, width: 14, height: 14, display: 'grid', placeItems: 'center' }}>
+                        <Icon name="credit_card" size={10} style={{ color: '#64748B' }} />
+                      </span>
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="t-sm">{p.description}{p.parcelaLabel ? ` (${p.parcelaLabel})` : ''}</div>
@@ -422,7 +443,7 @@ function ListaView({ provisions, categories, persons, deleting, togglingActive, 
             <Icon name="event_note" size={36} style={{ color: 'var(--text-muted-2)' }} />
             <div className="t-sm t-muted">Nenhuma provisão cadastrada</div>
           </div>
-        ) : provisions.map(p => {
+        ) : [...provisions].sort((a, b) => a.day - b.day).map(p => {
           const cat = categories.find(c => c.id === p.category_id)
           const person = persons.find(pe => pe.id === (p as any).person_id)
           const inactive = !p.active
@@ -434,7 +455,10 @@ function ListaView({ provisions, categories, persons, deleting, togglingActive, 
                 {inactive && <span className="t-xs t-muted" style={{ marginLeft: 6 }}>(inativa)</span>}
               </div>
               <div>{cat ? <CategoryChip label={cat.name} color={cat.color} /> : <span className="t-xs t-muted">—</span>}</div>
-              <div className="t-xs t-muted">{p.type === 'parcela' ? `${p.installment_current}/${p.installment_total}${p.virtual ? ' · cartão' : ''}` : 'Mensal'}</div>
+              <div className="t-xs t-muted" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                {p.type === 'parcela' && <Icon name="credit_card" size={11} />}
+                {p.type === 'parcela' ? `${p.installment_current}/${p.installment_total}` : 'Mensal'}
+              </div>
               <div className="t-xs t-muted">dia {p.day}</div>
               <div className={`t-sm${p.amount > 0 ? ' tx-val-pos' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{brl(p.amount)}</div>
               <div style={{ display: 'flex', gap: 2 }}>

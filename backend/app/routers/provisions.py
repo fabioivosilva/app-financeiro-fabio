@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
-from app.models import Provision, Transaction
+from app.models import Category, Provision, Transaction
+from app.services.auto_provision import maybe_upsert_income_provision
 
 router = APIRouter(prefix="/provisions", tags=["provisions"])
 
@@ -125,3 +126,16 @@ def delete_provision(id: int, db: Session = Depends(get_db)):
         raise HTTPException(404)
     db.delete(p)
     db.commit()
+
+
+@router.post("/reinforce-auto")
+def reinforce_auto_provisions(db: Session = Depends(get_db)):
+    """Re-runs auto-provision logic on all already-categorized transactions."""
+    eligible_types = {"receita", "fixa"}
+    cats = {c.id: c for c in db.query(Category).filter(Category.type.in_(eligible_types)).all()}
+    txs = db.query(Transaction).filter(Transaction.category_id.in_(list(cats.keys()))).all()
+    affected = 0
+    for tx in txs:
+        if maybe_upsert_income_provision(db, tx):
+            affected += 1
+    return {"processed": len(txs), "provisions_affected": affected}

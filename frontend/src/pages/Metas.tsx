@@ -30,6 +30,7 @@ export function Metas() {
   const [editing, setEditing] = useState<Goal | null>(null)
   const [showNew, setShowNew] = useState(false)
   const [tick, setTick] = useState(0)
+  const [confirmDeleteCard, setConfirmDeleteCard] = useState<number | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -102,8 +103,9 @@ export function Metas() {
           {goals.map((goal, index) => {
             const visual = getGoalVisual(goal, categories, index)
             const pct = percent(goal.current, goal.target)
+            const confirming = confirmDeleteCard === goal.id
             return (
-              <Glass key={goal.id} className="meta-card meta-card-clickable" onClick={() => setSelected(goal)}>
+              <Glass key={goal.id} className="meta-card meta-card-clickable" onClick={() => !confirming && setSelected(goal)}>
                 <div className="meta-card-icon" style={{ background: visual.color + '25', color: visual.color }}>
                   <Icon name={visual.icon} size={28} />
                 </div>
@@ -116,9 +118,24 @@ export function Metas() {
                 <div className="t-xs t-muted">
                   {Math.round(pct)}% concluído · faltam {brlCompact(Math.max(goal.target - goal.current, 0))}
                 </div>
-                <div className="meta-card-hint">
-                  <Icon name="open_in_full" size={12} /> Ver detalhes
-                </div>
+                {!confirming ? (
+                  <div className="meta-card-foot">
+                    <span className="t-xs t-muted"><Icon name="open_in_full" size={12} /> Ver detalhes</span>
+                    <button
+                      className="btn-icon meta-card-del"
+                      title="Excluir meta"
+                      onClick={e => { e.stopPropagation(); setConfirmDeleteCard(goal.id) }}
+                    >
+                      <Icon name="delete_outline" size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="meta-card-confirm" onClick={e => e.stopPropagation()}>
+                    <span className="t-xs" style={{ color: '#FCA5A5' }}>Excluir?</span>
+                    <button className="btn-ghost" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => setConfirmDeleteCard(null)}>Não</button>
+                    <button className="btn-danger" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { deleteGoal(goal.id); setConfirmDeleteCard(null) }}>Sim</button>
+                  </div>
+                )}
               </Glass>
             )
           })}
@@ -437,17 +454,32 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
             <Icon name="label" size={16} />
             <span>Sem categoria</span>
           </button>
-          {categories.filter(c => !(c as any).parent_id).map(c => (
-            <button
-              key={c.id}
-              type="button"
-              className={`inbox-cat${categoryId === c.id ? ' inbox-cat-suggest' : ''}`}
-              onClick={() => setCategoryId(categoryId === c.id ? undefined : c.id)}
-            >
-              <Icon name={(c as any).icon ?? 'label'} size={16} style={{ color: c.color ?? '#888' }} />
-              <span>{c.name}</span>
-            </button>
-          ))}
+          {categories.filter(c => !(c as any).parent_id).map(parent => {
+            const subs = categories.filter(c => (c as any).parent_id === parent.id)
+            return (
+              <div key={parent.id} style={{ display: 'contents' }}>
+                <button
+                  type="button"
+                  className={`inbox-cat${categoryId === parent.id ? ' inbox-cat-suggest' : ''}`}
+                  onClick={() => setCategoryId(categoryId === parent.id ? undefined : parent.id)}
+                >
+                  <Icon name={(parent as any).icon ?? 'label'} size={16} style={{ color: parent.color ?? '#888' }} />
+                  <span>{parent.name}</span>
+                </button>
+                {subs.map(sub => (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    className={`inbox-cat inbox-cat-sub${categoryId === sub.id ? ' inbox-cat-suggest' : ''}`}
+                    onClick={() => setCategoryId(categoryId === sub.id ? undefined : sub.id)}
+                  >
+                    <Icon name={(sub as any).icon ?? 'subdirectory_arrow_right'} size={14} style={{ color: parent.color ?? '#888' }} />
+                    <span>{sub.name}</span>
+                  </button>
+                ))}
+              </div>
+            )
+          })}
         </div>
       </div>
 

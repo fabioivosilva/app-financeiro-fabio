@@ -14,6 +14,7 @@ interface ImportItem {
   novas: number
   dup: number
   status: 'ok' | 'novo' | 'erro'
+  importedAt?: string
 }
 
 interface UploadResult {
@@ -71,6 +72,8 @@ export function Importar() {
   const [novo, setNovo] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reinforcing, setReinforcing] = useState(false)
+  const [scanResult, setScanResult] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Estado do modal de senha para PDFs protegidos
@@ -100,6 +103,7 @@ export function Importar() {
 
   const scanAssistedFolder = useCallback(async () => {
     setScanning(true)
+    setScanResult(null)
     setAssistedError(null)
     try {
       const settings = await api.get<ImportSettings>('/imports/settings')
@@ -107,6 +111,7 @@ export function Importar() {
       const scan = await api.get<AssistedScan>('/imports/scan')
       setImportFolder(scan.folder ?? settings.default_import_folder ?? null)
       setAssistedFiles(scan.files)
+      setScanResult(scan.files.length === 0 ? 'Nenhum arquivo novo na pasta' : `${scan.files.length} arquivo(s) encontrado(s)`)
     } catch (e) {
       setAssistedFiles([])
       setAssistedError(importErrorMessage(e))
@@ -114,6 +119,27 @@ export function Importar() {
       setScanning(false)
     }
   }, [])
+
+  async function handleReinforceRules() {
+    setReinforcing(true)
+    try {
+      const res = await api.post<{ updated: number; auto_provisions: number }>('/rules/apply', {})
+      setError(null)
+      setScanResult(`${res.updated} transações categorizadas automaticamente`)
+    } catch (e) {
+      setError(importErrorMessage(e))
+    } finally {
+      setReinforcing(false)
+    }
+  }
+
+  function removeHistoryItem(id: string) {
+    setImportados(prev => {
+      const updated = prev.filter(item => item.id !== id)
+      saveHistory(updated)
+      return updated
+    })
+  }
 
   useEffect(() => {
     scanAssistedFolder()
@@ -181,6 +207,7 @@ export function Importar() {
           novas: result.imported ?? 0,
           dup: result.duplicates ?? 0,
           status: 'novo',
+          importedAt: new Date().toISOString(),
         }
         newItems.push(item)
       }
@@ -230,6 +257,7 @@ export function Importar() {
         novas: result.imported ?? 0,
         dup: result.duplicates ?? 0,
         status: 'novo',
+        importedAt: new Date().toISOString(),
       }
       setPendingPdfFiles(null)
       setPdfPassword('')
@@ -267,6 +295,7 @@ export function Importar() {
         novas: result.imported ?? 0,
         dup: result.duplicates ?? 0,
         status: 'novo',
+        importedAt: new Date().toISOString(),
       }
       addImportedItems([item])
       scanAssistedFolder()
@@ -294,14 +323,14 @@ export function Importar() {
       />
 
       <Glass
-        className={`dropzone ${drag ? 'dropzone-drag' : ''}`}
+        className={`dropzone ${drag ? 'dropzone-drag' : ''} ${bancosSelecionados.length === 0 ? 'dropzone-disabled' : ''}`}
         padded={false}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => bancosSelecionados.length > 0 && inputRef.current?.click()}
       >
         <div
-          onDragOver={e => { e.preventDefault(); setDrag(true) }}
+          onDragOver={e => { if (bancosSelecionados.length === 0) return; e.preventDefault(); setDrag(true) }}
           onDragLeave={() => setDrag(false)}
-          onDrop={e => { e.preventDefault(); setDrag(false); handleFiles(e.dataTransfer.files) }}
+          onDrop={e => { e.preventDefault(); setDrag(false); if (bancosSelecionados.length > 0) handleFiles(e.dataTransfer.files) }}
           className="dropzone-inner"
         >
           <div className="dropzone-icon">
@@ -339,10 +368,13 @@ export function Importar() {
         <SectionHeader
           title="Arquivos da pasta padrão"
           right={
-            <button className="btn-ghost" onClick={scanAssistedFolder} disabled={scanning}>
-              <Icon name={scanning ? 'hourglass_empty' : 'refresh'} size={14} />
-              {scanning ? 'Atualizando' : 'Atualizar'}
-            </button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {scanResult && <span className="t-xs t-muted">{scanResult}</span>}
+              <button className="btn-ghost" onClick={scanAssistedFolder} disabled={scanning}>
+                <Icon name={scanning ? 'hourglass_empty' : 'refresh'} size={14} />
+                {scanning ? 'Atualizando...' : 'Atualizar'}
+              </button>
+            </div>
           }
         />
         <div className="import-folder-bar">
@@ -443,8 +475,21 @@ export function Importar() {
         </Glass>
       </div>
 
+      <div className="hint-card hint-card-inline">
+        <Icon name="lightbulb" size={16} className="hint-icon" />
+        <span className="t-xs t-muted">Importe extratos no início de cada ciclo (dia 27). O app reconhece o formato e ignora duplicatas automaticamente.</span>
+      </div>
+
       <Glass>
-        <SectionHeader title="Histórico de importações" />
+        <SectionHeader
+          title="Histórico de importações"
+          right={
+            <button className="btn-ghost" onClick={handleReinforceRules} disabled={reinforcing}>
+              <Icon name={reinforcing ? 'hourglass_empty' : 'rule'} size={14} />
+              {reinforcing ? 'Aplicando...' : 'Re-aplicar regras'}
+            </button>
+          }
+        />
         {importados.length === 0 ? (
           <div className="empty-state-mini">
             <Icon name="upload_file" size={32} className="t-muted" />
@@ -453,35 +498,29 @@ export function Importar() {
           </div>
         ) : (
           <div className="imp-list">
-            {importados.map((item: ImportItem) => (
+            {importados.slice(0, 20).map((item: ImportItem) => (
               <div key={item.id} className={`imp-row ${novo === item.id ? 'imp-row-new' : ''}`}>
                 <div className="imp-icon" style={fileIconStyle(item.tipo)}>
                   <Icon name={fileIcon(item.tipo)} size={20} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="t-sm">{item.nome}</div>
-                  <div className="t-xs t-muted">{item.fonte} · {item.transacoes} transações lidas</div>
+                  <div className="t-xs t-muted">
+                    {item.fonte} · {item.transacoes} transações
+                    {item.importedAt && <span> · {formatDateTime(item.importedAt)}</span>}
+                  </div>
                 </div>
                 <div className="imp-stats">
                   <span className="imp-pill imp-pill-new">+{item.novas} novas</span>
                   {item.dup > 0 && <span className="imp-pill imp-pill-dup">{item.dup} dup.</span>}
                 </div>
-                <button className="btn-icon"><Icon name="more_vert" size={18} /></button>
+                <button className="btn-icon" title="Remover do histórico" onClick={() => removeHistoryItem(item.id)}>
+                  <Icon name="close" size={16} />
+                </button>
               </div>
             ))}
           </div>
         )}
-      </Glass>
-
-      <Glass className="hint-card">
-        <Icon name="lightbulb" size={20} className="hint-icon" />
-        <div>
-          <div className="t-sm">Dica</div>
-          <div className="t-xs t-muted">
-            Importe extratos no início de cada ciclo (dia 27). O app reconhece o formato automaticamente
-            e ignora arquivos já processados.
-          </div>
-        </div>
       </Glass>
     </div>
   )
