@@ -593,9 +593,10 @@ function SistemaSection() {
             <label className="cfg-label"><Icon name="event" size={16} /> Dia de início do ciclo</label>
             <div className="cfg-hint">Define o período mensal usado nos relatórios (ex: 27 → 26)</div>
             <div className="cfg-input-row">
-              <input type="number" min={1} max={28} className="cfg-input cfg-input-num" value={diaCiclo} onChange={e => setDiaCiclo(Number(e.target.value))} />
+              <input type="number" min={1} max={31} className="cfg-input cfg-input-num" value={diaCiclo} onChange={e => setDiaCiclo(Number(e.target.value))} />
               <span className="t-sm t-muted">do mês</span>
             </div>
+            <div className="cfg-hint" style={{ marginTop: 4, fontSize: 11 }}>Dias 29-31: nos meses sem esse dia, ajusta automaticamente para o último dia do mês.</div>
           </div>
           <div className="cfg-form-foot">
             <button

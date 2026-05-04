@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react'
 
 export function getCycleInfo(cycleStart?: number) {
-  const diaInicio = cycleStart ?? Number(localStorage.getItem('cycleDayStart') ?? '27')
+  const diaInicioRaw = cycleStart ?? Number(localStorage.getItem('cycleDayStart') ?? '27')
   const hoje = new Date()
   const dia = hoje.getDate()
+
+  // Helper: último dia de um mês/ano específico
+  const ultimoDiaDoMes = (ano: number, mes: number) => new Date(ano, mes + 1, 0).getDate()
+
+  // Clamp do dia de início para o mês corrente (ex: dia 31 em fevereiro vira 28/29)
+  const clampDia = (ano: number, mes: number, d: number) => Math.min(d, ultimoDiaDoMes(ano, mes))
 
   let inicioMes = hoje.getMonth()
   let inicioAno = hoje.getFullYear()
 
-  if (dia < diaInicio) {
+  // Se hoje é antes do dia de início (já considerando clamp), ciclo começou no mês anterior
+  const diaInicioAtual = clampDia(inicioAno, inicioMes, diaInicioRaw)
+  if (dia < diaInicioAtual) {
     inicioMes -= 1
     if (inicioMes < 0) { inicioMes = 11; inicioAno -= 1 }
   }
 
-  const diaFim = diaInicio - 1 === 0 ? 28 : diaInicio - 1
+  const diaInicio = clampDia(inicioAno, inicioMes, diaInicioRaw)
   const inicio = new Date(inicioAno, inicioMes, diaInicio)
-  const fimMes = inicioMes + 1 > 11 ? 0 : inicioMes + 1
-  const fimAno = inicioMes + 1 > 11 ? inicioAno + 1 : inicioAno
-  const fim = new Date(fimAno, fimMes, diaFim)
+
+  // Fim do ciclo = dia anterior ao próximo início (também sob clamp do mês seguinte)
+  let fimMes = inicioMes + 1
+  let fimAno = inicioAno
+  if (fimMes > 11) { fimMes = 0; fimAno += 1 }
+  const proxInicio = clampDia(fimAno, fimMes, diaInicioRaw)
+  const fim = new Date(fimAno, fimMes, proxInicio - 1)
+  const diaFim = fim.getDate()
 
   const total = Math.round((fim.getTime() - inicio.getTime()) / 86400000) + 1
   const passados = Math.max(1, Math.round((hoje.getTime() - inicio.getTime()) / 86400000) + 1)

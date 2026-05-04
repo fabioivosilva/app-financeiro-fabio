@@ -5,6 +5,11 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **BUG.CFG.1 — Dia de ciclo limitado a 28 em Configurações** · *Claude.ai · baixa em 2026-05-04*
+  Input do dia de ciclo agora aceita 1-31. `getCycleInfo` ajusta automaticamente para o último
+  dia do mês quando o dia escolhido não existe (ex: 31 em fevereiro vira 28/29).
+  Files: `frontend/src/pages/Config.tsx`, `frontend/src/components/layout/CycleProgress.tsx`.
+
 - ✅ **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *Codex · baixa em 2026-05-04*
   Grids de categorias em modais migrados para `modal-cat-grid`; preview da Nova Provisão com `prov-icon`;
   popover de categoria saiu de `<span>` e ganhou limite de altura; chips/dropdowns com ellipsis;
