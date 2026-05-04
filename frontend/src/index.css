@@ -707,6 +707,15 @@ body::before {
 .cat-create-input:focus, .cat-create-select:focus { border-color: rgba(192,132,252,0.5); }
 .cat-create-select option { background: #1c1433; }
 .cat-create-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.cat-create-person-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cat-create-person-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.cat-create-person-chip {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; cursor: pointer;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(192,132,252,0.15);
+  color: var(--text-muted); transition: all 0.12s;
+}
+.cat-create-person-chip:hover { border-color: rgba(192,132,252,0.35); color: var(--text); }
+.cat-create-person-chip.active { background: rgba(130,10,209,0.2); border-color: rgba(192,132,252,0.5); color: var(--text); }
 .empty-state-mini {
   padding: 60px 20px; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 8px;

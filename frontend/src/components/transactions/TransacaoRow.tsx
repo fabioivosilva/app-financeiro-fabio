@@ -101,6 +101,7 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
               {showPopover && (
                 <CategoryPopover
                   categories={categories}
+                  persons={persons}
                   currentId={tx.category_id}
                   onSelect={handleSelectCategory}
                   onCreateRule={() => setShowRuleModal(true)}

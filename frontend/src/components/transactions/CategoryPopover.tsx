@@ -3,20 +3,21 @@ import { useState, useEffect, useRef } from 'react'
 import { Icon } from '../ui/Icon'
 import { api } from '../../api/client'
 import { toast } from '../ui/Toast'
-import type { Category } from '../../api/types'
+import type { Category, Person } from '../../api/types'
 
 interface Props {
   categories: Category[]
+  persons?: Person[]
   currentId?: number
   onSelect: (categoryId: number) => void
   onCreateRule: () => void
   onClose: () => void
   anchorRef: React.RefObject<HTMLElement>
   onCategoryCreated?: (cat: Category) => void
-  txKeyword?: string  // keyword da transação atual para criar regra automática
+  txKeyword?: string
 }
 
-export function CategoryPopover({ categories, currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
+export function CategoryPopover({ categories, persons = [], currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
   const [busca, setBusca] = useState('')
   const popoverRef = useRef<HTMLDivElement>(null)
 
@@ -59,6 +60,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [newParentId, setNewParentId] = useState<number | null>(null)
+  const [newPersonId, setNewPersonId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const newInputRef = useRef<HTMLInputElement>(null)
 
@@ -76,15 +78,18 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
     setSaving(true)
     try {
       // 1. Cria categoria
+      const parentCat = newParentId ? categories.find(c => c.id === newParentId) : null
       const created = await api.post<Category>('/categories/', {
         name: newName.trim(),
         parent_id: newParentId ?? null,
-        color: null, icon: null, exclude_totals: false,
+        color: parentCat?.color ?? null,
+        icon: parentCat?.icon ?? null,
+        exclude_totals: false,
       })
       // 2. Cria regra ligando keyword da transação à nova categoria
       const keyword = txKeyword ?? newName.trim().split(/\s+/).slice(0, 2).join(' ')
       await api.post('/rules/', {
-        keyword, category_id: created.id, person_id: null, origin: null, goal_id: null,
+        keyword, category_id: created.id, person_id: newPersonId, origin: null, goal_id: null,
       })
       // 3. Aplica em massa em todas as transações existentes
       const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
@@ -228,6 +233,23 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
             <option value="">Categoria raiz</option>
             {parents.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
+          {persons.length > 0 && (
+            <div className="cat-create-person-row">
+              <Icon name="person" size={13} className="t-muted" />
+              <span className="t-xs t-muted">Vincular pessoa (opcional)</span>
+              <div className="cat-create-person-chips">
+                {persons.map(p => (
+                  <button
+                    key={p.id}
+                    className={`cat-create-person-chip${newPersonId === p.id ? ' active' : ''}`}
+                    onClick={() => setNewPersonId(id => id === p.id ? null : p.id)}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="cat-create-actions">
             <button className="btn-ghost" style={{ fontSize: 12 }} onClick={() => setCreating(false)}>Cancelar</button>
             <button className="btn-primary" style={{ fontSize: 12 }} onClick={saveNewCategory} disabled={!newName.trim() || saving}>
