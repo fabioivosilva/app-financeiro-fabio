@@ -197,22 +197,16 @@ export function Provisoes() {
         title="Provisões"
         subtitle="Receitas e despesas recorrentes que ainda vão acontecer"
         right={
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-ghost" onClick={handleReinforceAuto} disabled={reinforcing} title="Re-dispara provisão automática em todas as transações categorizadas">
-              <Icon name={reinforcing ? 'hourglass_empty' : 'autorenew'} size={14} />
-              {reinforcing ? 'Atualizando...' : 'Sincronizar provisões'}
+          <div className="seg-control">
+            <button className={view === 'timeline' ? 'seg-on' : ''} onClick={() => setView('timeline')}>
+              <Icon name="timeline" size={16} /> Timeline
             </button>
-            <div className="seg-control">
-              <button className={view === 'timeline' ? 'seg-on' : ''} onClick={() => setView('timeline')}>
-                <Icon name="timeline" size={16} /> Timeline
-              </button>
-              <button className={view === 'calendario' ? 'seg-on' : ''} onClick={() => setView('calendario')}>
-                <Icon name="calendar_month" size={16} /> Calendário
-              </button>
-              <button className={view === 'lista' ? 'seg-on' : ''} onClick={() => setView('lista')}>
-                <Icon name="list" size={16} /> Lista
-              </button>
-            </div>
+            <button className={view === 'calendario' ? 'seg-on' : ''} onClick={() => setView('calendario')}>
+              <Icon name="calendar_month" size={16} /> Calendário
+            </button>
+            <button className={view === 'lista' ? 'seg-on' : ''} onClick={() => setView('lista')}>
+              <Icon name="list" size={16} /> Lista
+            </button>
           </div>
         }
       />
@@ -252,6 +246,7 @@ export function Provisoes() {
           provisions={allProvisions} categories={categories} persons={persons}
           deleting={deleting} togglingActive={togglingActive}
           importing={importing} onImport={handleImportInstallments}
+          reinforcing={reinforcing} onReinforce={handleReinforceAuto}
           onDelete={handleDelete} onAdd={() => setShowModal(true)}
           onEdit={openEdit} onToggleActive={handleToggleActive}
         />
@@ -445,10 +440,10 @@ function CalendarView({ mes, categories }: { mes: any; categories: Category[] })
 
 // ─── Lista ────────────────────────────────────────────────────────────────────
 
-function ListaView({ provisions, categories, persons, deleting, togglingActive, importing, onImport, onDelete, onAdd, onEdit, onToggleActive }: {
+function ListaView({ provisions, categories, persons, deleting, togglingActive, importing, reinforcing, onImport, onReinforce, onDelete, onAdd, onEdit, onToggleActive }: {
   provisions: ProvisionView[]; categories: Category[]; persons: Person[]
-  deleting: number | null; togglingActive: number | null; importing: boolean
-  onImport: () => void; onDelete: (id: number) => void; onAdd: () => void
+  deleting: number | null; togglingActive: number | null; importing: boolean; reinforcing: boolean
+  onImport: () => void; onReinforce: () => void; onDelete: (id: number) => void; onAdd: () => void
   onEdit: (p: Provision) => void; onToggleActive: (p: Provision) => void
 }) {
   return (
@@ -456,9 +451,13 @@ function ListaView({ provisions, categories, persons, deleting, togglingActive, 
       <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(192,132,252,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="t-sm" style={{ fontWeight: 600 }}>Todas as provisões</span>
         <div className="section-actions">
+          <button className="btn-ghost" onClick={onReinforce} disabled={reinforcing} title="Re-calcula provisões de todas as transações categorizadas">
+            <Icon name={reinforcing ? 'hourglass_empty' : 'autorenew'} size={14} />
+            {reinforcing ? 'Sincronizando...' : 'Sincronizar'}
+          </button>
           <button className="btn-ghost" onClick={onImport} disabled={importing}>
             <Icon name={importing ? 'hourglass_empty' : 'credit_card'} size={14} />
-            {importing ? 'Importando...' : 'Importar parcelas pendentes'}
+            {importing ? 'Importando...' : 'Importar parcelas'}
           </button>
           <button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>
         </div>

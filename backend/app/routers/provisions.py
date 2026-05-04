@@ -139,11 +139,18 @@ def delete_provision(id: int, db: Session = Depends(get_db)):
 @router.post("/reinforce-auto")
 def reinforce_auto_provisions(db: Session = Depends(get_db)):
     """Re-runs auto-provision logic on all already-categorized transactions."""
-    eligible_types = {"receita", "fixa"}
-    cats = {c.id: c for c in db.query(Category).filter(Category.type.in_(eligible_types)).all()}
-    txs = db.query(Transaction).filter(Transaction.category_id.in_(list(cats.keys()))).all()
+    from app.services.provision_engine import evaluate_transaction_for_provision
+    eligible_behaviors = {"recurring_income", "fixed_expense", "installment"}
+    cats = {
+        c.id: c for c in db.query(Category).all()
+        if (c.provision_behavior or "none") in eligible_behaviors
+    }
+    txs = db.query(Transaction).filter(
+        Transaction.category_id.in_(list(cats.keys()))
+    ).all()
     affected = 0
     for tx in txs:
-        if maybe_upsert_income_provision(db, tx):
+        result = evaluate_transaction_for_provision(db, tx)
+        if result.get("provision") or result.get("installments"):
             affected += 1
     return {"processed": len(txs), "provisions_affected": affected}
