@@ -68,13 +68,15 @@ When completing any `NORTE.md` roadmap/backlog item:
    - backend: `backend\.venv\Scripts\python.exe -m py_compile <files>` and relevant tests when available,
    - desktop build only if the current repo still has `build_desktop.bat` and the task requires it.
 2. Update `NORTE.md`:
-   - mark the item `[x]`,
+   - remove the item entirely from the roadmap section (do NOT leave it as `[x]`),
    - remove its claim,
    - refresh `SNAPSHOT` status, next task, and claims.
-3. Keep memory compact. Prefer `NORTE.md` for the new workflow; add Obsidian handoff only when it helps the next session.
-4. Check `git status --short`.
-5. Do not commit `.pyc`, local databases, generated exe/build artifacts, private imports, or debug files.
-6. Commit the task scope intentionally.
-7. Push only when authorized.
+3. Append the closed item to `obsidian-vault/CHANGELOG.md` with date and short outcome.
+   This keeps NORTE.md token-cheap for every future session.
+4. Keep memory compact. Prefer `NORTE.md` for the new workflow; add Obsidian handoff only when it helps the next session.
+5. Check `git status --short`.
+6. Do not commit `.pyc`, local databases, generated exe/build artifacts, private imports, or debug files.
+7. Commit the task scope intentionally.
+8. Push only when authorized.
 
 Never declare a roadmap item complete without updating `NORTE.md`.
