@@ -278,6 +278,7 @@ export function Transacoes() {
                 <div className="day-header">
                   <div className="day-label">
                     <span className="t-sm">{formatDate(dateStr)}</span>
+                    <span className="t-xs t-muted">· {(() => { const [y,m,d]=dateStr.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('pt-BR',{weekday:'long'}) })()}</span>
                     <span className="t-xs t-muted">· {txs.length} transações</span>
                   </div>
                   <span className="t-xs t-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>

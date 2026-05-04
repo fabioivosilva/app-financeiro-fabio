@@ -37,6 +37,7 @@ def list_transactions(
     category_id: Optional[int] = Query(None),
     person_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
+    goal_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
     q = db.query(Transaction)
@@ -51,6 +52,8 @@ def list_transactions(
         q = q.filter(Transaction.person_id == person_id)
     if status:
         q = q.filter(Transaction.status == status)
+    if goal_id:
+        q = q.filter(Transaction.goal_id == goal_id)
     return q.order_by(Transaction.date.desc()).all()
 
 

@@ -173,7 +173,14 @@ interface DetailProps {
 function MetaDetailModal({ goal, categories, goalIndex, onClose, onEdit, onDelete }: DetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [aportes, setAportes] = useState<{ id: number; date: string; amount: number; description: string }[]>([])
   const visual = getGoalVisual(goal, categories, goalIndex)
+
+  useEffect(() => {
+    api.get<{ id: number; date: string; amount: number; description: string }[]>(
+      `/transactions/?goal_id=${goal.id}`
+    ).then(txs => setAportes((txs ?? []).slice(0, 8)))
+  }, [goal.id])
   const category = categories.find(cat => cat.id === goal.category_id)
   const pct = percent(goal.current, goal.target)
   const falta = Math.max(goal.target - goal.current, 0)
@@ -239,6 +246,23 @@ function MetaDetailModal({ goal, categories, goalIndex, onClose, onEdit, onDelet
               <div className="t-xs t-muted">por transações vinculadas</div>
             </div>
           </div>
+
+          {aportes.length > 0 && (
+            <div className="meta-historico">
+              <div className="t-xs t-muted" style={{ marginBottom: 8 }}>HISTÓRICO DE APORTES</div>
+              {aportes.map(a => {
+                const [y, m, d] = a.date.split('-').map(Number)
+                const mesLabel = new Date(y, m - 1, d).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '')
+                return (
+                  <div key={a.id} className="meta-aporte-row">
+                    <span className="meta-aporte-mes">{mesLabel}</span>
+                    <span className="t-xs t-muted" style={{ flex: 1 }}>{a.description}</span>
+                    <span className="meta-aporte-val">{brl(a.amount)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
           <button className="meta-add-aporte" type="button">
             <Icon name="add_circle" size={18} />

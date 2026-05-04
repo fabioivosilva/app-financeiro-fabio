@@ -963,6 +963,11 @@ body::before {
   transition: background 0.15s;
 }
 .meta-add-aporte:hover { background: rgba(130, 10, 209, 0.2); }
+.meta-historico { display: flex; flex-direction: column; gap: 2px; padding: 14px; background: rgba(255,255,255,0.03); border-radius: 10px; }
+.meta-aporte-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.meta-aporte-row:last-child { border-bottom: none; }
+.meta-aporte-mes { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); min-width: 52px; }
+.meta-aporte-val { font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; color: #22C55E; }
 .cfg-field { display: flex; flex-direction: column; gap: 4px; }
 .cfg-label {
   display: flex; align-items: center; gap: 6px;
