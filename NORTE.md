@@ -10,8 +10,8 @@ STATUS     : 2026-05-04. BUG.DASH.CYCLE corrigido (getCycleInfo normalizado + St
              (none|recurring_income|fixed_expense|installment) + parcelas futuras + tags visuais
              + Dashboard com saldo projetado real. Pontos de chamada unificados.
 BRANCH     : develop
-PRÓXIMA    : FEAT.CFG.CARDS.UX [P] · T2.3 [P] · FEAT.META.REINFORCE [P]
-CLAIMS     : 🔒 [FABIO] FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
+PRÓXIMA    : T2.3 [P] · FEAT.META.REINFORCE [P]
+CLAIMS     : 🔒 [FABIO] T2.3 · FEAT.META.REINFORCE
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 4 [P] restantes nesta sessão (70% usado)
 
@@ -141,9 +141,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
   Outros usuários fazem `git pull` ou clicam "Sync" e o app aplica regras novas sem sobrescrever categorizações manuais.
   Pré-req: base de categorias com nomes idênticos entre usuários. Ganho: categorização de um beneficia todos.
   Config mostra apenas data/hora do último sync (tapume atual já entregue).
-
-- [ ] `[P]` **FEAT.CFG.CARDS.UX — UX da lista de cartões com muitos itens** · *qualquer um*
-  Muitos cartões → lista imensa. Adicionar busca/filtro ou colapso para listas longas.
 
 ---
 

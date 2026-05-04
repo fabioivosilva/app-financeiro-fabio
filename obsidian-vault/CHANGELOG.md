@@ -6,6 +6,10 @@
 
 ## Sessão 2026-05-04 (continuação 5)
 
+- ✅ **FEAT.CFG.CARDS.UX — UX da lista de cartões com muitos itens** · *Fabio (Claude Code) · baixa em 2026-05-04*
+  Input de busca aparece automaticamente quando há mais de 5 cartões. Filtra por nome e últimos 4 dígitos.
+  Files: `frontend/src/pages/Config.tsx`, `frontend/src/index.css`.
+
 - ✅ **FEAT.PROV.TIMELINE.UX — Melhorar cards de mês na timeline** · *Fabio (Claude Code) · baixa em 2026-05-04*
   Cards da timeline de provisões: substituiu barras duplas (compromisso/receita) por saldo líquido
   em destaque (verde/vermelho) + barra fina de % comprometido com cor semafórica

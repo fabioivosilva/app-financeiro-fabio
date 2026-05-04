@@ -30,6 +30,7 @@ export function Config() {
   const [rules, setRules] = useState<Rule[]>([])
   const [loading, setLoading] = useState(true)
   const [secao, setSecao] = useState('pessoas')
+  const [cardSearch, setCardSearch] = useState('')
 
   const refPessoas = useRef<HTMLElement>(null)
   const refCategorias = useRef<HTMLElement>(null)
@@ -236,8 +237,22 @@ export function Config() {
                       </button>
                     }
                   />
+                  {cards.length > 5 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <input
+                        className="input-search"
+                        type="text"
+                        placeholder="Buscar cartão..."
+                        value={cardSearch}
+                        onChange={e => setCardSearch(e.target.value)}
+                      />
+                    </div>
+                  )}
                   <div className="cartao-mini-grid">
-                    {cards.map(c => {
+                    {cards.filter(c =>
+                      !cardSearch || c.name.toLowerCase().includes(cardSearch.toLowerCase()) ||
+                      (c.last4 && c.last4.includes(cardSearch))
+                    ).map(c => {
                       const owner = persons.find(p => p.id === c.person_id)
                       const cor = owner ? personColor(owner.id) : '#820AD1'
                       return (

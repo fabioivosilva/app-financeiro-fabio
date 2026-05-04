@@ -1113,6 +1113,13 @@ body::before {
 .pessoa-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
 .pessoa-card:hover .pessoa-actions { opacity: 1; }
 /* Cartões mini */
+.input-search {
+  width: 100%; padding: 8px 12px; border-radius: 8px; font: inherit; font-size: 13px;
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(192,132,252,0.15);
+  color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.input-search::placeholder { color: var(--text-muted-2); }
+.input-search:focus { border-color: rgba(192,132,252,0.4); }
 .cartao-mini-grid { display: flex; flex-direction: column; gap: 10px; }
 .cartao-mini {
   padding: 14px 16px; border-radius: 12px;
