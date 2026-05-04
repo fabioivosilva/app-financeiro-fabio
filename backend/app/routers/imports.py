@@ -234,6 +234,21 @@ def _process_import(
 
     db.commit()
 
+    # Pós-commit: reinforce completo para capturar provisões que precisavam de 2+ ciclos
+    if criadas:
+        from app.models import Category as Cat
+        eligible_behaviors = {"recurring_income", "fixed_expense", "installment"}
+        all_cats = db.query(Cat).all()
+        parent_ids = {c.id for c in all_cats if (c.provision_behavior or "none") in eligible_behaviors}
+        eligible_cat_ids = {
+            c.id for c in all_cats
+            if (c.provision_behavior or "none") in eligible_behaviors
+            or (getattr(c, "parent_id", None) in parent_ids)
+        }
+        for tx in criadas:
+            if tx.category_id in eligible_cat_ids:
+                evaluate_transaction_for_provision(db, tx)
+
     return {
         "bank": result.bank,
         "format": result.format,

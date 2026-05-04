@@ -196,6 +196,12 @@ def evaluate_transaction_for_provision(
 
     behavior = cat.provision_behavior or "none"
 
+    # Subcategorias herdam o behavior do pai quando não têm o próprio configurado
+    if behavior == "none" and getattr(cat, "parent_id", None):
+        parent = db.query(Category).get(cat.parent_id)
+        if parent:
+            behavior = parent.provision_behavior or "none"
+
     if behavior in ("recurring_income", "fixed_expense"):
         result["provision"] = _handle_recurrent(db, transaction, cat)
 

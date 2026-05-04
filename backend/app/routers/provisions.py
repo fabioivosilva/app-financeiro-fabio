@@ -141,12 +141,19 @@ def reinforce_auto_provisions(db: Session = Depends(get_db)):
     """Re-runs auto-provision logic on all already-categorized transactions."""
     from app.services.provision_engine import evaluate_transaction_for_provision
     eligible_behaviors = {"recurring_income", "fixed_expense", "installment"}
-    cats = {
-        c.id: c for c in db.query(Category).all()
+    all_cats = db.query(Category).all()
+    parent_ids_with_behavior = {
+        c.id for c in all_cats
         if (c.provision_behavior or "none") in eligible_behaviors
     }
+    # inclui subcategorias cujo pai tem behavior configurado
+    eligible_cat_ids = {
+        c.id for c in all_cats
+        if (c.provision_behavior or "none") in eligible_behaviors
+        or (getattr(c, "parent_id", None) in parent_ids_with_behavior)
+    }
     txs = db.query(Transaction).filter(
-        Transaction.category_id.in_(list(cats.keys()))
+        Transaction.category_id.in_(list(eligible_cat_ids))
     ).all()
     affected = 0
     for tx in txs:

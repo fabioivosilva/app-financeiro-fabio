@@ -113,14 +113,25 @@ def deduplicate_rules(db: Session = Depends(get_db)):
 
 @router.post("/apply", summary="Aplica regras a todas as transações sem categoria")
 def apply_rules(db: Session = Depends(get_db)):
+    from app.models import Category as Cat
     rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
     if not rules:
         return {"updated": 0, "auto_provisions": 0}
     pending = db.query(Transaction).filter(Transaction.category_id.is_(None)).all()
     updated = apply_rules_to(pending, rules)
     db.commit()
+    eligible_behaviors = {"recurring_income", "fixed_expense", "installment"}
+    all_cats = db.query(Cat).all()
+    parent_ids = {c.id for c in all_cats if (c.provision_behavior or "none") in eligible_behaviors}
+    cat_ids = {
+        c.id for c in all_cats
+        if (c.provision_behavior or "none") in eligible_behaviors
+        or (getattr(c, "parent_id", None) in parent_ids)
+    }
     auto_provisions = 0
     for tx in pending:
-        if tx.category_id and evaluate_transaction_for_provision(db, tx).get("provision"):
-            auto_provisions += 1
+        if tx.category_id in cat_ids:
+            result = evaluate_transaction_for_provision(db, tx)
+            if result.get("provision") or result.get("installments"):
+                auto_provisions += 1
     return {"updated": updated, "auto_provisions": auto_provisions}
