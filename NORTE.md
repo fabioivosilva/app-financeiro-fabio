@@ -85,57 +85,7 @@ Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
   Objetivo: manter os dois sempre alinhados sem precisar compartilhar arquivo de banco.
 
 
-#### HANDOFF ANTIGRAVITY — 2026-05-03 sessão 4 (Fim do dia)
 
-- **BUG.7 Concluído ✅:** Importação Itaú (PDF, OFX, Excel) estabilizada.
-  - **Performance:** Deduplicação otimizada de N+1 para query única (IN).
-  - **Estabilidade:** Banco migrado de `Enum` para `String` em `origin` e `status` para evitar erros de encoding/acentuação (Error 500).
-  - **Conectividade:** Alinhamento de hostnames (`localhost` vs `127.0.0.1`) resolveu o `Failed to fetch`.
-- **FEATURE TOGGLE DE IMPORTAÇÃO 🚀:**
-  - O motor de importação agora é "amarrado" aos bancos ativos nas configurações.
-  - O backend recebe `active_bank_ids` e só executa os parsers permitidos.
-  - O `OFXParser` agora detecta automaticamente se o arquivo é do Itaú (código 341).
-- **BANCO DE DADOS:** Resetado em `data/finance.db` com o novo esquema e populado via `seed.py`.
-
-#### HANDOFF CLAUDE — 2026-05-03 sessão 3 (Thiago)
-
-- **Entregues:**
-  - `rodar.bat`: mata portas 8000/5173 antes de subir novos processos + `--reload` no uvicorn → problema de "porta ocupada" resolvido
-  - C3 parser C6 Bank (`backend/app/parsers/c6_csv.py`): detecta `Fatura_YYYY-MM-DD.csv` pelo header real (`Data de Compra;Final do Cartão;Valor (em R$)`), extrai parcelas (`N/M`), inverte sinal compra/pagamento
-  - Encoding CSV corrigido em todos parsers: `utf-8-sig` (strip BOM) + fallback `latin-1`
-  - PDF protegido por senha: `can_parse` retorna 0.80 para PDFs criptografados; `parse` emite `PDF_ENCRYPTED`; frontend abre modal de senha e re-envia
-  - Nubank corrigido: campo real do CSV de crédito é `title`, não `description`
-  - Generic CSV: keyword sets expandidos com aliases brasileiros reais (`data de compra`, `valor (em r$)`, `title` etc.)
-
-- **Pendente C3 — dois sub-problemas para próxima sessão:**
-  1. **ESTRATÉGIA MULTI-BANCO:** deliberar a forma mais prática de reconhecer e diferenciar extratos/faturas de múltiplas instituições sem virar um labirinto de parsers. Arquivos modelo disponíveis em `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse` para guiar decisão.
-  2. **FLUXO IMPORTAÇÃO→TRANSAÇÕES:** parser reconhece e salva no banco (confirmado: `total_found` e `imported` retornam valores), mas as transações não aparecem na tela de Transações. Causa mais provável: **filtro de ciclo (dia 27→26)** — o arquivo C6 tem datas de out/2025 a abr/2026, que caem em ciclos anteriores ao atual (maio 2026). Antes de qualquer código: mudar o MonthSelector para o ciclo de abril (abr/27 → mai/26) e verificar se as transações aparecem.
-
-- **Arquivos modelo para C3:** `C:\Users\thiag\Desktop\Projeto Fabo\Modelos para parse\` — qualquer novo parser deve ser validado contra estes arquivos antes de marcar concluído.
-
-#### HANDOFF CLAUDE — 2026-05-03 sessão 2 (Fabio + Claude Code)
-
-- **Entregues nesta sessão:**
-  - BUG.1 ✅ auditoria completa UI/API (Thiago fez junto)
-  - BUG.4 ✅ Importar sem mock — localStorage (Thiago)
-  - T1.2 ✅ desbloqueada (BUG.4 fechado)
-  - fix b7: filtro "Ciclo atual" dia 27→26 em Transações
-  - fix b8: suggestCategory usa regras reais do backend (não hardcoded)
-  - T6.1 ✅ Configurações completa: Pessoas+Cartões CRUD, Categorias com subcategorias, Sistema, Zona de Perigo
-  - Backend: `parent_id` em Category com migration automática no startup
-  - CORS liberado para porta 5174
-- **REGRA CRÍTICA aprendida:** SEMPRE abrir `C:\Users\fabio\Downloads\App-financeiro` antes de qualquer JSX. Copiar o código de referência, não reinventar. Subcategorias, modais, grids — tudo tem código pronto.
-- **Próximo:** BUG.2 (conformidade visual Dashboard/Cartão/Provisões) ou BUG.3 (modais/popovers). Não iniciar T3.2/T4/T5 antes de fechar BUG.2+BUG.3.
-- **Backend rodando:** `uvicorn app.main:app --port 8000 --reload` dentro de `backend/` com `.venv` ativado.
-
-#### HANDOFF CLAUDE — 2026-05-03 noite
-
-- **Regra UX absoluta:** abrir `C:\Users\fabio\Downloads\App-financeiro` antes de mexer em qualquer tela. Copiar estrutura, classes, ordem, labels e comportamento do componente de referencia; adaptar somente dados/API depois. "Parecido" nao passa.
-- **Validado hoje:** `npm.cmd run build` passou depois dos ajustes de UI em Transacoes/sidebar.
-- **Commits recentes em `develop`:** `da83edd` inbox de pendentes; `0a9ddef` sem categoria conta como pendente; `6e303ba` status local da sidebar; `01285d9` dropdown acima da lista; `c75f069` filtros de Transacoes conforme referencia.
-- **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
-- **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
-- **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
 
 ### TRILHA 0 — Fundação
 
