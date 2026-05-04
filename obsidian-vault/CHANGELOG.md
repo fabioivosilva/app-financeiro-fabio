@@ -4,6 +4,16 @@
 
 
 
+## Sessão 2026-05-04 (continuação 4)
+
+- ✅ **T0.4 — Onboarding de Perfil** · *Claude Code · baixa em 2026-05-04*
+  Wizard 3-passos no primeiro acesso: nome → dia do ciclo → bancos.
+  Backend: `GET /perfil/` (retorna null se não existe), `POST /perfil/` (salva `data/perfil.json`).
+  AppShell checa perfil no startup; se null exibe `<Onboarding>` fullscreen (sem sidebar).
+  Ao finalizar: seta `cycleDayStart` e `cfg_bancos_ativos` no localStorage + dispatch storage event.
+  Files: `backend/app/routers/perfil.py`, `backend/app/main.py`,
+  `frontend/src/pages/Onboarding.tsx`, `frontend/src/components/layout/AppShell.tsx`, `index.css`.
+
 ## Sessão 2026-05-04 (continuação 3)
 
 - ✅ **BUG.2 — Conformidade visual Transações + Metas** · *Claude Code · baixa em 2026-05-04*

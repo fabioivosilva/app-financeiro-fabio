@@ -5,11 +5,10 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1 fechados (Claude Code).
-             Transações: dia da semana no agrupamento. Metas: histórico de aportes.
-             Backend: filtro goal_id em /transactions/. Config: ícones e toast.
+STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, T0.4 fechados (Claude Code).
+             T0.4: wizard 3-passos no primeiro acesso; backend GET/POST /perfil/.
 BRANCH     : develop
-PRÓXIMA    : T0.4 — Onboarding de Perfil [M] (T_SYNC.1 para o fim)
+PRÓXIMA    : T1.3 — Importação Assistida [M] (T_SYNC.1 para o fim)
 CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
@@ -134,13 +133,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 
 ---
-
-- [ ] `[M]` **T0.4 — Onboarding de Perfil** · *qualquer um · depende T0.2*
-  Wizard no primeiro acesso: nome do usuário, dia de início do ciclo, bancos utilizados + formatos por banco.
-  Persiste em `data/perfil.json` (não sobe pro Git). Parser Registry carrega apenas os parsers do perfil.
-  Se perfil não existe → redireciona para o wizard ao abrir o app.
-  **Campos:** nome · ciclo_inicio (dia) · bancos[] (nome + formatos suportados)
-  **Saída:** `data/perfil.json` criado · tela de importação mostra só os bancos/formatos declarados
 
 ### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
 
