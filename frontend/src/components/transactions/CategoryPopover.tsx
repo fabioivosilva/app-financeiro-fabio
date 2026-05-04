@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+
 import { Icon } from '../ui/Icon'
 import { api } from '../../api/client'
 import { toast } from '../ui/Toast'
@@ -19,7 +19,7 @@ interface Props {
 export function CategoryPopover({ categories, currentId, onSelect, onCreateRule, onClose, anchorRef, onCategoryCreated, txKeyword }: Props) {
   const [busca, setBusca] = useState('')
   const popoverRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
+
 
   // Group structure
   const parents = categories.filter(c => !c.parent_id)
