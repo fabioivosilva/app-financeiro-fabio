@@ -63,13 +63,21 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
   async function handleSelectCategory(categoryId: number, silent = false) {
     try {
       const chosenCat = categories.find(c => c.id === categoryId)
-      await api.put(`/transactions/${tx.id}`, { ...tx, category_id: categoryId, status: 'confirmado' })
+      const { headers } = await api.putWithHeaders(`/transactions/${tx.id}`, { ...tx, category_id: categoryId, status: 'confirmado' })
       const keyword = tx.description.trim().split(/\s+/).slice(0, 2).join(' ')
       await api.post('/rules/', { keyword, category_id: categoryId, person_id: tx.person_id ?? null, origin: null, goal_id: null })
       const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
       if (!silent && chosenCat) {
         const sub = updated > 1 ? `+${updated - 1} transação semelhante categorizada` : undefined
         toast(`Categoria salva: ${chosenCat.name}`, sub)
+      }
+      // Auto-provisão de receita recorrente
+      const provDesc = headers.get('X-Auto-Provision-Description')
+      const provAmount = headers.get('X-Auto-Provision-Amount')
+      const provDay = headers.get('X-Auto-Provision-Day')
+      if (provDesc && provAmount && provDay) {
+        const valor = Number(provAmount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        toast(`📌 ${provDesc} virou provisão recorrente`, `${valor} · dia ${provDay}`, 'info')
       }
       onUpdated?.()
     } catch {

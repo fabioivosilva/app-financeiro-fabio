@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 from app.database import get_db
 from app.models import Transaction
+from app.services.auto_provision import maybe_upsert_income_provision
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -63,7 +64,7 @@ def create_transaction(data: TransactionIn, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=TransactionOut)
-def update_transaction(id: int, data: TransactionIn, db: Session = Depends(get_db)):
+def update_transaction(id: int, data: TransactionIn, response: Response, db: Session = Depends(get_db)):
     t = db.query(Transaction).get(id)
     if not t:
         raise HTTPException(404)
@@ -71,6 +72,15 @@ def update_transaction(id: int, data: TransactionIn, db: Session = Depends(get_d
         setattr(t, k, v)
     db.commit()
     db.refresh(t)
+
+    # Auto-provisão de receita recorrente
+    provision = maybe_upsert_income_provision(db, t)
+    if provision:
+        response.headers["X-Auto-Provision-Id"] = str(provision.id)
+        response.headers["X-Auto-Provision-Description"] = provision.description
+        response.headers["X-Auto-Provision-Amount"] = str(provision.amount)
+        response.headers["X-Auto-Provision-Day"] = str(provision.day)
+
     return t
 
 

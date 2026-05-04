@@ -5,6 +5,14 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **AUTO.RECEITA — Receitas recorrentes viram provisão automaticamente** · *Claude.ai · baixa em 2026-05-04*
+  Ao categorizar uma transação em subcategoria de receita (`type='receita'`), o backend detecta
+  recorrência por (categoria, dono) e cria/atualiza provisão mensal automaticamente. Mínimo 2
+  ciclos distintos para evitar receitas pontuais. Toast informativo no frontend quando criar/atualizar.
+  Files: `backend/app/services/auto_provision.py` (novo), `backend/app/routers/transactions.py`,
+  `backend/app/main.py` (CORS expose), `frontend/src/api/client.ts` (putWithHeaders),
+  `frontend/src/components/transactions/TransacaoRow.tsx`, `frontend/src/pages/Transacoes.tsx`.
+
 - ✅ **BUG.CFG.1 — Dia de ciclo limitado a 28 em Configurações** · *Claude.ai · baixa em 2026-05-04*
   Input do dia de ciclo agora aceita 1-31. `getCycleInfo` ajusta automaticamente para o último
   dia do mês quando o dia escolhido não existe (ex: 31 em fevereiro vira 28/29).

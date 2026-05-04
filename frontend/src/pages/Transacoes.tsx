@@ -431,7 +431,7 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
     if (!selectedCat) return
     setSaving(true)
     try {
-      await api.put<Transaction>(`/transactions/${tx.id}`, {
+      const { headers } = await api.putWithHeaders(`/transactions/${tx.id}`, {
         ...tx, category_id: selectedCat, person_id: selectedPerson, status: 'confirmado',
       })
       await api.post('/rules/', {
@@ -445,6 +445,14 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
       const catName = categories.find(c => c.id === selectedCat)?.name ?? ''
       const sub = similares > 0 ? `+${similares} similar${similares > 1 ? 'es' : ''} categorizada${similares > 1 ? 's' : ''} automaticamente` : updated > 1 ? `+${updated - 1} recategorizada${updated > 2 ? 's' : ''}` : undefined
       toast(`Categoria salva: ${catName}`, sub)
+      // Auto-provisão de receita recorrente
+      const provDesc = headers.get('X-Auto-Provision-Description')
+      const provAmount = headers.get('X-Auto-Provision-Amount')
+      const provDay = headers.get('X-Auto-Provision-Day')
+      if (provDesc && provAmount && provDay) {
+        const valor = Number(provAmount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        toast(`📌 ${provDesc} virou provisão recorrente`, `${valor} · dia ${provDay}`, 'info')
+      }
       onUpdated()
     } finally {
       setSaving(false)

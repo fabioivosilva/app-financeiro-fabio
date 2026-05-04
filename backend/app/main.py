@@ -11,6 +11,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[
+        "X-Auto-Provision-Id",
+        "X-Auto-Provision-Description",
+        "X-Auto-Provision-Amount",
+        "X-Auto-Provision-Day",
+    ],
 )
 
 app.include_router(categories.router)
