@@ -5,15 +5,13 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04 (2). Provisões: backend modelo+router+API completos,
-             tela portada da referência (Timeline 6 meses + Lista + Modal Nova Provisão).
-             Regras: busca+grupos+editar inline+dedup+upsert. Toast em toda categorização.
-             Popover: grupos colapsáveis, busca pai+subs, nova categoria inline c/ herança cor.
-             Bancos: toast ao ativar/desativar. Inbox: todas as pendentes sem filtro de ciclo.
-             PENDENTE: T_SYNC.1 auto-sync regras/categorias · BUG.3 modais/popovers.
+STATUS     : Sessão 2026-05-04 (3). Provisões 100%: Timeline+Calendário+Lista+Modal
+             com auto-sugestão por regra + pessoa + seg-control da referência.
+             Backend: modelo Provision com person_id + router CRUD completo.
+             PRÓXIMA TAREFA: T_PROV.1 — importar parcelas do cartão como provisões futuras.
 BRANCH     : develop
-PRÓXIMA    : T_SYNC.1 [M] auto-sync · ou · BUG.3 [M] modais/popovers
-CLAIMS     : nenhum
+PRÓXIMA    : T_PROV.1 — Auto-importar parcelas pendentes como provisões [M]
+CLAIMS     : 🔒 [CODEX] T_PROV.1
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
@@ -81,12 +79,33 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
 
-- [ ] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** · *qualquer um*
-  Ao entrar em Provisões, detectar transações com `installment_current < installment_total`
-  (parcelas ainda em andamento). Para cada uma, calcular as parcelas restantes e sugerir
-  criação automática de provisões mensais até a última parcela. Ex: "Compra em 6x, já vieram
-  3 — sugerir 3 provisões futuras no mesmo dia/valor/categoria".
-  Botão "Importar parcelas pendentes" na tela de Provisões.
+- [ ] `[M]` **T_PROV.1 — Auto-importar parcelas do cartão como provisões futuras** 🔒 [CODEX]
+  **Objetivo:** detectar transações parceladas já importadas e gerar provisões para as parcelas restantes.
+
+  **Lógica:**
+  - Buscar `GET /transactions/` e filtrar onde `installment_current IS NOT NULL AND installment_current < installment_total`
+  - Agrupar por descrição normalizada (mesmo item em meses diferentes = mesma compra)
+  - Para cada grupo: pegar a parcela mais recente (`max(installment_current)`), calcular quantas faltam (`installment_total - max_current`)
+  - Para cada parcela restante: criar uma `Provision` com:
+    - `description` = descrição da transação (sem " N/M")
+    - `amount` = valor médio das parcelas já vistas (negativo)
+    - `day` = dia do mês da transação original
+    - `type` = "parcela"
+    - `installment_current` = próxima parcela (max_current + 1)
+    - `installment_total` = installment_total da transação
+    - `category_id` = category_id da transação
+    - `active` = true
+
+  **Frontend:** botão "Importar parcelas pendentes" no header da tela Provisões (ao lado de Nova provisão).
+  Ao clicar: `POST /provisions/import-installments` → mostra toast com quantas foram criadas → refetch.
+
+  **Backend:** nova rota `POST /provisions/import-installments` em `backend/app/routers/provisions.py`.
+  Deve evitar duplicatas: checar se já existe provisão com mesma descrição normalizada e parcela futura antes de criar.
+
+  **Arquivos a editar:**
+  - `backend/app/routers/provisions.py` — adicionar rota import-installments
+  - `frontend/src/pages/Provisoes.tsx` — botão no header + chamada API + toast
+  - `frontend/src/hooks/useProvisoes.ts` — já tem transactions disponível
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
