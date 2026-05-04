@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Dashboard } from '../../pages/Dashboard'
@@ -8,8 +9,27 @@ import { Metas } from '../../pages/Metas'
 import { Cartao } from '../../pages/Cartao'
 import { Provisoes } from '../../pages/Provisoes'
 import { Config } from '../../pages/Config'
+import { Onboarding } from '../../pages/Onboarding'
+import { api } from '../../api/client'
 
 export function AppShell() {
+  const [checked, setChecked] = useState(false)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
+
+  useEffect(() => {
+    api.get('/perfil/').then(data => {
+      setNeedsOnboarding(data === null || data === undefined)
+    }).catch(() => {
+      setNeedsOnboarding(false) // se backend offline, não bloquear
+    }).finally(() => setChecked(true))
+  }, [])
+
+  if (!checked) return null
+
+  if (needsOnboarding) {
+    return <Onboarding onDone={() => setNeedsOnboarding(false)} />
+  }
+
   return (
     <div className="app">
       <Sidebar />
