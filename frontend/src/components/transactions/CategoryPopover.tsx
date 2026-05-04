@@ -89,13 +89,11 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
       // 3. Aplica em massa em todas as transações existentes
       const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
       onCategoryCreated?.(created)
-      // 4. Seleciona na transação atual
+      // 4. Seleciona na transação atual e fecha
       onSelect(created.id)
       onClose()
-      // 5. Navega para Config para o usuário ver categoria criada
       const sub = updated > 0 ? `+${updated} transação${updated > 1 ? 'ões' : ''} categorizadas automaticamente` : undefined
       toast(`Categoria "${created.name}" criada`, sub)
-      navigate('/config')
     } finally {
       setSaving(false)
     }
