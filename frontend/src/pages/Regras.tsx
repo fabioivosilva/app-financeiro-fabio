@@ -114,15 +114,17 @@ export function Regras() {
               </div>
             )
 
-            // Group by category
+            // Group by parent category (if subcategory, use parent)
             const groups: { catId: number | null; catName: string; color?: string; rules: typeof rules }[] = []
             const seen = new Set<number | null>()
             filtered.forEach(r => {
-              const key = r.category_id ?? null
+              const cat = categories.find(c => c.id === r.category_id)
+              const parent = cat?.parent_id ? categories.find(c => c.id === cat.parent_id) : null
+              const groupCat = parent ?? cat
+              const key = groupCat?.id ?? null
               if (!seen.has(key)) {
                 seen.add(key)
-                const cat = categories.find(c => c.id === key)
-                groups.push({ catId: key, catName: cat?.name ?? 'Sem categoria', color: cat?.color, rules: [] })
+                groups.push({ catId: key, catName: groupCat?.name ?? 'Sem categoria', color: groupCat?.color, rules: [] })
               }
               groups.find(g => g.catId === key)!.rules.push(r)
             })
