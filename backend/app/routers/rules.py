@@ -29,6 +29,16 @@ def list_rules(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=RuleOut, status_code=201)
 def create_rule(data: RuleIn, db: Session = Depends(get_db)):
+    # Upsert: se já existe regra com mesmo keyword (normalizado), atualiza
+    norm = _normalize(data.keyword.strip())
+    existing = db.query(Rule).all()
+    match = next((r for r in existing if _normalize(r.keyword.strip()) == norm), None)
+    if match:
+        for k, v in data.model_dump().items():
+            setattr(match, k, v)
+        db.commit()
+        db.refresh(match)
+        return match
     rule = Rule(**data.model_dump())
     db.add(rule)
     db.commit()
@@ -77,6 +87,22 @@ def apply_rules_to(transactions: list, rules: list) -> int:
                 updated += 1
                 break
     return updated
+
+
+@router.post("/deduplicate", summary="Remove regras duplicadas pelo mesmo keyword")
+def deduplicate_rules(db: Session = Depends(get_db)):
+    rules = db.query(Rule).order_by(Rule.id).all()
+    seen: dict[str, int] = {}
+    removed = 0
+    for rule in rules:
+        norm = _normalize(rule.keyword.strip())
+        if norm in seen:
+            db.delete(rule)
+            removed += 1
+        else:
+            seen[norm] = rule.id
+    db.commit()
+    return {"removed": removed}
 
 
 @router.post("/apply", summary="Aplica regras a todas as transações sem categoria")
