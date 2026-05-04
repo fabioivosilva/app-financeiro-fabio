@@ -3,6 +3,7 @@ from .person import Person, Card
 from .goal import Goal
 from .settings import Settings
 from .provision import Provision
+from .import_record import ImportRecord
 
 __all__ = [
     "Transaction", "Category", "Rule",
@@ -10,4 +11,5 @@ __all__ = [
     "Goal",
     "Settings",
     "Provision",
+    "ImportRecord",
 ]

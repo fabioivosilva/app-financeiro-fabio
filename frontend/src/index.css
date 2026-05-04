@@ -331,6 +331,21 @@ body::before {
   text-decoration: none;
 }
 .import-config-link:hover { text-decoration: underline; }
+.import-folder-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; padding: 9px 11px;
+  border: 1px solid rgba(192,132,252,0.10);
+  border-radius: 8px; background: rgba(192,132,252,0.04);
+  color: var(--text-muted); font-size: 12px;
+}
+.import-folder-bar span {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.import-error { color: #F87171; margin-bottom: 8px; }
+.import-one-click {
+  flex-shrink: 0; padding: 8px 12px; font-size: 13px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
 .stat-card { display: flex; flex-direction: column; gap: 6px; }
 .stat-label { font-size: 11px; letter-spacing: 0.06em; color: var(--text-muted); }
 .stat-val { font-size: 28px; font-weight: 600; font-feature-settings: "tnum"; letter-spacing: -0.02em; }

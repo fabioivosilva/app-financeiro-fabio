@@ -20,7 +20,7 @@ def get_db():
 
 
 def init_db():
-    from app.models import Transaction, Category, Rule, Person, Card, Goal, Settings  # noqa
+    from app.models import Transaction, Category, Rule, Person, Card, Goal, Settings, ImportRecord  # noqa
     os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
     Base.metadata.create_all(bind=engine)
     _migrate()

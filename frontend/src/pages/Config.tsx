@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import { toast } from '../components/ui/Toast'
-import type { Card, Category, Person, Rule } from '../api/types'
+import type { Card, Category, Person, Rule, Settings } from '../api/types'
 import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
 import { BANCOS_DISPONIVEIS, BANKS_STORAGE_KEY, loadBancosAtivos } from '../config/banks'
 
@@ -572,18 +572,62 @@ function SistemaSection() {
 
   const [pasta, setPasta] = useState(savedPasta)
   const [diaCiclo, setDiaCiclo] = useState(savedDia)
+  const [savedBackendPasta, setSavedBackendPasta] = useState(savedPasta)
+  const [savedBackendDia, setSavedBackendDia] = useState(savedDia)
   const [justSaved, setJustSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const dirty = pasta !== (localStorage.getItem('importFolder') ?? '') ||
-                diaCiclo !== Number(localStorage.getItem('cycleDayStart') ?? '27')
+  const dirty = pasta !== savedBackendPasta || diaCiclo !== savedBackendDia
 
-  function handleSave() {
-    localStorage.setItem('importFolder', pasta)
-    const day = String(Math.min(31, Math.max(1, diaCiclo)))
+  useEffect(() => {
+    let alive = true
+    api.get<Settings>('/imports/settings')
+      .then(settings => {
+        if (!alive) return
+        const folder = settings.default_import_folder ?? savedPasta
+        const day = settings.cycle_start_day ?? savedDia
+        setPasta(folder)
+        setDiaCiclo(day)
+        setSavedBackendPasta(folder)
+        setSavedBackendDia(day)
+        localStorage.setItem('importFolder', folder)
+        localStorage.setItem('cycleDayStart', String(day))
+      })
+      .catch(() => {
+        setSavedBackendPasta(savedPasta)
+        setSavedBackendDia(savedDia)
+      })
+    return () => { alive = false }
+  }, [savedDia, savedPasta])
+
+  async function handleSave() {
+    let day = String(Math.min(31, Math.max(1, diaCiclo)))
+    setSaving(true)
+    try {
+      const settings = await api.put<Settings>('/imports/settings', {
+        default_import_folder: pasta.trim(),
+        cycle_start_day: Number(day),
+      })
+      const folder = settings.default_import_folder ?? ''
+      const savedDay = settings.cycle_start_day ?? Number(day)
+      day = String(savedDay)
+      setPasta(folder)
+      setDiaCiclo(savedDay)
+      setSavedBackendPasta(folder)
+      setSavedBackendDia(savedDay)
+      localStorage.setItem('importFolder', folder)
+      localStorage.setItem('cycleDayStart', String(savedDay))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: String(savedDay) }))
+    } catch {
+      setSaving(false)
+      toast('Erro ao salvar', 'Nao consegui gravar as configuracoes no backend', 'error')
+      return
+    }
     localStorage.setItem('cycleDayStart', day)
     window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: day }))
     setJustSaved(true)
     setTimeout(() => setJustSaved(false), 2000)
+    setSaving(false)
     toast('Configurações salvas', `Pasta e ciclo (dia ${day}) atualizados`)
   }
 
@@ -640,11 +684,11 @@ function SistemaSection() {
           <div className="cfg-form-foot">
             <button
               className="btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px', opacity: dirty || justSaved ? 1 : 0.4 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px', opacity: dirty || justSaved || saving ? 1 : 0.4 }}
               onClick={handleSave}
-              disabled={!dirty && !justSaved}
+              disabled={saving || (!dirty && !justSaved)}
             >
-              <Icon name={justSaved ? 'check' : 'save'} size={14} />
+              <Icon name={saving ? 'hourglass_empty' : justSaved ? 'check' : 'save'} size={14} />
               {justSaved ? 'Salvo!' : 'Salvar alterações'}
             </button>
           </div>

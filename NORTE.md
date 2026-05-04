@@ -5,11 +5,12 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, BUG.ICON1, T0.4, T3.2 fechados.
+STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, BUG.ICON1, T0.4, T1.3, T3.2 fechados.
              T3.2: aporte manual em metas (modal + POST /goals/{id}/deposit).
+             FEAT.PROV.AUTO.FIXA fechado: categorias fixas recorrentes geram provisão.
 BRANCH     : develop
-PRÓXIMA    : T1.3 — Importação Assistida [M] (T_SYNC.1 para o fim)
-CLAIMS     : CODEX em T1.3 e FEAT.PROV.AUTO.FIXA
+PRÓXIMA    : FEAT.META.ICON — Seletor de ícone no cadastro de meta [P] (T_SYNC.1 para o fim)
+CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -58,7 +59,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*Ativo: 🔒 [CODEX] T1.3 — Importação Assistida; 🔒 [CODEX] FEAT.PROV.AUTO.FIXA.*
+*Nenhum claim ativo no momento.*
 
 ---
 
@@ -70,14 +71,6 @@ Regra de status: item fechado sai do NORTE.md e vai para `obsidian-vault/CHANGEL
 Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
-
-- [ ] `[M]` **FEAT.PROV.AUTO.FIXA — Auto-provisão para categorias fixas** · *🔒 [CODEX]*
-  `auto_provision.py` hoje só age em `category.type == "receita"`. Estender para `type == "fixa"`:
-  ao categorizar uma transação de despesa fixa (Aluguel, Condomínio, Plano de saúde, etc.)
-  com 2+ ocorrências em meses distintos → cria/atualiza provisão mensal automaticamente
-  com valor médio e dia médio, igual ao fluxo de receitas.
-  **Cuidado:** ignorar type="interna" e type="variavel" — só fixas fazem sentido para provisão automática.
-  Arquivo a editar: `backend/app/services/auto_provision.py` (linha 42: condição `category.type != "receita"`).
 
 - [ ] `[P]` **FEAT.META.ICON — Seletor de ícone no cadastro de meta** · *qualquer um*
   Modal "Nova meta" / "Editar meta" não permite escolher ícone — usa fallback por índice.
@@ -150,9 +143,6 @@ Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 ---
 
 ### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
-
-- [ ] `[M]` **T1.3 — Importação Assistida** · *🔒 [CODEX] · depende T1.2*
-  Pasta padrão configurável · lista arquivos não importados · 1 clique para importar
 
 ---
 

@@ -6,6 +6,20 @@
 
 ## Sessão 2026-05-04 (continuação 4)
 
+- ✅ **T1.3 — Importação Assistida** · *Codex · baixa em 2026-05-04*
+  Pasta padrão agora é salva no backend (`/imports/settings`). A tela Importar lista arquivos
+  suportados ainda não importados em `/imports/scan` e permite importar cada arquivo em 1 clique
+  via `/imports/import-path`. Arquivos processados são registrados por hash em `import_records`
+  para não reaparecerem na fila assistida.
+  Files: `backend/app/routers/imports.py`, `backend/app/models/import_record.py`,
+  `frontend/src/pages/Importar.tsx`, `frontend/src/pages/Config.tsx`, `frontend/src/index.css`.
+
+- ✅ **FEAT.PROV.AUTO.FIXA — Auto-provisão para categorias fixas** · *Codex · baixa em 2026-05-04*
+  `auto_provision.py` agora aceita `category.type == "fixa"` com transações negativas, mantendo
+  receitas positivas como antes. Com 2+ ocorrências em meses distintos, cria/atualiza provisão
+  mensal com valor médio e dia médio; categorias `interna` e `variavel` seguem ignoradas.
+  Coberto por `backend/test_auto_provision.py`.
+
 - ✅ **BUG.ICON1 — Duplicatas na biblioteca de ícones ao pesquisar** · *Claude.ai · baixa em 2026-05-04*
   Validado que `frontend/src/components/ui/IconPicker.tsx` não possui mais `id` duplicado em
   `FINANCIAL_ICONS`; item removido do NORTE.md conforme fluxo de fila viva.

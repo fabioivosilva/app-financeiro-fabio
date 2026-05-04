@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
-import { API_BASE_URL } from '../api/client'
+import { API_BASE_URL, api } from '../api/client'
 import { bancosVisiveis, detectBankForFile, loadBancosAtivos } from '../config/banks'
 
 interface ImportItem {
@@ -27,6 +27,25 @@ interface UploadResult {
 
 interface ApiError {
   detail?: string | { code?: string; message?: string }
+}
+
+interface AssistedFile {
+  name: string
+  path: string
+  type: string
+  size: number
+  modified_at: string
+  imported: boolean
+}
+
+interface AssistedScan {
+  folder: string | null
+  files: AssistedFile[]
+}
+
+interface ImportSettings {
+  cycle_start_day: number
+  default_import_folder?: string | null
 }
 
 const STORAGE_KEY = 'app-financeiro-import-history'
@@ -63,6 +82,42 @@ export function Importar() {
   const totalDup = useMemo(() => importados.reduce((sum: number, item: ImportItem) => sum + item.dup, 0), [importados])
   const bancosAtivos = useMemo(loadBancosAtivos, [])
   const bancosSelecionados = useMemo(() => bancosVisiveis(bancosAtivos), [bancosAtivos])
+  const [importFolder, setImportFolder] = useState<string | null>(null)
+  const [assistedFiles, setAssistedFiles] = useState<AssistedFile[]>([])
+  const [scanning, setScanning] = useState(false)
+  const [pathImporting, setPathImporting] = useState<string | null>(null)
+  const [assistedError, setAssistedError] = useState<string | null>(null)
+
+  const addImportedItems = useCallback((items: ImportItem[]) => {
+    setImportados(prev => {
+      const updated = [...items, ...prev]
+      saveHistory(updated)
+      return updated
+    })
+    setNovo(items[0]?.id ?? null)
+    window.setTimeout(() => setNovo(null), 1800)
+  }, [])
+
+  const scanAssistedFolder = useCallback(async () => {
+    setScanning(true)
+    setAssistedError(null)
+    try {
+      const settings = await api.get<ImportSettings>('/imports/settings')
+      setImportFolder(settings.default_import_folder ?? null)
+      const scan = await api.get<AssistedScan>('/imports/scan')
+      setImportFolder(scan.folder ?? settings.default_import_folder ?? null)
+      setAssistedFiles(scan.files)
+    } catch (e) {
+      setAssistedFiles([])
+      setAssistedError(importErrorMessage(e))
+    } finally {
+      setScanning(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    scanAssistedFolder()
+  }, [scanAssistedFolder])
 
   async function handleFiles(files: FileList | File[], password?: string) {
     const fileList = Array.from(files)
@@ -129,13 +184,8 @@ export function Importar() {
         }
         newItems.push(item)
       }
-      setImportados(prev => {
-        const updated = [...newItems, ...prev]
-        saveHistory(updated)
-        return updated
-      })
-      setNovo(newItems[0]?.id ?? null)
-      window.setTimeout(() => setNovo(null), 1800)
+      addImportedItems(newItems)
+      scanAssistedFolder()
     } catch (e) {
       setError(importErrorMessage(e))
     } finally {
@@ -153,6 +203,9 @@ export function Importar() {
     const form = new FormData()
     form.append('file', file)
     form.append('password', pdfPassword.trim())
+    form.append('active_bank_ids', bancosAtivos.join(','))
+    const detectedBanco = detectBankForFile(file.name, bancosAtivos)
+    if (detectedBanco) form.append('bank_hint', detectedBanco.id)
 
     try {
       const res = await fetch(`${API_BASE_URL}/imports/upload`, { method: 'POST', body: form })
@@ -172,7 +225,7 @@ export function Importar() {
         id: `${file.name}-${Date.now()}`,
         nome: file.name,
         tipo: detectType(file.name, result.format),
-        fonte: `${result.bank ?? 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
+        fonte: `${result.bank ?? detectedBanco?.label ?? 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
         transacoes: result.total_found ?? 0,
         novas: result.imported ?? 0,
         dup: result.duplicates ?? 0,
@@ -180,18 +233,47 @@ export function Importar() {
       }
       setPendingPdfFiles(null)
       setPdfPassword('')
-      setImportados(prev => {
-        const updated = [item, ...prev]
-        saveHistory(updated)
-        return updated
-      })
-      setNovo(item.id)
-      window.setTimeout(() => setNovo(null), 1800)
+      addImportedItems([item])
+      scanAssistedFolder()
     } catch (e) {
       setError(importErrorMessage(e))
       setPendingPdfFiles(null)
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function handleImportPath(file: AssistedFile) {
+    if (bancosSelecionados.length === 0) {
+      setAssistedError('Nenhum banco ativo. Ative pelo menos um banco em Configurações > Bancos antes de importar.')
+      return
+    }
+
+    setPathImporting(file.path)
+    setAssistedError(null)
+    try {
+      const detectedBanco = detectBankForFile(file.name, bancosAtivos)
+      const result = await api.post<UploadResult>('/imports/import-path', {
+        path: file.path,
+        active_bank_ids: bancosAtivos,
+        bank_hint: detectedBanco?.id,
+      })
+      const item: ImportItem = {
+        id: `${file.name}-${Date.now()}`,
+        nome: file.name,
+        tipo: detectType(file.name, result.format),
+        fonte: `${result.bank || detectedBanco?.label || 'Arquivo'} · ${result.account ?? result.format ?? 'Importação'}`,
+        transacoes: result.total_found ?? 0,
+        novas: result.imported ?? 0,
+        dup: result.duplicates ?? 0,
+        status: 'novo',
+      }
+      addImportedItems([item])
+      scanAssistedFolder()
+    } catch (e) {
+      setAssistedError(importErrorMessage(e))
+    } finally {
+      setPathImporting(null)
     }
   }
 
@@ -251,6 +333,57 @@ export function Importar() {
           </div>
           {error && <div className="t-sm" style={{ color: '#F87171' }}>{error}</div>}
         </div>
+      </Glass>
+
+      <Glass>
+        <SectionHeader
+          title="Arquivos da pasta padrão"
+          right={
+            <button className="btn-ghost" onClick={scanAssistedFolder} disabled={scanning}>
+              <Icon name={scanning ? 'hourglass_empty' : 'refresh'} size={14} />
+              {scanning ? 'Atualizando' : 'Atualizar'}
+            </button>
+          }
+        />
+        <div className="import-folder-bar">
+          <Icon name="folder" size={15} />
+          <span>{importFolder || 'Configure a pasta em Configurações > Sistema'}</span>
+        </div>
+        {assistedError && <div className="t-sm import-error">{assistedError}</div>}
+        {assistedFiles.length === 0 ? (
+          <div className="empty-state-mini">
+            <Icon name="folder_open" size={32} className="t-muted" />
+            <div className="t-sm">{scanning ? 'Procurando arquivos...' : 'Nenhum arquivo novo encontrado'}</div>
+            <div className="t-xs t-muted">OFX, Excel, PDF e CSV ainda não importados aparecem aqui</div>
+          </div>
+        ) : (
+          <div className="imp-list">
+            {assistedFiles.map(file => {
+              const importingThis = pathImporting === file.path
+              return (
+                <div key={file.path} className="imp-row">
+                  <div className="imp-icon" style={fileIconStyle(file.type)}>
+                    <Icon name={fileIcon(file.type)} size={20} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="t-sm">{file.name}</div>
+                    <div className="t-xs t-muted">
+                      {file.type} · {formatFileSize(file.size)} · {formatDateTime(file.modified_at)}
+                    </div>
+                  </div>
+                  <button
+                    className="btn-primary import-one-click"
+                    onClick={() => handleImportPath(file)}
+                    disabled={uploading || scanning || importingThis}
+                  >
+                    <Icon name={importingThis ? 'hourglass_empty' : 'download_done'} size={14} />
+                    {importingThis ? 'Importando' : 'Importar'}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Glass>
 
       {/* Modal de senha para PDF protegido */}
@@ -360,6 +493,23 @@ function importErrorMessage(error: unknown) {
     return `Não consegui conectar ao backend em ${API_BASE_URL}. Verifique se o rodar.bat está aberto e se não há bloqueio de Firewall/Antivírus.`
   }
   return error instanceof Error ? error.message : 'Erro desconhecido ao importar arquivo'
+}
+
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / 1024 / 1024).toFixed(1)} MB`
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }
 
 function detectType(filename: string, fallback?: string) {

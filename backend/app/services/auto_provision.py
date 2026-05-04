@@ -1,21 +1,24 @@
 """
-Detecta receitas recorrentes e cria/atualiza provisões automaticamente
-quando uma transação é categorizada em uma subcategoria de receita.
+Detects recurring income and fixed expenses, then creates/updates provisions.
 
-Regras:
-- Só age sobre categorias com type='receita'
-- Cria provisão quando há 2+ transações da mesma (categoria, dono) em ciclos diferentes
-- Se já existe provisão, atualiza valor médio e dia médio
-- Provisão criada/atualizada é retornada para o frontend exibir feedback
+Rules:
+- Only acts on categories with type='receita' or type='fixa'
+- Income provisions use positive transactions
+- Fixed expense provisions use negative transactions
+- Creates a provision when there are 2+ transactions from the same
+  (category, owner) in different cycles
+- Existing provisions are updated with the average amount and average day
+- The created/updated provision is returned so the frontend can show feedback
 """
-from collections import defaultdict
 from typing import Optional
+
 from sqlalchemy.orm import Session
-from app.models import Transaction, Category, Provision
+
+from app.models import Category, Provision, Transaction
 
 
 def _safe_day(transactions: list[Transaction]) -> int:
-    """Dia médio do mês entre as transações, clamped 1-28."""
+    """Average day of month between transactions, clamped to 1-31."""
     if not transactions:
         return 1
     avg = sum(t.date.day for t in transactions) / len(transactions)
@@ -27,8 +30,16 @@ def _avg_amount(transactions: list[Transaction]) -> float:
 
 
 def _diff_cycles(transactions: list[Transaction]) -> int:
-    """Quantos (ano, mês) distintos as transações cobrem."""
+    """How many distinct (year, month) cycles the transactions cover."""
     return len({(t.date.year, t.date.month) for t in transactions})
+
+
+def _amount_matches_category_type(category_type: str, amount: float) -> bool:
+    if category_type == "receita":
+        return amount > 0
+    if category_type == "fixa":
+        return amount < 0
+    return False
 
 
 def maybe_upsert_income_provision(
@@ -36,21 +47,24 @@ def maybe_upsert_income_provision(
     transaction: Transaction,
 ) -> Optional[Provision]:
     """
-    Chamado após uma transação ter sido categorizada/atualizada.
-    Retorna a Provision criada/atualizada, ou None se nada mudou.
+    Called after a transaction has been categorized/updated.
+    Returns the created/updated Provision, or None when nothing changed.
     """
-    if not transaction.category_id or transaction.amount <= 0:
+    if not transaction.category_id:
         return None
 
     category = db.query(Category).get(transaction.category_id)
-    if not category or category.type != "receita":
+    if not category or not _amount_matches_category_type(category.type, transaction.amount):
         return None
 
-    # Busca todas as transações de receita dessa categoria com mesmo dono
     similar = db.query(Transaction).filter(
         Transaction.category_id == transaction.category_id,
-        Transaction.amount > 0,
     )
+    if category.type == "receita":
+        similar = similar.filter(Transaction.amount > 0)
+    else:
+        similar = similar.filter(Transaction.amount < 0)
+
     if transaction.person_id is not None:
         similar = similar.filter(Transaction.person_id == transaction.person_id)
     else:
@@ -58,14 +72,12 @@ def maybe_upsert_income_provision(
 
     occurrences = similar.all()
 
-    # Precisa de 2+ ocorrências em ciclos distintos para criar/atualizar
     if _diff_cycles(occurrences) < 2:
         return None
 
     avg_amount = _avg_amount(occurrences)
     avg_day = _safe_day(occurrences)
 
-    # Provisão existe para essa (categoria, dono)?
     existing_q = db.query(Provision).filter(
         Provision.category_id == transaction.category_id,
         Provision.type == "mensal",
@@ -78,7 +90,6 @@ def maybe_upsert_income_provision(
     existing = existing_q.first()
 
     if existing:
-        # Atualiza com a nova média
         existing.amount = round(avg_amount, 2)
         existing.day = avg_day
         existing.active = True
@@ -86,10 +97,8 @@ def maybe_upsert_income_provision(
         db.refresh(existing)
         return existing
 
-    # Cria nova provisão
-    desc = category.name
     provision = Provision(
-        description=desc,
+        description=category.name,
         amount=round(avg_amount, 2),
         day=avg_day,
         type="mensal",
