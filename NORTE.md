@@ -12,6 +12,13 @@ STATUS     : Sessão 2026-05-04 (3). Provisões 100%: Timeline+Calendário+Lista
 BRANCH     : develop
 PRÓXIMA    : T_PROV.1 — Auto-importar parcelas pendentes como provisões [M]
 CLAIMS     : 🔒 [CODEX] T_PROV.1
+BLOCKER    : Tela Provisões mostra "Erro ao carregar provisões". Causa provável: tabela
+             `provisions` no SQLite não tem coluna `person_id` (adicionada depois da criação
+             inicial). Fix: reiniciar o backend — o `init_db()` no startup chama
+             `Base.metadata.create_all()` mas NÃO faz ALTER TABLE em colunas novas.
+             Solução: deletar `data/finance.db` e reiniciar (perde dados locais), OU rodar
+             migration manual: `ALTER TABLE provisions ADD COLUMN person_id INTEGER`.
+             Codex deve resolver isso ANTES de começar T_PROV.1.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
