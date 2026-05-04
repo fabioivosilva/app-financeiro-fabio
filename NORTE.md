@@ -5,8 +5,9 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, T0.4 fechados (Claude Code).
-             T0.4: wizard 3-passos no primeiro acesso; backend GET/POST /perfil/.
+STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, T0.4, T3.2 fechados (Claude Code).
+             T3.2: aporte manual em metas (modal + POST /goals/{id}/deposit).
+             Novo bug registrado: BUG.ICON1 — duplicatas na biblioteca de ícones.
 BRANCH     : develop
 PRÓXIMA    : T1.3 — Importação Assistida [M] (T_SYNC.1 para o fim)
 CLAIMS     : nenhum
@@ -69,6 +70,11 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**. O trabalho de amanhã começa em BUG.1.
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
+
+- [ ] `[P]` **BUG.ICON1 — Duplicatas na biblioteca de ícones ao pesquisar** · *qualquer um*
+  Ao digitar no campo de busca do IconPicker (ex: "plr"), o mesmo ícone aparece múltiplas vezes.
+  Causa: `FINANCIAL_ICONS` em `IconPicker.tsx` tem entradas duplicadas (ex: `pets` aparece duas vezes).
+  Fix: deduplicar o array por `id` em `IconPicker.tsx` e remover entradas duplicadas do `FINANCIAL_ICONS`.
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
