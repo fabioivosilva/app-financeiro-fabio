@@ -10,8 +10,8 @@ STATUS     : Sessão 2026-05-04 (4). T_PROV.1 concluído: backend importa parcel
              `provisions.person_id` e botão/toast na tela Provisões.
              Ajuste visual extra: alinhamento do botão/contador pendente em Transações.
 BRANCH     : develop
-PRÓXIMA    : BUG.2 — Conformidade 100% da referência visual [G]
-CLAIMS     : Nenhum claim ativo no momento.
+PRÓXIMA    : BUG.2 + BUG.3 — Conformidade visual e modais/popovers [G/M]
+CLAIMS     : 🔒 [CODEX] BUG.2 · 🔒 [CODEX] BUG.3
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -76,7 +76,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Resultado: Dashboard🔴placeholder, Importar🟡funcional/BUG.4, Transações🟡funcional/BUG.2-3, Cartão🔴placeholder, Provisões🔴placeholder(sem backend), Metas🟢funcional, Regras🟢funcional, Config🔴placeholder. Backend: todas as rotas existem exceto provisions e settings.
   **Fixes entregues:** filtro "Ciclo atual" (dia 27→26) em Transações + suggestCategory agora usa regras reais do backend.
 
-- [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
+- [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
 
@@ -131,7 +131,7 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Configurações > Categorias para o usuário ver o resultado registrado.
   Gatilho natural: busca sem resultado + botão "Criar '{{termo}}'".
 
-- [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1*
+- [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
   Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
 
 - [x] `[M]` **BUG.4 — Remover mocks ou sinalizar claramente o que ainda é mock** · *Thiago · CONCLUÍDO 2026-05-03*
