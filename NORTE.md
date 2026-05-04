@@ -5,13 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04 (5). BUG.2/BUG.3 em andamento por Codex.
-             Entregue primeira fatia: Cartão saiu de placeholder e foi portado para
-             estrutura da referência; modais/popovers/dropdowns receberam fixes de
-             grid modal, preview, ellipsis e altura/HTML válido.
+STATUS     : Sessão 2026-05-04. BUG.3 fechado (Codex). BUG.2 reduzido a Dashboard + reauditoria.
+             Bugs ativos do Dashboard (D1) e Provisões (PR1) registrados como prioridade alta.
 BRANCH     : develop
-PRÓXIMA    : BUG.2 + BUG.3 — Conformidade visual e modais/popovers [G/M]
-CLAIMS     : 🔒 [CODEX] BUG.2 · 🔒 [CODEX] BUG.3
+PRÓXIMA    : BUG.D1 — Dashboard não respeita ciclo dia 27→26 [M]
+CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -72,13 +70,11 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
-- [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
-  Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
-  - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
-  - Fatia Codex 2026-05-04: Cartão deixou de ser placeholder e usa `page-cartao`,
-    `cartao-card`, `cartao-bg`, `cartao-info`, `cartao-bar`; Config ganhou
-    `page-config` e toolbar de categorias com `cfg-cat-toolbar`/`search-wrap`;
-    Provisões recuperou ação visual `Vincular` no status futuro.
+- [ ] `[M]` **BUG.2 — Conformidade visual restante (Dashboard + reauditoria)** · *qualquer um*
+  Fatias já entregues por Codex em 2026-05-03/04: Configurações>Bancos, Cartão, Config toolbar, Provisões (botão Vincular).
+  **Sobrou:** Dashboard ainda usa mock para provisões (`provisoesRestantes: any[] = []` linha 62) e
+  reauditoria visual fina em Transações/Regras/Importar/Metas para garantir match com a referência.
+  Note: BUG.D1 trata especificamente do filtro de ciclo no Dashboard — atacar junto.
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
@@ -86,13 +82,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Thiago roda `POST /sync/apply` para aplicar as regras e categorias do Fabio na base dele.
   Objetivo: manter os dois sempre alinhados sem precisar compartilhar arquivo de banco.
 
-- [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1* 🔒 [CODEX]
-  Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
-  - Fatia Codex 2026-05-04: grids de categorias em modais trocados para
-    `modal-cat-grid`; preview da Nova Provisão voltou a ter `prov-icon`;
-    popover de categoria saiu de dentro de `<span>` e ganhou limite de altura;
-    chips/dropdowns ganharam ellipsis; modal de senha PDF usa `modal-backdrop`,
-    `modal-head`, `modal-foot` e `cfg-input`.
 
 #### HANDOFF ANTIGRAVITY — 2026-05-03 sessão 4 (Fim do dia)
 

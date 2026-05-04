@@ -5,6 +5,12 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *Codex · baixa em 2026-05-04*
+  Grids de categorias em modais migrados para `modal-cat-grid`; preview da Nova Provisão com `prov-icon`;
+  popover de categoria saiu de `<span>` e ganhou limite de altura; chips/dropdowns com ellipsis;
+  modal de senha PDF usa `modal-backdrop`, `modal-head`, `modal-foot` e `cfg-input`.
+  Confirmado em commits `6a83e5f` e `4d4168b`.
+
 
 - ✅ **T0.3 — Script de Execução** · *baixa em 2026-05-04*
   rodar.bat + auto_sync.ps1 + instalar_sync.bat funcionando
