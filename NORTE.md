@@ -80,6 +80,18 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
 
+- [ ] `[P]` **T_CAT.1 — Busca no popover traz categoria pai + subcategorias** · *qualquer um*
+  Quando o usuário digita no campo de busca do `CategoryPopover` e o resultado bate com um pai (ex: "Lazer"),
+  exibir também todas as subcategorias desse pai logo abaixo — mesmo comportamento dos grupos colapsáveis,
+  mas acionado pela busca. Hoje retorna só o pai e o usuário não consegue escolher a sub.
+
+- [ ] `[P]` **T_CAT.2 — Botão rápido "Nova categoria/subcategoria" no popover** · *qualquer um*
+  Adicionar botão no rodapé do `CategoryPopover` (ao lado de "Criar regra automática") para cadastrar
+  uma nova categoria ou subcategoria inline sem sair do fluxo de categorização.
+  Ao confirmar: salva via `POST /categories/`, executa `/rules/apply` em massa e navega para
+  Configurações > Categorias para o usuário ver o resultado registrado.
+  Gatilho natural: busca sem resultado + botão "Criar '{{termo}}'".
+
 - [ ] `[M]` **BUG.3 — Modais, popovers e dropdowns sem quebra visual** · *qualquer um · depende BUG.1*
   Auditar `CategoryPopover`, `RuleModal`, modais de Metas, modal Nova Regra, dropdowns de filtros e grid de categorias/pessoas. Todo modal deve usar classes da referência (`modal-*`, `modal-cat-grid`, `inbox-cat`, `inbox-person`, `filter-dd`) sem texto grudado/overflow.
 
