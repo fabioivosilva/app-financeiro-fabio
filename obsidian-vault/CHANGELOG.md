@@ -2,6 +2,28 @@
 > Itens concluídos do roadmap. Mantido fora do NORTE.md para economizar tokens em sessões.
 > Para auditoria detalhada: `git log`.
 
+
+
+## Sessão 2026-05-04 — Limpeza e baixas em massa
+
+- ✅ **T0.3 — Script de Execução** · *baixa em 2026-05-04*
+  rodar.bat + auto_sync.ps1 + instalar_sync.bat funcionando
+
+- ✅ **T2.1 — Tela de Transações** · *baixa em 2026-05-04*
+  590 linhas, filtros, MonthSelector, busca, inline edit — completa
+
+- ✅ **T2.2 — Tela de Regras** · *baixa em 2026-05-04*
+  345 linhas, RuleModal, CRUD completo, busca por keyword/categoria
+
+- ✅ **T3.1 — Tela de Metas** · *baixa em 2026-05-04*
+  428 linhas, cards de progresso, modal, cálculo de aporte mensal
+
+- ✅ **T3.3 — Insight de Meta** · *baixa em 2026-05-04*
+  Aporte mensal necessário calculado e exibido em Metas.tsx (entregue dentro de T3.1)
+
+- ✅ **T6.4 — Seção Sistema funcional** · *baixa em 2026-05-04*
+  SistemaSection em Config.tsx com pasta de importação persistida
+
 - [x] `[G]` **BUG.1 — Auditoria UI/API de todos os menus** · *Thiago + Fabio · CONCLUÍDO 2026-05-03*
   Resultado: Dashboard🔴placeholder, Importar🟡funcional/BUG.4, Transações🟡funcional/BUG.2-3, Cartão🔴placeholder, Provisões🔴placeholder(sem backend), Metas🟢funcional, Regras🟢funcional, Config🔴placeholder. Backend: todas as rotas existem exceto provisions e settings.
   **Fixes entregues:** filtro "Ciclo atual" (dia 27→26) em Transações + suggestCategory agora usa regras reais do backend.

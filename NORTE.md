@@ -146,11 +146,18 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
 - **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
 
+- [ ] `[M]` **BUG.D1 — Dashboard não filtra pelo ciclo selecionado** · *qualquer um · ALTA prioridade*
+  Dashboard exibe valores que não respeitam o ciclo dia 27→26 do MonthSelector. Auditar:
+  `frontend/src/pages/Dashboard.tsx` linha ~62 (`provisoesRestantes: any[] = []` — ainda mock)
+  e o agrupamento de transações por ciclo. Conferir com `useTransacoes` se filtro de mês está aplicado.
+
+- [ ] `[M]` **BUG.PR1 — Tela de Provisões com pendências** · *qualquer um · ALTA prioridade*
+  Vários pontos pendentes na tela de Provisões — Fabio relatou em 2026-05-04.
+  Auditar `frontend/src/pages/Provisoes.tsx` (544 linhas) contra a referência visual e
+  comportamento esperado: criação, recorrência, vinculação a transações, exibição.
+
 ### TRILHA 0 — Fundação
 
-- [ ] `[P]` **T0.3 — Script de Execução** · *Fabio · PARCIAL/BLOQUEADO BUG.5*
-  `rodar.bat` existe, mas ainda precisa validação ponta a ponta como fluxo dev confiável antes de marcar concluído.
-  **Saída:** app abrindo no browser via rodar.bat
 
 ---
 
@@ -170,13 +177,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### TRILHA 2 — Transações & Regras *(depende T0+T1)*
 
-- [ ] `[M]` **T2.1 — Tela de Transações** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
-  Lista agrupada por data · filtros pill conforme referência · aba pendentes · sem categoria conta como pendente · inline edit categoria · botão `Revisar N pendentes` abre inbox one-by-one · categoriza e cria regra automática. Não marcar concluído até reauditoria visual/API passar.
-  **Ref visual:** `07_UX_REFERENCE.md` → seção "Transações"
-
-- [ ] `[M]` **T2.2 — Tela de Regras** · *Fabio · PARCIAL/BLOQUEADO BUG.2/BUG.3*
-  CRUD regras keyword→categoria+pessoa · nova regra em modal · exclusão · lista no padrão visual de referência existem, mas ainda precisam reauditoria visual/API. Vínculo cartão→pessoa/paginação ficam para BUG.1 se ainda forem necessários.
-  **Ref visual:** `07_UX_REFERENCE.md` → seção "Regras"
 
 - [ ] `[P]` **T2.3 — Cofrinho por Keyword** · *qualquer um · depende T2.2+T3.1*
   Campo `keyword` em Goal · ao categorizar, bate keyword → vincula à meta automaticamente
@@ -185,15 +185,10 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### TRILHA 3 — Metas & Cofrinho *(depende T0+T2)*
 
-- [ ] `[M]` **T3.1 — Tela de Metas** · *Fabio · PARCIAL/BLOQUEADO BUG.2*
-  Cards com barra de progresso · CRUD (nome, objetivo, prazo, categoria vinculada) · progresso calculado por transações da categoria existem, mas ainda precisam reauditoria 100% contra a referência antes de marcar concluído.
-  **Ref visual:** `07_UX_REFERENCE.md` → seção "Metas"
 
 - [ ] `[M]` **T3.2 — Aporte Manual** · *qualquer um · depende T3.1*
   Botão "Registrar Aporte" · modal (valor, descrição, data) · `POST /goals/{id}/deposit` → cria Transaction com origem `Aporte Manual`
 
-- [ ] `[P]` **T3.3 — Insight de Meta** · *qualquer um · depende T3.1*
-  Card roxo: "Para atingir X até DD/MM, guarde R$ Y/mês"
 
 ---
 
@@ -224,11 +219,6 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### TRILHA 6 — Configurações *(paralelo com T1-T3)*
 
-- [ ] `[M]` **T6.4 — Seção Sistema funcional** · *qualquer um*
-  Três problemas identificados em Configurações > Sistema:
-  1. **Botão Salvar sempre ativo** — falta dirty-state: botão deve ficar desabilitado até o usuário alterar pasta ou dia de ciclo.
-  2. **Pasta de importação não conectada** — valor salva em localStorage mas nenhuma tela usa essa pasta ainda (T1.3 depende disso). Em webapp puro não é possível abrir seletor de pasta nativo; solução possível: input de texto + botão que abre `<input type="file" webkitdirectory>` para leitura.
-  3. **Dia de ciclo não conectado ao backend** — `Settings.cycle_start_day` existe no banco mas falta `PUT /settings/` e o filtro de transações usa mês calendário, não o ciclo configurado. Conectar ao backend e usar `cycle_start_day` no cálculo do período atual em Transações e Dashboard.
 
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 
