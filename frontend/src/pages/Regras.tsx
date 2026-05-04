@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Button } from '../components/ui/Button'
@@ -13,6 +13,7 @@ export function Regras() {
   const { rules, categories, persons, loading, error, refetch, deleteRule } = useRegras()
   const [showNew, setShowNew] = useState(false)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [editing, setEditing] = useState<number | null>(null)
   const [applying, setApplying] = useState(false)
   const [applyResult, setApplyResult] = useState<number | null>(null)
   const [busca, setBusca] = useState('')
@@ -148,14 +149,26 @@ export function Regras() {
                     {g.rules.map(rule => {
                       const cat = categories.find(c => c.id === rule.category_id)
                       const person = persons.find(p => p.id === rule.person_id)
-                      return (
+                      return editing === rule.id ? (
+                        <EditRuleRow
+                          key={rule.id}
+                          rule={rule}
+                          categories={categories}
+                          persons={persons}
+                          onSaved={() => { setEditing(null); refetch() }}
+                          onCancel={() => setEditing(null)}
+                        />
+                      ) : (
                         <div key={rule.id} className="lista-prov-row lista-regras-grid">
                           <div className="t-sm" style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text)' }}>"{rule.keyword}"</div>
                           <div>{cat ? <CategoryChip label={cat.name} color={cat.color} /> : <CategoryChip label="" empty />}</div>
                           <div className="t-xs t-muted">{person?.name ?? 'Todas'}</div>
-                          <div>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <button className="btn-icon" onClick={() => setEditing(rule.id)} title="Editar">
+                              <Icon name="edit" size={15} />
+                            </button>
                             <button className="btn-icon" onClick={() => handleDelete(rule.id)} disabled={deleting === rule.id} title="Excluir">
-                              <Icon name={deleting === rule.id ? 'hourglass_empty' : 'delete_outline'} size={16} />
+                              <Icon name={deleting === rule.id ? 'hourglass_empty' : 'delete_outline'} size={15} />
                             </button>
                           </div>
                         </div>
@@ -269,5 +282,62 @@ function NewRuleModal({ open, onClose, categories, persons, onSaved }: NewRuleMo
 
       {err && <div className="modal-error">{err}</div>}
     </Modal>
+  )
+}
+
+// ─── Edit Rule Row ─────────────────────────────────────────────────────────────
+
+interface EditRuleRowProps {
+  rule: ReturnType<typeof useRegras>['rules'][0]
+  categories: ReturnType<typeof useRegras>['categories']
+  persons: ReturnType<typeof useRegras>['persons']
+  onSaved: () => void
+  onCancel: () => void
+}
+
+function EditRuleRow({ rule, categories, persons, onSaved, onCancel }: EditRuleRowProps) {
+  const [keyword, setKeyword] = useState(rule.keyword)
+  const [catId, setCatId] = useState<number | undefined>(rule.category_id ?? undefined)
+  const [personId, setPersonId] = useState<number | undefined>(rule.person_id ?? undefined)
+  const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  async function save() {
+    if (!keyword.trim()) return
+    setSaving(true)
+    try {
+      await api.put(`/rules/${rule.id}`, { keyword: keyword.trim(), category_id: catId ?? null, person_id: personId ?? null, origin: null, goal_id: null })
+      await api.post('/rules/apply', {})
+      onSaved()
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <div className="lista-prov-row regra-edit-row">
+      <input
+        ref={inputRef}
+        autoFocus
+        className="regra-edit-input"
+        value={keyword}
+        onChange={e => setKeyword(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') onCancel() }}
+      />
+      <select className="regra-edit-select" value={catId ?? ''} onChange={e => setCatId(e.target.value ? Number(e.target.value) : undefined)}>
+        <option value="">Sem categoria</option>
+        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+      </select>
+      <select className="regra-edit-select" value={personId ?? ''} onChange={e => setPersonId(e.target.value ? Number(e.target.value) : undefined)}>
+        <option value="">Todas</option>
+        {persons.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+      </select>
+      <div style={{ display: 'flex', gap: 4 }}>
+        <button className="btn-icon" onClick={save} disabled={saving} title="Salvar" style={{ color: '#22C55E' }}>
+          <Icon name={saving ? 'hourglass_empty' : 'check'} size={16} />
+        </button>
+        <button className="btn-icon" onClick={onCancel} title="Cancelar">
+          <Icon name="close" size={16} />
+        </button>
+      </div>
+    </div>
   )
 }

@@ -678,6 +678,15 @@ body::before {
   color: var(--text); font: inherit; font-size: 13px;
 }
 .regras-search input::placeholder { color: var(--text-muted-2); }
+.regra-edit-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: center; padding: 8px 16px; background: rgba(130,10,209,0.06); }
+.regra-edit-input, .regra-edit-select {
+  padding: 6px 10px; border-radius: 8px;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(192,132,252,0.25);
+  color: var(--text); font: inherit; font-size: 12px; outline: none;
+  font-family: ui-monospace, monospace;
+}
+.regra-edit-input:focus, .regra-edit-select:focus { border-color: rgba(192,132,252,0.5); }
+.regra-edit-select option { background: #1c1433; font-family: inherit; }
 .regras-group-header {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 16px; background: rgba(192,132,252,0.04);
