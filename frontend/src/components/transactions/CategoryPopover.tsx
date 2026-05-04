@@ -112,7 +112,7 @@ export function CategoryPopover({ categories, currentId, onSelect, onCreateRule,
   const flatOrphans = flat.filter(c => !!c.parent_id && !flatParents.find(p => p.id === c.parent_id))
 
   return (
-    <div ref={popoverRef} className="cat-popover">
+    <div ref={popoverRef} className="cat-popover" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
       <div className="cat-popover-search">
         <Icon name="search" size={14} className="t-muted" />
         <input
