@@ -5,6 +5,7 @@ import { Icon } from '../components/ui/Icon'
 import { TransacaoRow } from '../components/transactions/TransacaoRow'
 import { CategoryPopover } from '../components/transactions/CategoryPopover'
 import { api } from '../api/client'
+import { toast } from '../components/ui/Toast'
 import type { Category, Person, Rule, Transaction } from '../api/types'
 import { useTransacoes, groupByDate, formatDate, formatCurrency, isTransactionPending } from '../hooks/useTransacoes'
 
@@ -89,7 +90,7 @@ export function Transacoes() {
     [allPending],
   )
   // Contador de pendentes usa todas as transações sem filtro de ciclo
-  const { transactions: allTx } = useTransacoes({})
+  const { transactions: allTx, refetch: refetchAll } = useTransacoes({})
   const pendentes = useMemo(() => allTx.filter(isTransactionPending).length, [allTx])
   const totalGastos = filtered.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
   const filtrosAtivos = [filtroCat, filtroPessoa, filtroValor, filtroData, filtroStatus].filter(Boolean).length
@@ -103,8 +104,8 @@ export function Transacoes() {
         rules={rules}
         loading={loadingInbox}
         error={errorInbox}
-        onClose={() => setTab('todas')}
-        onUpdated={refetch}
+        onClose={() => { setTab('todas'); refetchAll() }}
+        onUpdated={() => { refetch(); refetchAll() }}
       />
     )
   }
@@ -436,11 +437,14 @@ function PendingInbox({ transactions, categories, persons, rules, loading, error
       await api.post('/rules/', {
         keyword, category_id: selectedCat, person_id: selectedPerson, origin: null, goal_id: null,
       })
-      await api.post('/rules/apply', {})
+      const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
       const similarIds = pending
         .filter(t => t.id !== tx.id && normalizeText(t.description).includes(normalizeText(keyword)))
         .map(t => t.id)
       setDoneIds(prev => [...prev, tx.id, ...similarIds])
+      const catName = categories.find(c => c.id === selectedCat)?.name ?? ''
+      const sub = similares > 0 ? `+${similares} similar${similares > 1 ? 'es' : ''} categorizada${similares > 1 ? 's' : ''} automaticamente` : updated > 1 ? `+${updated - 1} recategorizada${updated > 2 ? 's' : ''}` : undefined
+      toast(`Categoria salva: ${catName}`, sub)
       onUpdated()
     } finally {
       setSaving(false)
