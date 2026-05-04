@@ -6,6 +6,7 @@ export interface Category {
   limit?: number
   limit_value?: number
   type?: 'fixa' | 'variavel' | 'receita' | 'interna'
+  provision_behavior?: 'none' | 'recurring_income' | 'fixed_expense' | 'installment'
   parent_id?: number | null
   exclude_totals?: boolean
 }

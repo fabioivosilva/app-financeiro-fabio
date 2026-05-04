@@ -14,7 +14,7 @@ from app.models import Card, ImportRecord, Person, Rule, Settings, Transaction
 from app.parsers import PARSER_REGISTRY
 from app.parsers.dedup import deduplicate
 from app.routers.rules import apply_rules_to
-from app.services.auto_provision import maybe_upsert_income_provision
+from app.services.provision_engine import evaluate_transaction_for_provision
 
 
 SUPPORTED_EXTENSIONS = {".ofx", ".xls", ".xlsx", ".pdf", ".csv"}
@@ -218,7 +218,7 @@ def _process_import(
         apply_rules_to(criadas, rules)
         for tx in criadas:
             if tx.category_id:
-                maybe_upsert_income_provision(db, tx)
+                evaluate_transaction_for_provision(db, tx)
 
     _record_import(
         db,

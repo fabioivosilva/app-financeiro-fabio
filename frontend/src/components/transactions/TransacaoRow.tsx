@@ -122,8 +122,16 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
             )}
 
             {person && <span className="t-xs t-muted">{person.name}</span>}
-            {tx.origin !== 'Débito' && <span className="t-xs t-muted">{tx.origin}</span>}
+            {tx.origin && tx.origin !== 'Débito' && (
+              <span className="tx-tag tx-tag-origin">{tx.origin}</span>
+            )}
             {installmentLabel && <span className="t-xs t-muted">parcela {installmentLabel}</span>}
+            {tx.status === 'revisar' && (
+              <span className="tx-tag tx-tag-revisar">Revisar</span>
+            )}
+            {tx.status === 'provisao' && (
+              <span className="tx-tag tx-tag-provisao">Provisão</span>
+            )}
             {isPending && (
               <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 999, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}>
                 pendente

@@ -28,9 +28,12 @@ export function Dashboard() {
 
   const { inicio, fim } = getCycleInfo()
 
-  const [provisions, setProvisions] = useState<{ id: number; active: boolean }[]>([])
+  const [provisions, setProvisions] = useState<{
+    id: number; active: boolean; amount: number; day: number; type: string
+  }[]>([])
   useEffect(() => {
-    api.get<{ id: number; active: boolean }[]>('/provisions/').then(p => setProvisions(p || []))
+    api.get<{ id: number; active: boolean; amount: number; day: number; type: string }[]>('/provisions/')
+      .then(p => setProvisions(p || []))
   }, [])
 
   const { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas } = useMemo(() => {
@@ -70,32 +73,52 @@ export function Dashboard() {
   }, [transactions, categories, inicio, fim])
 
   const saldoAtual = receitas - gastos
-  const saldoProjetado = saldoAtual // simplified projection
   const provisoesRestantes = provisions.filter(p => p.active)
-  const receitaRestante = 0
-  const compromissoRestante = 0
+
+  // Receitas previstas restantes no ciclo (provisões de receita com dia > hoje)
+  const hoje = new Date()
+  const receitaRestante = provisoesRestantes
+    .filter(p => p.amount > 0 && p.day > hoje.getDate())
+    .reduce((s, p) => s + p.amount, 0)
+
+  // Compromissos futuros restantes no ciclo (provisões de despesa com dia > hoje)
+  const compromissoRestante = provisoesRestantes
+    .filter(p => p.amount < 0 && p.day > hoje.getDate())
+    .reduce((s, p) => s + Math.abs(p.amount), 0)
+
+  // Saldo projetado = atual + receitas esperadas - compromissos futuros
+  const saldoProjetado = saldoAtual + receitaRestante - compromissoRestante
 
   const projecao = useMemo(() => {
     const meses = []
-    let saldoAcum = saldoAtual
-    const hoje = new Date()
     const labelsM: string[] = []
     for (let i = 0; i < 6; i++) {
       const d = new Date(hoje)
       d.setMonth(d.getMonth() + i)
       labelsM.push(d.toLocaleDateString('pt-BR', { month: '2-digit', year: '2-digit' }).replace(/\//g, '/'))
     }
+    // Receitas mensais recorrentes ativas
+    const receitaMensal = provisoesRestantes
+      .filter(p => p.amount > 0 && p.type === 'mensal')
+      .reduce((s, p) => s + p.amount, 0)
+    // Despesas mensais recorrentes ativas
+    const despesaMensal = provisoesRestantes
+      .filter(p => p.amount < 0 && p.type === 'mensal')
+      .reduce((s, p) => s + Math.abs(p.amount), 0)
+    const saldoMensalLiquido = receitaMensal - despesaMensal
+
+    let saldoAcum = saldoProjetado
     for (let i = 0; i < 6; i++) {
       if (i === 0) {
         meses.push({ label: labelsM[i], saldo: saldoProjetado, delta: saldoProjetado - saldoAtual })
         saldoAcum = saldoProjetado
       } else {
-        saldoAcum += saldoAtual * 0.3
-        meses.push({ label: labelsM[i], saldo: saldoAcum, delta: saldoAtual * 0.3 })
+        saldoAcum += saldoMensalLiquido
+        meses.push({ label: labelsM[i], saldo: saldoAcum, delta: saldoMensalLiquido })
       }
     }
     return meses
-  }, [saldoProjetado, saldoAtual])
+  }, [saldoProjetado, saldoAtual, provisoesRestantes])
 
   return (
     <div className="page page-dashboard">

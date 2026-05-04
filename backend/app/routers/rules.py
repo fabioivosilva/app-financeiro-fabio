@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
 from app.models import Rule, Transaction
-from app.services.auto_provision import maybe_upsert_income_provision
+from app.services.provision_engine import evaluate_transaction_for_provision
 from app.services.sync import write_snapshot_file
 
 router = APIRouter(prefix="/rules", tags=["rules"])
@@ -121,6 +121,6 @@ def apply_rules(db: Session = Depends(get_db)):
     db.commit()
     auto_provisions = 0
     for tx in pending:
-        if tx.category_id and maybe_upsert_income_provision(db, tx):
+        if tx.category_id and evaluate_transaction_for_provision(db, tx).get("provision"):
             auto_provisions += 1
     return {"updated": updated, "auto_provisions": auto_provisions}

@@ -920,17 +920,18 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
   const [color, setColor] = useState('#820AD1')
   const [icon, setIcon] = useState('label')
   const [type, setType] = useState<'fixa' | 'variavel'>('variavel')
+  const [provBehavior, setProvBehavior] = useState<string>('none')
   const [limitValue, setLimitValue] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (open) {
       setName(editing?.name ?? '')
-      // Subcategoria SEMPRE usa cor do pai (atualiza se pai mudar de cor)
       const isSub = !!parentId || !!editing?.parent_id
       setColor(isSub ? (parent?.color ?? '#820AD1') : (editing?.color ?? '#820AD1'))
       setIcon(editing?.icon ?? 'label')
       setType((editing?.type as 'fixa' | 'variavel') ?? (parent?.type as 'fixa' | 'variavel') ?? 'variavel')
+      setProvBehavior(editing?.provision_behavior ?? 'none')
       setLimitValue(editing?.limit_value ? String(editing.limit_value) : '')
     }
   }, [open, editing, parent, parentId])
@@ -944,6 +945,7 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
         color,
         icon,
         type,
+        provision_behavior: provBehavior,
         limit_value: limitValue ? Number(limitValue) : null,
         parent_id: parentId ?? editing?.parent_id ?? null,
       }
@@ -1003,6 +1005,16 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
             <label style={labelStyle}>Limite mensal (R$)</label>
             <input type="number" value={limitValue} onChange={e => setLimitValue(e.target.value)} placeholder="Sem limite" style={inputStyle} />
           </div>
+        </div>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Gera provisão automática</label>
+          <select value={provBehavior} onChange={e => setProvBehavior(e.target.value)} style={{ ...inputStyle, fontFamily: 'inherit' }}>
+            <option value="none">Não gera provisão</option>
+            <option value="recurring_income">Receita recorrente (salário, freelance…)</option>
+            <option value="fixed_expense">Despesa fixa (aluguel, escola, assinatura…)</option>
+            <option value="installment">Parcelamento (gera parcelas futuras)</option>
+          </select>
+          <div className="t-xs t-muted" style={{ marginTop: 4 }}>Controla se transações desta categoria geram provisões automaticamente.</div>
         </div>
       </div>
     </Modal>

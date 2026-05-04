@@ -1484,3 +1484,28 @@ body::before {
   border: 1.5px solid rgba(255,255,255,0.15);
   display: inline-block;
 }
+
+/* ── Transaction tags / chips de origem ───────────────────── */
+.tx-tag {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  line-height: 1.6;
+}
+.tx-tag-origin {
+  background: rgba(130,10,209,0.10);
+  color: #C084FC;
+  border-color: rgba(130,10,209,0.20);
+}
+.tx-tag-revisar {
+  background: rgba(245,158,11,0.12);
+  color: #F59E0B;
+  border-color: rgba(245,158,11,0.25);
+}
+.tx-tag-provisao {
+  background: rgba(6,182,212,0.12);
+  color: #06B6D4;
+  border-color: rgba(6,182,212,0.25);
+}

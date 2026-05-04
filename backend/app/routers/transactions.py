@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import date
 from app.database import get_db
 from app.models import Transaction
-from app.services.auto_provision import maybe_upsert_income_provision
+from app.services.provision_engine import evaluate_transaction_for_provision
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -76,8 +76,9 @@ def update_transaction(id: int, data: TransactionIn, response: Response, db: Ses
     db.commit()
     db.refresh(t)
 
-    # Auto-provisão de receita recorrente
-    provision = maybe_upsert_income_provision(db, t)
+    # Motor de provisão central
+    prov_result = evaluate_transaction_for_provision(db, t)
+    provision = prov_result.get("provision")
     if provision:
         response.headers["X-Auto-Provision-Id"] = str(provision.id)
         response.headers["X-Auto-Provision-Description"] = provision.description

@@ -15,6 +15,7 @@ class CategoryIn(BaseModel):
     icon: Optional[str] = "label"
     limit_value: Optional[float] = None
     type: Optional[str] = "variavel"
+    provision_behavior: Optional[str] = "none"
     parent_id: Optional[int] = None
     exclude_totals: Optional[bool] = False
 

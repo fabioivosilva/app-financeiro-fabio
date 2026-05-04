@@ -25,6 +25,9 @@ class Category(Base):
     icon = Column(String, default="label")
     limit_value = Column(Float, nullable=True)
     type = Column(String, default="variavel")
+    # Controla geração automática de provisão:
+    # none | recurring_income | fixed_expense | installment
+    provision_behavior = Column(String, default="none")
     exclude_totals = Column(Boolean, default=False)
     parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 

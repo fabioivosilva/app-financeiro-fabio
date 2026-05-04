@@ -338,3 +338,18 @@
 - **Transacoes:** botao `Revisar N pendentes` agora abre fluxo inbox one-by-one baseado na referencia, com categoria, pessoa, pular, categorizar e proxima, `PUT /transactions/{id}` e regra opcional via `POST /rules/`.
 - **Pendente amanha:** executar BUG.1 antes de novas features. Conferir todos os menus contra backend real e referencia visual: Dashboard, Importar, Transacoes, Cartao, Provisoes, Metas, Regras e Configuracoes. Configuracoes ainda nao foi portada/conectada.
 - **Cuidado:** nao usar fluxo antigo de `.exe`, `build_desktop.bat`, PyWebView ou PyInstaller. Modelo atual e backend FastAPI + Vite.
+
+## Sessão 2026-05-04 — Motor de Provisão Central
+
+- ✅ **FEAT.PROV.ENGINE.CATEGORY — Motor de provisão por comportamento da categoria** · *Claude.ai · 2026-05-04*
+  - `backend/app/services/provision_engine.py` (novo): motor central com `evaluate_transaction_for_provision(db, tx)`
+  - `Category.provision_behavior`: novo campo (none|recurring_income|fixed_expense|installment) + migration + seed
+  - Parcelas futuras: `_handle_installment` gera provisões das parcelas restantes com dedup
+  - Wrapper de compatibilidade `maybe_upsert_income_provision` mantido para zero breaking changes
+  - Todos os pontos de chamada unificados: imports OFX/PDF, PUT /transactions, apply rules
+  - Tags visuais em TransacaoRow: origem, revisar, provisão
+  - Dashboard: saldo projetado usa valores reais de provisões (receita restante - compromissos restantes)
+  - Projeção 6 meses usa saldo mensal líquido real (receitas mensais - despesas mensais das provisões)
+  - CategoryModal: seletor de provision_behavior com 4 opções
+  - `frontend/src/api/types.ts`: `provision_behavior` adicionado ao tipo Category
+

@@ -48,6 +48,20 @@ def _migrate():
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE categories ADD COLUMN icon VARCHAR DEFAULT 'label'"))
                 conn.commit()
+        if 'provision_behavior' not in cat_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN provision_behavior VARCHAR DEFAULT 'none'"))
+                # Aplicar behaviors baseados nas categorias reais do seed
+                conn.execute(text("""
+                    UPDATE categories SET provision_behavior = 'recurring_income'
+                    WHERE name IN ('Receitas','Salário','Freelance','CLT','13°/Bônus','Projetos')
+                """))
+                conn.execute(text("""
+                    UPDATE categories SET provision_behavior = 'fixed_expense'
+                    WHERE type = 'fixa'
+                """))
+                # variavel e interna ficam 'none' (padrão)
+                conn.commit()
         _seed_missing_categories()
 
     if 'provisions' in inspector.get_table_names():
