@@ -5,12 +5,12 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1, BUG.ICON1, T0.4, T1.3, T3.2 fechados.
-             T3.2: aporte manual em metas (modal + POST /goals/{id}/deposit).
-             FEAT.PROV.AUTO.FIXA fechado: categorias fixas recorrentes geram provisão.
+STATUS     : Sessão 2026-05-04. Trilhas 0, 1, 3, 6 completas. T2.1, T2.2 fechados.
+             Todos os bugs fechados. FEAT.PROV.AUTO.FIXA fechada.
+             Lucas em andamento: FEAT.META.ICON + T_SYNC.1 (PR pendente, sem claim formal).
 BRANCH     : develop
-PRÓXIMA    : FEAT.META.ICON — Seletor de ícone no cadastro de meta [P] (T_SYNC.1 para o fim)
-CLAIMS     : nenhum
+PRÓXIMA    : T4.1 Dashboard [G] · ou · T2.3 Cofrinho por Keyword [P]
+CLAIMS     : nenhum (aguardar PR do Lucas para FEAT.META.ICON/T_SYNC.1)
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -34,6 +34,7 @@ QUANDO LER MAIS:
 |---|---|
 | Fabio | Claude.ai + Claude Code VSCode |
 | Thiago | Claude.ai |
+| Lucas | Claude.ai |
 
 **Repo:** `github.com/fabioivosilva/app-financeiro-fabio` · Branch: `develop`
 **Dev:** backend FastAPI `127.0.0.1:8000` + Vite `127.0.0.1:5173` · **DB:** `data\finance.db` (local, não versionar)
@@ -70,7 +71,7 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 Regra de status: item fechado sai do NORTE.md e vai para `obsidian-vault/CHANGELOG.md`.
 Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 
-### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
+### 🔴 TRILHA BUG — Lucas em andamento *(aguardar PR antes de puxar estes itens)*
 
 - [ ] `[P]` **FEAT.META.ICON — Seletor de ícone no cadastro de meta** · *qualquer um*
   Modal "Nova meta" / "Editar meta" não permite escolher ícone — usa fallback por índice.
@@ -87,29 +88,12 @@ Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
 
 
 
-### TRILHA 0 — Fundação
-
-
----
-
-### TRILHA 1 — Importação *(T0.4 antes de T1.1 — parser depende do perfil)*
-
----
 
 ### TRILHA 2 — Transações & Regras *(depende T0+T1)*
 
 
 - [ ] `[P]` **T2.3 — Cofrinho por Keyword** · *qualquer um · depende T2.2+T3.1*
   Campo `keyword` em Goal · ao categorizar, bate keyword → vincula à meta automaticamente
-
----
-
-### TRILHA 3 — Metas & Cofrinho *(depende T0+T2)*
-
-
-- [ ] `[M]` **T3.2 — Aporte Manual** · *qualquer um · depende T3.1*
-  Botão "Registrar Aporte" · modal (valor, descrição, data) · `POST /goals/{id}/deposit` → cria Transaction com origem `Aporte Manual`
-
 
 ---
 
@@ -137,9 +121,6 @@ Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**.
   Projeção mês a mês: receitas previstas | despesas previstas | saldo projetado · realizado vs provisionado · drill-down por mês
 
 ---
-
-### TRILHA 6 — Configurações *(paralelo com T1-T3)*
-
 
 ### TRILHA 7 — Insights/IA *(após T4+T5)*
 
