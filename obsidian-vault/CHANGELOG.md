@@ -6,6 +6,26 @@
 
 ## Sessão 2026-05-04 (continuação 4)
 
+- ✅ **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *Lucas (Claude Code) · baixa em 2026-05-04*
+  Endpoints: `GET /sync/rules-categories` (snapshot atual: categorias com `parent_name`,
+  regras com `category_name`/`person_name`/`goal_name`) e `POST /sync/apply` (upsert por nome
+  para categorias e por keyword normalizada para regras). Auxiliares: `POST /sync/apply-file`
+  (lê `data/sync_snapshot.json`) e `POST /sync/write-file` (regrava snapshot).
+  Auto-gravação: cada `POST/PUT/DELETE` em `/categories` e `/rules` chama `write_snapshot_file`,
+  mantendo o JSON sempre atualizado em `data/sync_snapshot.json`.
+  UI: nova seção "Sincronizar com parceiro" em Configurações > Sistema com botões para baixar/copiar
+  o snapshot e textarea/upload + "Aplicar snapshot" para aplicar o JSON enviado pelo parceiro.
+  Files: `backend/app/services/sync.py`, `backend/app/routers/sync.py`, `backend/app/main.py`,
+  `backend/app/routers/categories.py`, `backend/app/routers/rules.py`, `frontend/src/pages/Config.tsx`.
+
+- ✅ **FEAT.META.ICON — Seletor de ícone no cadastro de meta** · *Lucas (Claude Code) · baixa em 2026-05-04*
+  `GoalFormModal` (Nova/Editar meta) agora usa o `<IconPicker>` completo — mesmo componente já
+  utilizado em Configurações — em vez do grid local com 10 ícones. Backend já tinha o campo `icon`
+  no modelo `Goal` e migration em `database.py`, mas `_goal_out` não retornava o valor; ajustado
+  para incluir `icon`. Type `Goal` em `frontend/src/api/types.ts` ganhou `icon?: string` e os
+  casts `(goal as any).icon` em `getGoalVisual()` foram removidos.
+  Files: `backend/app/routers/goals.py`, `frontend/src/api/types.ts`, `frontend/src/pages/Metas.tsx`.
+
 - ✅ **T1.3 — Importação Assistida** · *Codex · baixa em 2026-05-04*
   Pasta padrão agora é salva no backend (`/imports/settings`). A tela Importar lista arquivos
   suportados ainda não importados em `/imports/scan` e permite importar cada arquivo em 1 clique
@@ -24,7 +44,7 @@
   Validado que `frontend/src/components/ui/IconPicker.tsx` não possui mais `id` duplicado em
   `FINANCIAL_ICONS`; item removido do NORTE.md conforme fluxo de fila viva.
 
-- ✅ **T0.4 — Onboarding de Perfil** · *Claude Code · baixa em 2026-05-04*
+- ✅ **T0.4 — Onboarding de Perfil** · *Lucas (Claude Code) · baixa em 2026-05-04*
   Wizard 3-passos no primeiro acesso: nome → dia do ciclo → bancos.
   Backend: `GET /perfil/` (retorna null se não existe), `POST /perfil/` (salva `data/perfil.json`).
   AppShell checa perfil no startup; se null exibe `<Onboarding>` fullscreen (sem sidebar).
@@ -34,7 +54,7 @@
 
 ## Sessão 2026-05-04 (continuação 3)
 
-- ✅ **BUG.2 — Conformidade visual Transações + Metas** · *Claude Code · baixa em 2026-05-04*
+- ✅ **BUG.2 — Conformidade visual Transações + Metas** · *Lucas (Claude Code) · baixa em 2026-05-04*
   - Transacoes.tsx: dia da semana (pt-BR long) adicionado ao cabeçalho de grupo de datas
   - Metas.tsx: seção `.meta-historico` no modal de detalhe busca transações vinculadas
     via `GET /transactions/?goal_id={id}` (mostra até 8 aportes recentes)
@@ -44,7 +64,7 @@
 
 ## Sessão 2026-05-04 (continuação 2)
 
-- ✅ **BUG.PR1 — Tela de Provisões completa** · *Claude Code · baixa em 2026-05-04*
+- ✅ **BUG.PR1 — Tela de Provisões completa** · *Lucas (Claude Code) · baixa em 2026-05-04*
   - Editar provisão: modal `ProvisaoModal` reutilizado com dados pré-preenchidos; chama `PUT /provisions/{id}`
   - Desativar/reativar: botão na lista, toggle do campo `active`; inativas ficam opacidade 0.45 + "(inativa)"
   - Filtro de categorias por tipo: despesa → fixa/variavel, receita → receita; troca de tipo limpa seleção
@@ -55,7 +75,7 @@
 
 ## Sessão 2026-05-04 (continuação)
 
-- ✅ **BUG.D1 — Dashboard filtra pelo ciclo 27→26** · *Claude Code · baixa em 2026-05-04*
+- ✅ **BUG.D1 — Dashboard filtra pelo ciclo 27→26** · *Lucas (Claude Code) · baixa em 2026-05-04*
   Dashboard.tsx chamava `useTransacoes({})` sem filtro de data, exibindo todas as transações do histórico.
   Fix: importar `getCycleInfo` de `CycleProgress.tsx` e filtrar `transactions` para o ciclo atual antes
   de qualquer cálculo (receitas, gastos, top gastos, pendentes). `provisoesRestantes` conectado à API

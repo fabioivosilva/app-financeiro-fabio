@@ -323,6 +323,7 @@ export function Config() {
             {/* Sistema */}
             <section ref={refSistema}>
               <SistemaSection />
+              <SyncSection onApplied={load} />
             </section>
 
             {/* Zona de Perigo */}
@@ -691,6 +692,182 @@ function SistemaSection() {
               <Icon name={saving ? 'hourglass_empty' : justSaved ? 'check' : 'save'} size={14} />
               {justSaved ? 'Salvo!' : 'Salvar alterações'}
             </button>
+          </div>
+        </div>
+      </Glass>
+    </>
+  )
+}
+
+// ─── Sincronizar com parceiro ─────────────────────────────────────────────────
+
+type SyncSnapshot = {
+  version: number
+  generated_at?: string | null
+  categories: unknown[]
+  rules: unknown[]
+}
+
+function SyncSection({ onApplied }: { onApplied: () => void }) {
+  const [snapshot, setSnapshot] = useState<SyncSnapshot | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [pasted, setPasted] = useState('')
+  const [applying, setApplying] = useState(false)
+
+  async function refreshSnapshot() {
+    setLoading(true)
+    try {
+      const data = await api.get<SyncSnapshot>('/sync/rules-categories')
+      setSnapshot(data)
+    } catch {
+      toast('Erro ao carregar snapshot', undefined, 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    api.get<SyncSnapshot>('/sync/rules-categories')
+      .then(data => { if (!cancelled) setSnapshot(data) })
+      .catch(() => { if (!cancelled) toast('Erro ao carregar snapshot', undefined, 'error') })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  function downloadSnapshot() {
+    if (!snapshot) return
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'sync_snapshot.json'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  async function copyToClipboard() {
+    if (!snapshot) return
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(snapshot, null, 2))
+      toast('Snapshot copiado', 'Cole na máquina do parceiro')
+    } catch {
+      toast('Erro ao copiar', undefined, 'error')
+    }
+  }
+
+  async function handlePasteFile(file: File) {
+    try {
+      const text = await file.text()
+      setPasted(text)
+    } catch {
+      toast('Erro ao ler arquivo', undefined, 'error')
+    }
+  }
+
+  async function applyPasted() {
+    if (!pasted.trim()) return
+    let payload: unknown
+    try {
+      payload = JSON.parse(pasted)
+    } catch {
+      toast('JSON inválido', 'Verifique o conteúdo colado', 'error')
+      return
+    }
+    setApplying(true)
+    try {
+      const result = await api.post<{
+        categories_created: number; categories_updated: number
+        rules_created: number; rules_updated: number
+      }>('/sync/apply', payload)
+      toast(
+        'Snapshot aplicado',
+        `Categorias: +${result.categories_created} novas, ${result.categories_updated} atualizadas · ` +
+        `Regras: +${result.rules_created} novas, ${result.rules_updated} atualizadas`,
+      )
+      setPasted('')
+      await refreshSnapshot()
+      onApplied()
+    } catch {
+      toast('Erro ao aplicar snapshot', undefined, 'error')
+    } finally {
+      setApplying(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="cfg-section-head" style={{ marginTop: 24 }}>
+        <div>
+          <div className="cfg-section-title">Sincronizar com parceiro</div>
+          <div className="t-xs t-muted">
+            Compartilhe regras e categorias entre as instalações sem precisar copiar o banco. O snapshot
+            é regravado automaticamente em <code>data/sync_snapshot.json</code> a cada criação/edição
+            de categoria ou regra.
+          </div>
+        </div>
+      </div>
+      <Glass>
+        <div className="cfg-form">
+          <div className="cfg-field">
+            <label className="cfg-label"><Icon name="cloud_upload" size={16} /> Exportar meu snapshot</label>
+            <div className="cfg-hint">
+              {loading
+                ? 'Carregando...'
+                : snapshot
+                  ? `${snapshot.categories.length} categorias · ${snapshot.rules.length} regras` +
+                    (snapshot.generated_at ? ` · gerado ${new Date(snapshot.generated_at).toLocaleString('pt-BR')}` : '')
+                  : 'Snapshot indisponível'}
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px' }}
+                onClick={downloadSnapshot} disabled={!snapshot || loading}>
+                <Icon name="download" size={14} /> Baixar JSON
+              </button>
+              <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px' }}
+                onClick={copyToClipboard} disabled={!snapshot || loading}>
+                <Icon name="content_copy" size={14} /> Copiar
+              </button>
+              <button className="btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px' }}
+                onClick={refreshSnapshot} disabled={loading}>
+                <Icon name="refresh" size={14} /> Atualizar
+              </button>
+            </div>
+          </div>
+
+          <div className="cfg-field">
+            <label className="cfg-label"><Icon name="cloud_download" size={16} /> Aplicar snapshot do parceiro</label>
+            <div className="cfg-hint">Cole o JSON enviado pelo parceiro ou selecione o arquivo. Categorias e regras são unificadas por nome / palavra-chave.</div>
+            <input
+              type="file"
+              accept="application/json,.json"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handlePasteFile(f) }}
+              style={{ marginBottom: 8, fontSize: 12 }}
+            />
+            <textarea
+              className="cfg-input"
+              value={pasted}
+              onChange={e => setPasted(e.target.value)}
+              placeholder='{ "version": 1, "categories": [...], "rules": [...] }'
+              rows={6}
+              style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, resize: 'vertical', minHeight: 120 }}
+            />
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '8px 14px' }}
+                onClick={applyPasted} disabled={applying || !pasted.trim()}>
+                <Icon name={applying ? 'hourglass_empty' : 'sync'} size={14} />
+                {applying ? 'Aplicando...' : 'Aplicar snapshot'}
+              </button>
+              {pasted && (
+                <button className="btn-ghost" style={{ fontSize: 13, padding: '8px 14px' }}
+                  onClick={() => setPasted('')} disabled={applying}>
+                  Limpar
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </Glass>

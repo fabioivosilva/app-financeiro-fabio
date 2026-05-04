@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
 from app.models import Category
+from app.services.sync import write_snapshot_file
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
@@ -40,6 +41,7 @@ def create_category(data: CategoryIn, db: Session = Depends(get_db)):
     db.add(cat)
     db.commit()
     db.refresh(cat)
+    write_snapshot_file(db)
     return cat
 
 
@@ -58,6 +60,7 @@ def update_category(id: int, data: CategoryIn, db: Session = Depends(get_db)):
             s.color = data.color
     db.commit()
     db.refresh(cat)
+    write_snapshot_file(db)
     return cat
 
 
@@ -68,3 +71,4 @@ def delete_category(id: int, db: Session = Depends(get_db)):
         raise HTTPException(404)
     db.delete(cat)
     db.commit()
+    write_snapshot_file(db)

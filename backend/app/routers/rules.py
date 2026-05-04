@@ -6,6 +6,7 @@ from typing import Optional
 from app.database import get_db
 from app.models import Rule, Transaction
 from app.services.auto_provision import maybe_upsert_income_provision
+from app.services.sync import write_snapshot_file
 
 router = APIRouter(prefix="/rules", tags=["rules"])
 
@@ -39,11 +40,13 @@ def create_rule(data: RuleIn, db: Session = Depends(get_db)):
             setattr(match, k, v)
         db.commit()
         db.refresh(match)
+        write_snapshot_file(db)
         return match
     rule = Rule(**data.model_dump())
     db.add(rule)
     db.commit()
     db.refresh(rule)
+    write_snapshot_file(db)
     return rule
 
 
@@ -56,6 +59,7 @@ def update_rule(id: int, data: RuleIn, db: Session = Depends(get_db)):
         setattr(rule, k, v)
     db.commit()
     db.refresh(rule)
+    write_snapshot_file(db)
     return rule
 
 
@@ -66,6 +70,7 @@ def delete_rule(id: int, db: Session = Depends(get_db)):
         raise HTTPException(404)
     db.delete(rule)
     db.commit()
+    write_snapshot_file(db)
 
 
 def _normalize(text: str) -> str:

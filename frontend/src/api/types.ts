@@ -48,6 +48,7 @@ export interface Goal {
   deadline?: string
   category_id?: number
   keyword?: string
+  icon?: string
 }
 
 export interface Rule {

@@ -3,6 +3,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
+import { IconPicker } from '../components/ui/IconPicker'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
 import type { Category, Goal } from '../api/types'
@@ -329,15 +330,13 @@ interface GoalFormProps {
   onSaved: () => void
 }
 
-const GOAL_ICONS = ['savings', 'home', 'flight', 'shield', 'laptop_mac', 'directions_car', 'school', 'beach_access', 'flag', 'favorite']
-
 function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: GoalFormProps) {
   const [name, setName] = useState(goal?.name ?? '')
   const [target, setTarget] = useState(goal?.target ? String(goal.target) : '')
   const [current, setCurrent] = useState(goal?.current ? String(goal.current) : '0')
   const [deadline, setDeadline] = useState(goal?.deadline ?? '')
   const [categoryId, setCategoryId] = useState<number | undefined>(goal?.category_id)
-  const [icon, setIcon] = useState<string | undefined>((goal as any)?.icon ?? undefined)
+  const [icon, setIcon] = useState<string | undefined>(goal?.icon ?? undefined)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -347,10 +346,12 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
     setTarget(goal?.target ? String(goal.target) : '')
     setCurrent(goal?.current ? String(goal.current) : '0')
     setDeadline(goal?.deadline ?? '')
-    setIcon((goal as any)?.icon ?? undefined)
+    setIcon(goal?.icon ?? undefined)
     setCategoryId(goal?.category_id)
     setErr(null)
   }, [goal, open])
+
+  const iconColor = categories.find(c => c.id === categoryId)?.color ?? '#820AD1'
 
   async function handleSave() {
     const parsedTarget = toNumber(target)
@@ -418,23 +419,11 @@ function GoalFormModal({ open, title, goal, categories, onClose, onSaved }: Goal
 
       <div className="cfg-field">
         <label className="cfg-label">Ícone</label>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {GOAL_ICONS.map(ic => (
-            <button
-              key={ic} type="button"
-              onClick={() => setIcon(icon === ic ? undefined : ic)}
-              style={{
-                width: 38, height: 38, borderRadius: 10, border: '1px solid',
-                borderColor: icon === ic ? 'var(--primary)' : 'rgba(255,255,255,0.08)',
-                background: icon === ic ? 'rgba(130,10,209,0.2)' : 'rgba(255,255,255,0.04)',
-                color: icon === ic ? 'var(--primary)' : 'var(--text-muted)',
-                display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s',
-              }}
-            >
-              <Icon name={ic} size={18} />
-            </button>
-          ))}
-        </div>
+        <IconPicker
+          selectedIcon={icon ?? ''}
+          selectedColor={iconColor}
+          onSelect={id => setIcon(icon === id ? undefined : id)}
+        />
       </div>
 
       <div className="cfg-field">
@@ -471,7 +460,7 @@ function getGoalVisual(goal: Goal, categories: Category[], index: number) {
   const category = categories.find(cat => cat.id === goal.category_id)
   return {
     color: category?.color ?? goalColors[Math.max(index, 0) % goalColors.length],
-    icon: (goal as any).icon ?? goalIcons[Math.max(index, 0) % goalIcons.length],
+    icon: goal.icon ?? goalIcons[Math.max(index, 0) % goalIcons.length],
   }
 }
 

@@ -6,7 +6,7 @@
 
 ```
 STATUS     : 2026-05-04. Varredura manual: 7 bugs + 14 features incorporados nas trilhas.
-             Lucas: FEAT.META.ICON (T3) + T_SYNC.1 (T6) — PR pendente, não puxar ainda.
+             Lucas entregou: FEAT.META.ICON (T3) + T_SYNC.1 (T6).
              Base entregue: trilhas 0,1,3,6 + T2.1, T2.2, todos os bugs anteriores.
 BRANCH     : develop
 PRÓXIMA    : BUG.RULES.2 [P] rápido · ou · T4.1 Dashboard [G]
@@ -67,7 +67,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 ## 📋 ROADMAP
 
 > Regra: item fechado → `obsidian-vault/CHANGELOG.md`. Só itens abertos ficam aqui.
-> 🔒 **Lucas em andamento (PR pendente — não puxar):** FEAT.META.ICON (T3) · T_SYNC.1 (T6)
 
 ---
 
@@ -111,9 +110,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 ---
 
 ### TRILHA 3 — Metas & Cofrinho
-
-- [ ] `[P]` **FEAT.META.ICON — Seletor de ícone no meta** · 🔒 *Lucas*
-  Adicionar campo `icon` ao modelo `Goal` + `<IconPicker>` no GoalFormModal. `getGoalVisual()` usa `goal.icon`, fallback por índice.
 
 - [ ] `[P]` **BUG.META.SUB — Modal de meta exibe só categoria pai** · *qualquer um*
   Seletor de categoria no GoalFormModal não exibe subcategorias → impede captura automática de transações.
@@ -177,9 +173,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 ---
 
 ### TRILHA 6 — Configurações & Sync
-
-- [ ] `[M]` **T_SYNC.1 — Auto-sync regras+categorias entre devs** · 🔒 *Lucas*
-  `GET /sync/rules-categories` + `POST /sync/apply` para Thiago/Lucas aplicarem as regras do Fabio na base deles.
 
 - [ ] `[P]` **FEAT.CFG.CARDS.UX — UX da lista de cartões com muitos itens** · *qualquer um*
   Muitos cartões → lista imensa. Adicionar busca/filtro ou colapso para listas longas.

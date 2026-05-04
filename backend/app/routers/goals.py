@@ -57,6 +57,7 @@ def _goal_out(goal: Goal, db: Session) -> GoalOut:
         deadline=goal.deadline,
         category_id=goal.category_id,
         keyword=goal.keyword,
+        icon=goal.icon,
     )
 
 
