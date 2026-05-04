@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
+import { IconPicker } from '../components/ui/IconPicker'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
@@ -373,6 +374,18 @@ function CategoriaSection({ categories, rules, onEdit, onDelete, onAdd, onAddSub
   const [busca, setBusca] = useState('')
   const [grupo, setGrupo] = useState('todos')
 
+  const COLLAPSE_KEY = 'cfg_cat_groups_collapsed'
+  const [collapsed, setCollapsed] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]') } catch { return [] }
+  })
+  function toggleGroup(id: string) {
+    setCollapsed(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      localStorage.setItem(COLLAPSE_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   const topLevel = useMemo(() => categories.filter(c => !c.parent_id), [categories])
 
   const filtered = useMemo(() => topLevel.filter(c => {
@@ -431,30 +444,36 @@ function CategoriaSection({ categories, rules, onEdit, onDelete, onAdd, onAddSub
           </div>
       </Glass>
 
-      {GRUPOS.filter(g => grouped[g.id]?.length).map(g => (
-        <div key={g.id} className="cfg-cat-group">
-          <div className="cfg-cat-group-head">
+      {GRUPOS.filter(g => grouped[g.id]?.length).map(g => {
+        const isCollapsed = collapsed.includes(g.id)
+        return (
+        <div key={g.id} className={`cfg-cat-group${isCollapsed ? ' cfg-cat-group-collapsed' : ''}`}>
+          <button type="button" className="cfg-cat-group-head" onClick={() => toggleGroup(g.id)}>
             <div className="cfg-cat-group-icon" style={{ background: g.color + '20', color: g.color }}>
               <Icon name={g.icon} size={16} />
             </div>
             <div className="cfg-cat-group-title">{g.label}</div>
             <div className="t-xs t-muted">{grouped[g.id].length} categorias</div>
-          </div>
-          <div className="cfg-cat-grid">
-            {grouped[g.id].map(cat => (
-              <CategoryCard
-                key={cat.id}
-                cat={cat}
-                subs={categories.filter(c => c.parent_id === cat.id)}
-                rules={rules}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onAddSub={onAddSub}
-              />
-            ))}
-          </div>
+            <Icon name="expand_more" size={18} className="cfg-cat-group-chevron" />
+          </button>
+          {!isCollapsed && (
+            <div className="cfg-cat-grid">
+              {grouped[g.id].map(cat => (
+                <CategoryCard
+                  key={cat.id}
+                  cat={cat}
+                  subs={categories.filter(c => c.parent_id === cat.id)}
+                  rules={rules}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onAddSub={onAddSub}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      ))}
+        )
+      })}
 
       {filtered.length === 0 && (
         <Glass>
@@ -483,7 +502,7 @@ function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
       <div className="cfg-cat-card-bar" />
       <div className="cfg-cat-card-head">
         <div className="cfg-cat-card-icon" style={{ background: color + '25', color }}>
-          <Icon name={CATEGORY_ICONS[cat.name] ?? 'label'} size={18} />
+          <Icon name={cat.icon ?? CATEGORY_ICONS[cat.name] ?? 'label'} size={18} />
         </div>
         <div className="cfg-cat-card-name">{cat.name}</div>
         <div className="cfg-cat-card-actions">
@@ -508,7 +527,7 @@ function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
           <div className="cfg-sub-preview">
             {subs.slice(0, 4).map(s => (
               <div key={s.id} className="cfg-sub-dot" style={{ background: color + '30', color }} title={s.name}>
-                <Icon name={CATEGORY_ICONS[s.name] ?? 'label'} size={11} />
+                <Icon name={s.icon ?? CATEGORY_ICONS[s.name] ?? 'label'} size={11} />
               </div>
             ))}
             {subs.length > 4 && <div className="cfg-sub-more">+{subs.length - 4}</div>}
@@ -520,7 +539,7 @@ function CategoryCard({ cat, subs, rules, onEdit, onDelete, onAddSub }: {
           {subs.map(s => (
             <div key={s.id} className="cfg-sub-row">
               <div className="cfg-sub-icon" style={{ background: color + '20', color }}>
-                <Icon name={CATEGORY_ICONS[s.name] ?? 'label'} size={13} />
+                <Icon name={s.icon ?? CATEGORY_ICONS[s.name] ?? 'label'} size={13} />
               </div>
               <div className="cfg-sub-name">{s.name}</div>
               <div className="cfg-sub-meta">
@@ -820,6 +839,7 @@ function CardModal({ open, editing, persons, onClose, onSaved }: { open: boolean
 function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { open: boolean; editing?: Category; parentId?: number; parent?: Category; onClose: () => void; onSaved: () => void }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState('#820AD1')
+  const [icon, setIcon] = useState('label')
   const [type, setType] = useState<'fixa' | 'variavel'>('variavel')
   const [limitValue, setLimitValue] = useState('')
   const [saving, setSaving] = useState(false)
@@ -828,6 +848,7 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
     if (open) {
       setName(editing?.name ?? '')
       setColor(editing?.color ?? parent?.color ?? '#820AD1')
+      setIcon(editing?.icon ?? parent?.icon ?? 'label')
       setType((editing?.type as 'fixa' | 'variavel') ?? (parent?.type as 'fixa' | 'variavel') ?? 'variavel')
       setLimitValue(editing?.limit_value ? String(editing.limit_value) : '')
     }
@@ -840,6 +861,7 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
       const payload = {
         name: name.trim(),
         color,
+        icon,
         type,
         limit_value: limitValue ? Number(limitValue) : null,
         parent_id: parentId ?? editing?.parent_id ?? null,
@@ -874,6 +896,10 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
             <input type="color" value={color} onChange={e => setColor(e.target.value)}
               style={{ width: 44, height: 38, padding: 2, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(192,132,252,0.1)', borderRadius: 8, cursor: 'pointer' }} />
           </div>
+        </div>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Ícone</label>
+          <IconPicker selectedIcon={icon} selectedColor={color} onSelect={setIcon} />
         </div>
         <div className="modal-row">
           <div style={{ ...fieldStyle, flex: 1 }}>

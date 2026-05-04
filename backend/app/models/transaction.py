@@ -22,6 +22,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
     color = Column(String, default="#888888")
+    icon = Column(String, default="label")
     limit_value = Column(Float, nullable=True)
     type = Column(String, default="variavel")
     exclude_totals = Column(Boolean, default=False)

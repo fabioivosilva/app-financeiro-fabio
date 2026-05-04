@@ -5,6 +5,18 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **CFG.ICONS — Biblioteca de ícones para categorias** · *Claude.ai · baixa em 2026-05-04*
+  Novo IconPicker (66 ícones financeiros) integrado no CategoryModal. Busca por palavra-chave
+  (comida, casa, carro, etc). Ícone escolhido é exibido no card e na linha de subcategoria.
+  Backend: campo `icon` em Category + migration ALTER TABLE + schema atualizado. Default 'label'.
+  Files: `backend/app/models/transaction.py`, `database.py`, `routers/categories.py`,
+  `frontend/src/components/ui/IconPicker.tsx` (novo), `frontend/src/pages/Config.tsx`, `index.css`.
+
+- ✅ **CFG.COLLAPSE — Grupos de categoria colapsáveis** · *Claude.ai · baixa em 2026-05-04*
+  Headers de grupo (Receitas/Fixas/Variáveis/Internas) viraram botões. Click colapsa/expande
+  o grid. Estado persistido em localStorage (`cfg_cat_groups_collapsed`). Chevron animado.
+  Files: `frontend/src/pages/Config.tsx`, `index.css`.
+
 - ✅ **CFG.TOAST — Feedback de salvamento em todas as ações de Configurações** · *Claude.ai · baixa em 2026-05-04*
   Adicionado toast em: deletePerson, deleteCard, deleteCategory, PersonModal/CardModal/CategoryModal save,
   SistemaSection save (pasta+ciclo), Zona de Perigo (apagar transações). Erros também notificados.

@@ -44,6 +44,10 @@ def _migrate():
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE categories ADD COLUMN exclude_totals BOOLEAN DEFAULT 0"))
                 conn.commit()
+        if 'icon' not in cat_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN icon VARCHAR DEFAULT 'label'"))
+                conn.commit()
         _seed_missing_categories()
 
     if 'provisions' in inspector.get_table_names():

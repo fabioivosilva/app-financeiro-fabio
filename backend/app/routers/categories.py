@@ -11,6 +11,7 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 class CategoryIn(BaseModel):
     name: str
     color: Optional[str] = "#888888"
+    icon: Optional[str] = "label"
     limit_value: Optional[float] = None
     type: Optional[str] = "variavel"
     parent_id: Optional[int] = None
