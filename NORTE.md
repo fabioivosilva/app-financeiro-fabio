@@ -71,6 +71,12 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
 
+- [ ] `[P]` **FEAT.META.ICON — Seletor de ícone no cadastro de meta** · *qualquer um*
+  Modal "Nova meta" / "Editar meta" não permite escolher ícone — usa fallback por índice.
+  Adicionar campo `icon` ao modelo `Goal` (backend + migration), expor no `GoalIn`/`GoalOut`,
+  e incluir `<IconPicker>` no `GoalFormModal` (mesmo componente já usado em Configurações).
+  `getGoalVisual()` passa a usar `goal.icon` quando preenchido, caindo no fallback por índice só se vazio.
+
 - [ ] `[P]` **BUG.ICON1 — Duplicatas na biblioteca de ícones ao pesquisar** · *qualquer um*
   Ao digitar no campo de busca do IconPicker (ex: "plr"), o mesmo ícone aparece múltiplas vezes.
   Causa: `FINANCIAL_ICONS` em `IconPicker.tsx` tem entradas duplicadas (ex: `pets` aparece duas vezes).
