@@ -4,6 +4,16 @@
 
 
 
+## Sessão 2026-05-04 (continuação 5)
+
+- ✅ **BUG.DASH.CYCLE — Progressão de ciclo estática no Dashboard** · *Fabio (Claude Code) · baixa em 2026-05-04*
+  `getCycleInfo`: `passados` normalizava `hoje` com hora atual, causando off-by-1 dependendo do horário.
+  Fix: `hojeNorm = new Date(y, m, d)` (meia-noite) antes do cálculo de dias decorridos.
+  Fix adicional: `Config.tsx` `useEffect` que carrega settings do backend não despachava `StorageEvent`
+  após gravar `cycleDayStart` no localStorage, impedindo `CycleProgress` de atualizar na mesma aba.
+  Bônus: `Transaction.status` em `types.ts` expandido para incluir `'revisar' | 'provisao'` (erros TS pré-existentes).
+  Files: `frontend/src/components/layout/CycleProgress.tsx`, `frontend/src/pages/Config.tsx`, `frontend/src/api/types.ts`.
+
 ## Sessão 2026-05-04 (continuação 4)
 
 - ✅ **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *Lucas (Claude Code) · baixa em 2026-05-04*

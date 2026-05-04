@@ -5,14 +5,15 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : 2026-05-04. Motor central provision_engine.py entregue. Category.provision_behavior
+STATUS     : 2026-05-04. BUG.DASH.CYCLE corrigido (getCycleInfo normalizado + StorageEvent Config).
+             Motor central provision_engine.py entregue. Category.provision_behavior
              (none|recurring_income|fixed_expense|installment) + parcelas futuras + tags visuais
              + Dashboard com saldo projetado real. Pontos de chamada unificados.
 BRANCH     : develop
-PRÓXIMA    : T4.1 Dashboard [G] · BUG.DASH.CYCLE [P] · ou · FEAT.PROV.ENGINE.CATEGORY [M] (motor central pronto)
-CLAIMS     : nenhum
+PRÓXIMA    : FEAT.PROV.TIMELINE.UX [P] · FEAT.CFG.CARDS.UX [P] · T2.3 [P] · FEAT.META.REINFORCE [P]
+CLAIMS     : 🔒 [FABIO] FEAT.PROV.TIMELINE.UX · FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
 BLOCKER    : Nenhum conhecido.
-SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
+SESSÃO     : 4 [P] restantes nesta sessão (70% usado)
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
   Abrir C:\Users\fabio\Downloads\App-financeiro ANTES de escrever qualquer JSX.
@@ -60,7 +61,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-*Nenhum claim ativo no momento.*
+🔒 [FABIO] FEAT.PROV.TIMELINE.UX · FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
 
 ---
 
@@ -99,9 +100,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 4 — Dashboard & Cartão
 
-- [ ] `[P]` **BUG.DASH.CYCLE — Progressão de ciclo estática no Dashboard** · *qualquer um*
-  Barra de dias e "dias restantes" não refletem o ciclo real (27→26). Verificar cálculo de `getCycleInfo`.
-
 - [ ] `[G]` **T4.1 — Dashboard** · *qualquer um*
   Hero saldo · sub-cards fatura+saldo · barras por pessoa · limites por categoria · meta de reserva · top 3 · comparativo ciclo anterior.
   Ícones do top gastos devem bater com a subcategoria (Config). Metas em posição de destaque (não escondidas).
@@ -129,13 +127,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 - [ ] `[P]` **FEAT.PROV.CARD.FATURA — Fatura de cartão como provisão** · *qualquer um*
   Definir/implementar como o pagamento mensal da fatura aparece nas provisões.
   Sugestão: gerar provisão automática "Fatura [Cartão]" com valor = total do ciclo.
-
-- [x] `[M]` **🔒 [FABIO] FEAT.PROV.ENGINE.CATEGORY — Motor de provisão por comportamento da categoria** · *Fabio/Claude*
-  Motor central `provision_engine.py` com `evaluate_transaction_for_provision(db, tx)`.
-  `Category.provision_behavior`: none | recurring_income | fixed_expense | installment.
-  Parcelas futuras geradas automaticamente (dedup por desc+parcela+mês).
-  Tags visuais de origem/status em TransacaoRow. Dashboard usa saldo projetado real (provisões do backend).
-  Chamado em: imports, PUT /transactions, apply rules. Relacionado a FEAT.PROV.CARD.FATURA, T5.2, T5.3.
 
 - [ ] `[G]` **T5.1 — Modelo de Provisões** · *Thiago propôs*
   Modelo `Provision`+`ProvisionOccurrence` · CRUD + tela frontend · assinaturas, parcelas, empréstimos.

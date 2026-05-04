@@ -33,7 +33,8 @@ export function getCycleInfo(cycleStart?: number) {
   const diaFim = fim.getDate()
 
   const total = Math.round((fim.getTime() - inicio.getTime()) / 86400000) + 1
-  const passados = Math.max(1, Math.round((hoje.getTime() - inicio.getTime()) / 86400000) + 1)
+  const hojeNorm = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
+  const passados = Math.max(1, Math.round((hojeNorm.getTime() - inicio.getTime()) / 86400000) + 1)
   const pct = Math.min(100, (passados / total) * 100)
 
   const fmtData = (d: Date) =>

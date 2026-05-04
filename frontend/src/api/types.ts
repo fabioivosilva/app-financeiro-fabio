@@ -35,7 +35,7 @@ export interface Transaction {
   person?: Person
   card_id?: number
   origin: 'Débito' | 'Crédito' | 'PIX' | 'Aporte Manual'
-  status: 'confirmado' | 'pendente'
+  status: 'confirmado' | 'pendente' | 'revisar' | 'provisao'
   installment_current?: number
   installment_total?: number
   goal_id?: number

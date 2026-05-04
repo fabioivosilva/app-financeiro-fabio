@@ -593,6 +593,7 @@ function SistemaSection() {
         setSavedBackendDia(day)
         localStorage.setItem('importFolder', folder)
         localStorage.setItem('cycleDayStart', String(day))
+        window.dispatchEvent(new StorageEvent('storage', { key: 'cycleDayStart', newValue: String(day) }))
       })
       .catch(() => {
         setSavedBackendPasta(savedPasta)
