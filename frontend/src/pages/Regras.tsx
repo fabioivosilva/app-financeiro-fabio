@@ -6,6 +6,7 @@ import { Icon } from '../components/ui/Icon'
 import { CategoryChip } from '../components/ui/Badge'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
+import { toast } from '../components/ui/Toast'
 import { useRegras } from '../hooks/useRegras'
 import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
 
@@ -307,7 +308,8 @@ function EditRuleRow({ rule, categories, persons, onSaved, onCancel }: EditRuleR
     setSaving(true)
     try {
       await api.put(`/rules/${rule.id}`, { keyword: keyword.trim(), category_id: catId ?? null, person_id: personId ?? null, origin: null, goal_id: null })
-      await api.post('/rules/apply', {})
+      const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
+      toast('Regra atualizada', updated > 0 ? `+${updated} transação${updated > 1 ? 'ões' : ''} recategorizadas` : undefined)
       onSaved()
     } finally { setSaving(false) }
   }
