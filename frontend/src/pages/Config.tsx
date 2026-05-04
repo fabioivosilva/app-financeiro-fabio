@@ -5,6 +5,7 @@ import { Icon } from '../components/ui/Icon'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import { api } from '../api/client'
+import { toast } from '../components/ui/Toast'
 import type { Card, Category, Person, Rule } from '../api/types'
 import { CATEGORY_ICONS } from '../components/transactions/TransacaoRow'
 import { BANCOS_DISPONIVEIS, BANKS_STORAGE_KEY, loadBancosAtivos } from '../config/banks'
@@ -38,8 +39,15 @@ export function Config() {
   const [bancosAtivos, setBancosAtivos] = useState<string[]>(loadBancosAtivos)
   function toggleBanco(id: string) {
     setBancosAtivos(prev => {
-      const next = prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id]
+      const ativando = !prev.includes(id)
+      const next = ativando ? [...prev, id] : prev.filter(b => b !== id)
       localStorage.setItem(BANKS_STORAGE_KEY, JSON.stringify(next))
+      const banco = BANCOS_DISPONIVEIS.find(b => b.id === id)
+      toast(
+        ativando ? `${banco?.label ?? id} ativado` : `${banco?.label ?? id} desativado`,
+        ativando ? 'Formatos de importação habilitados' : 'Removido da importação',
+        ativando ? 'success' : 'info'
+      )
       return next
     })
   }

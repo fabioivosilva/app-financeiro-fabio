@@ -738,6 +738,34 @@ body::before {
 .lista-prov-row:last-child { border-bottom: none; }
 .lista-prov-row:hover { background: rgba(192,132,252,0.03); }
 .lista-regras-grid { grid-template-columns: 2fr 1.5fr 1fr 0.5fr; }
+.lista-prov-grid { grid-template-columns: 2fr 1.5fr 1fr 0.5fr 1fr 0.3fr; }
+
+/* ===== Provisões ===== */
+.timeline-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.timeline-month { flex: 1; min-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 8px; border-radius: 10px; background: rgba(0,0,0,0.15); border: 1px solid rgba(192,132,252,0.08); cursor: pointer; transition: all 0.15s; }
+.timeline-month:hover { background: rgba(192,132,252,0.07); }
+.timeline-month-on { background: rgba(130,10,209,0.15) !important; border-color: rgba(192,132,252,0.3) !important; }
+.timeline-month-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; }
+.timeline-bars { display: flex; gap: 3px; align-items: flex-end; height: 48px; }
+.timeline-bar { width: 10px; border-radius: 3px 3px 0 0; min-height: 4px; }
+.timeline-bar-out { background: #F472B6; }
+.timeline-bar-in  { background: #22C55E; }
+.timeline-month-total { font-size: 11px; font-weight: 600; font-feature-settings: "tnum"; }
+
+.prov-list { display: flex; flex-direction: column; }
+.prov-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(192,132,252,0.05); transition: background 0.12s; }
+.prov-row:hover { background: rgba(192,132,252,0.03); }
+.prov-row:last-child { border-bottom: none; }
+.prov-row-done { opacity: 0.55; }
+.prov-day { text-align: center; flex-shrink: 0; width: 36px; }
+.prov-day-num { font-size: 20px; font-weight: 700; line-height: 1; font-feature-settings: "tnum"; }
+.prov-day-mes { font-size: 10px; color: var(--text-muted); letter-spacing: 0.04em; }
+.prov-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
+.prov-row-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.prov-val { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: #F472B6; flex-shrink: 0; }
+.prov-status { flex-shrink: 0; }
+.prov-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+.prov-tag-done { background: rgba(34,197,94,0.1); color: #22C55E; }
 /* ===== Inbox (one-by-one) ===== */
 .page-inbox, .page-inbox-done { max-width: 760px; margin: 0 auto; align-items: stretch; }
 .inbox-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }

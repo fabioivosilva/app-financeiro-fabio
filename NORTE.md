@@ -5,13 +5,14 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. Dashboard BUG.2 concluído: Alertas de orçamento,
-             Metas & cofrinhos, navegação alert-banner → Transações,
-             btn Gerenciar provisões → Provisões. Corrigidos t.value→t.amount e
-             status 'ok'→'confirmado'. icon adicionado ao tipo Category.
-             PENDENTE: BUG.2 outras telas (Cartão, Provisões) · BUG.3 modais/popovers.
+STATUS     : Sessão 2026-05-04 (2). Provisões: backend modelo+router+API completos,
+             tela portada da referência (Timeline 6 meses + Lista + Modal Nova Provisão).
+             Regras: busca+grupos+editar inline+dedup+upsert. Toast em toda categorização.
+             Popover: grupos colapsáveis, busca pai+subs, nova categoria inline c/ herança cor.
+             Bancos: toast ao ativar/desativar. Inbox: todas as pendentes sem filtro de ciclo.
+             PENDENTE: T_SYNC.1 auto-sync regras/categorias · BUG.3 modais/popovers.
 BRANCH     : develop
-PRÓXIMA    : BUG.3 — Modais/popovers [M] · ou · BUG.2 restante (Cartão/Provisões) [G]
+PRÓXIMA    : T_SYNC.1 [M] auto-sync · ou · BUG.3 [M] modais/popovers
 CLAIMS     : nenhum
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
 
@@ -79,6 +80,12 @@ Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem cód
 - [ ] `[G]` **BUG.2 — Conformidade 100% da referência visual** · *qualquer um · depende BUG.1*
   Portar telas ainda placeholder ou parciais usando exatamente os componentes da referência. Hoje confirmados como pendentes/parciais: Dashboard, Cartão, Provisões e Configurações; Transações/Regras/Importar/Metas precisam reauditoria visual fina.
   - Fatia Configurações > Bancos concluída por Codex em 2026-05-03: cards usam SVGs locais dos bancos, check/radio via componente `Icon`, visual dark/glass e chips separados para fatura/extrato. Não alterou `Importar.tsx`.
+
+- [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
+  Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
+  de "sync snapshot" (regras + categorias) que o Thiago pode puxar via `GET /sync/rules-categories`.
+  Thiago roda `POST /sync/apply` para aplicar as regras e categorias do Fabio na base dele.
+  Objetivo: manter os dois sempre alinhados sem precisar compartilhar arquivo de banco.
 
 - [x] `[P]` **T_CAT.1 — Busca no popover traz categoria pai + subcategorias** · *CONCLUÍDO 2026-05-04*
   Quando o usuário digita no campo de busca do `CategoryPopover` e o resultado bate com um pai (ex: "Lazer"),

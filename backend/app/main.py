@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import init_db
-from app.routers import categories, persons, cards, transactions, rules, goals, dashboard, imports
+from app.routers import categories, persons, cards, transactions, rules, goals, dashboard, imports, provisions
 
 app = FastAPI(title="App Financeiro API", version="0.1.0")
 
@@ -21,6 +21,7 @@ app.include_router(rules.router)
 app.include_router(goals.router)
 app.include_router(dashboard.router)
 app.include_router(imports.router)
+app.include_router(provisions.router)
 
 
 @app.on_event("startup")
