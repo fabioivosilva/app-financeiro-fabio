@@ -289,13 +289,18 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, onImp
           {meses.map((mes, i) => (
             <button key={i} className={`timeline-month${sel === i ? ' timeline-month-on' : ''}`} onClick={() => onSel(i)}>
               <div className="timeline-month-label">{mes.label}</div>
-              <div className="timeline-bars">
-                <div className="timeline-bar timeline-bar-out" style={{ height: Math.min(100, (mes.compromisso / 6000) * 100) + '%' }} />
-                <div className="timeline-bar timeline-bar-in" style={{ height: Math.min(100, (mes.receita / 10000) * 100) + '%' }} />
-              </div>
-              <div className="timeline-month-total" style={{ color: mes.total >= 0 ? '#22C55E' : '#F472B6' }}>
+              <div className="timeline-saldo" style={{ color: mes.total >= 0 ? '#22C55E' : '#F472B6' }}>
                 {mes.total >= 0 ? '+' : ''}{brlCompact(mes.total)}
               </div>
+              {(() => {
+                const pct = mes.receita > 0 ? Math.min(100, (mes.compromisso / mes.receita) * 100) : 100
+                const color = pct < 70 ? '#22C55E' : pct < 100 ? '#F59E0B' : '#F472B6'
+                return (
+                  <div className="timeline-commit-bar">
+                    <div className="timeline-commit-fill" style={{ width: pct + '%', background: color }} />
+                  </div>
+                )
+              })()}
             </button>
           ))}
         </div>

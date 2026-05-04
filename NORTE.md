@@ -10,8 +10,8 @@ STATUS     : 2026-05-04. BUG.DASH.CYCLE corrigido (getCycleInfo normalizado + St
              (none|recurring_income|fixed_expense|installment) + parcelas futuras + tags visuais
              + Dashboard com saldo projetado real. Pontos de chamada unificados.
 BRANCH     : develop
-PRÓXIMA    : FEAT.PROV.TIMELINE.UX [P] · FEAT.CFG.CARDS.UX [P] · T2.3 [P] · FEAT.META.REINFORCE [P]
-CLAIMS     : 🔒 [FABIO] FEAT.PROV.TIMELINE.UX · FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
+PRÓXIMA    : FEAT.CFG.CARDS.UX [P] · T2.3 [P] · FEAT.META.REINFORCE [P]
+CLAIMS     : 🔒 [FABIO] FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 4 [P] restantes nesta sessão (70% usado)
 
@@ -118,11 +118,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 ---
 
 ### TRILHA 5 — Provisões & Fluxo de Caixa
-
-- [ ] `[P]` **FEAT.PROV.TIMELINE.UX — Melhorar cards de mês na timeline** · *qualquer um*
-  Barras de compromisso vs receita não comunicam bem. Substituir por: saldo líquido em destaque
-  (verde se positivo, vermelho se negativo) + barra fina de % comprometido do mês.
-  Arquivo: `frontend/src/pages/Provisoes.tsx` → função `TimelineView`, div `timeline-month`.
 
 - [ ] `[P]` **FEAT.PROV.CARD.FATURA — Fatura de cartão como provisão** · *qualquer um*
   Definir/implementar como o pagamento mensal da fatura aparece nas provisões.

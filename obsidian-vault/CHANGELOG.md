@@ -6,6 +6,14 @@
 
 ## Sessão 2026-05-04 (continuação 5)
 
+- ✅ **FEAT.PROV.TIMELINE.UX — Melhorar cards de mês na timeline** · *Fabio (Claude Code) · baixa em 2026-05-04*
+  Cards da timeline de provisões: substituiu barras duplas (compromisso/receita) por saldo líquido
+  em destaque (verde/vermelho) + barra fina de % comprometido com cor semafórica
+  (verde < 70%, laranja 70-100%, vermelho > 100%).
+  Files: `frontend/src/pages/Provisoes.tsx` → `TimelineView`, `frontend/src/index.css`.
+
+
+
 - ✅ **BUG.DASH.CYCLE — Progressão de ciclo estática no Dashboard** · *Fabio (Claude Code) · baixa em 2026-05-04*
   `getCycleInfo`: `passados` normalizava `hoje` com hora atual, causando off-by-1 dependendo do horário.
   Fix: `hojeNorm = new Date(y, m, d)` (meia-noite) antes do cálculo de dias decorridos.
