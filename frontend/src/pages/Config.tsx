@@ -353,7 +353,13 @@ export function Config() {
         open={catModal.open}
         editing={catModal.editing}
         parentId={catModal.parentId}
-        parent={catModal.parentId ? categories.find(c => c.id === catModal.parentId) : undefined}
+        parent={
+          catModal.parentId
+            ? categories.find(c => c.id === catModal.parentId)
+            : catModal.editing?.parent_id
+              ? categories.find(c => c.id === catModal.editing!.parent_id)
+              : undefined
+        }
         onClose={() => setCatModal({ open: false })}
         onSaved={load}
       />
@@ -847,12 +853,14 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
   useEffect(() => {
     if (open) {
       setName(editing?.name ?? '')
-      setColor(editing?.color ?? parent?.color ?? '#820AD1')
-      setIcon(editing?.icon ?? parent?.icon ?? 'label')
+      // Subcategoria SEMPRE usa cor do pai (atualiza se pai mudar de cor)
+      const isSub = !!parentId || !!editing?.parent_id
+      setColor(isSub ? (parent?.color ?? '#820AD1') : (editing?.color ?? '#820AD1'))
+      setIcon(editing?.icon ?? 'label')
       setType((editing?.type as 'fixa' | 'variavel') ?? (parent?.type as 'fixa' | 'variavel') ?? 'variavel')
       setLimitValue(editing?.limit_value ? String(editing.limit_value) : '')
     }
-  }, [open, editing, parent])
+  }, [open, editing, parent, parentId])
 
   async function handleSave() {
     if (!name.trim()) return
@@ -891,12 +899,21 @@ function CategoryModal({ open, editing, parentId, parent, onClose, onSaved }: { 
             <label style={labelStyle}>Nome</label>
             <input autoFocus value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSave()} placeholder="ex: Mercado, Lazer..." style={inputStyle} />
           </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Cor</label>
-            <input type="color" value={color} onChange={e => setColor(e.target.value)}
-              style={{ width: 44, height: 38, padding: 2, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(192,132,252,0.1)', borderRadius: 8, cursor: 'pointer' }} />
-          </div>
+          {!parentId && !editing?.parent_id && (
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Cor</label>
+              <input type="color" value={color} onChange={e => setColor(e.target.value)}
+                style={{ width: 44, height: 38, padding: 2, background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(192,132,252,0.1)', borderRadius: 8, cursor: 'pointer' }} />
+            </div>
+          )}
         </div>
+        {(parentId || editing?.parent_id) && (
+          <div className="t-xs t-muted" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: -8 }}>
+            <Icon name="palette" size={14} />
+            Cor herdada da categoria pai
+            <span className="cfg-sub-color-dot" style={{ background: color }} />
+          </div>
+        )}
         <div style={fieldStyle}>
           <label style={labelStyle}>Ícone</label>
           <IconPicker selectedIcon={icon} selectedColor={color} onSelect={setIcon} />

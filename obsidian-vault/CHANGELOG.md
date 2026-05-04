@@ -5,6 +5,13 @@
 
 
 ## Sessão 2026-05-04 — Limpeza e baixas em massa
+- ✅ **CFG.SUB.COLOR — Subcategorias herdam cor do pai automaticamente** · *Claude.ai · baixa em 2026-05-04*
+  CategoryModal: seletor de cor escondido em subcategorias (mostra hint "Cor herdada da categoria pai" + dot).
+  Backend defesa em profundidade: POST força cor do pai em subcategorias; PUT propaga mudança de cor
+  da categoria pai para todas as suas subs em cascata.
+  Cada subcategoria mantém ÍCONE próprio (não herda do pai — usuário escolhe).
+  Files: `backend/app/routers/categories.py`, `frontend/src/pages/Config.tsx`, `index.css`.
+
 - ✅ **CFG.ICONS — Biblioteca de ícones para categorias** · *Claude.ai · baixa em 2026-05-04*
   Novo IconPicker (66 ícones financeiros) integrado no CategoryModal. Busca por palavra-chave
   (comida, casa, carro, etc). Ícone escolhido é exibido no card e na linha de subcategoria.
