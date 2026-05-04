@@ -4,6 +4,16 @@
 
 
 
+## Sessão 2026-05-04 (continuação 3)
+
+- ✅ **BUG.2 — Conformidade visual Transações + Metas** · *Claude Code · baixa em 2026-05-04*
+  - Transacoes.tsx: dia da semana (pt-BR long) adicionado ao cabeçalho de grupo de datas
+  - Metas.tsx: seção `.meta-historico` no modal de detalhe busca transações vinculadas
+    via `GET /transactions/?goal_id={id}` (mostra até 8 aportes recentes)
+  - Backend: parâmetro `goal_id` adicionado ao `GET /transactions/`
+  - index.css: classes `.meta-historico` / `.meta-aporte-row` / `.meta-aporte-val` adicionadas
+  - Importar.tsx e Regras.tsx: auditados — diferenças são melhorias intencionais, sem gaps visuais
+
 ## Sessão 2026-05-04 (continuação 2)
 
 - ✅ **BUG.PR1 — Tela de Provisões completa** · *Claude Code · baixa em 2026-05-04*

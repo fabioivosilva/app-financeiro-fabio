@@ -5,12 +5,11 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : Sessão 2026-05-04. BUG.D1 e BUG.PR1 fechados (Claude Code).
-             Provisões: editar, desativar, filtro por tipo, vincular removido, dia 1-31.
-             Dashboard: filtro de ciclo corrigido, provisoesRestantes conectado.
-             Bugs de Config resolvidos: ícones de categoria e toast duplicado.
+STATUS     : Sessão 2026-05-04. BUG.2, BUG.D1, BUG.PR1 fechados (Claude Code).
+             Transações: dia da semana no agrupamento. Metas: histórico de aportes.
+             Backend: filtro goal_id em /transactions/. Config: ícones e toast.
 BRANCH     : develop
-PRÓXIMA    : T_SYNC.1 — Auto-sync regras/categorias Fabio↔Thiago [M]
+PRÓXIMA    : T0.4 — Onboarding de Perfil [M] (T_SYNC.1 para o fim)
 CLAIMS     : nenhum
 BLOCKER    : Nenhum conhecido.
 SESSÃO     : 1G · ou · 2-3M · ou · 4-6P
@@ -71,12 +70,6 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 Regra de status: `[x]` só quando estiver pronto, validado e aceito. Se tem código mas ainda depende de BUG, fica `[ ]` como **PARCIAL/BLOQUEADO**. O trabalho de amanhã começa em BUG.1.
 
 ### 🔴 TRILHA BUG — Estabilização UI/API *(bloqueia novas features antes de T3.2)*
-
-- [ ] `[M]` **BUG.2 — Conformidade visual restante (Dashboard + reauditoria)** · *qualquer um*
-  Fatias já entregues por Codex em 2026-05-03/04: Configurações>Bancos, Cartão, Config toolbar, Provisões (botão Vincular).
-  **Sobrou:** Dashboard ainda usa mock para provisões (`provisoesRestantes: any[] = []` linha 62) e
-  reauditoria visual fina em Transações/Regras/Importar/Metas para garantir match com a referência.
-  Note: BUG.D1 trata especificamente do filtro de ciclo no Dashboard — atacar junto.
 
 - [ ] `[M]` **T_SYNC.1 — Auto-sync de regras e categorias entre Fabio e Thiago** · *qualquer um*
   Ao categorizar, criar regra ou criar categoria, salvar também no backend um endpoint
