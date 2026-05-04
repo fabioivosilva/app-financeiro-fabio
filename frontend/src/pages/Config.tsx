@@ -94,7 +94,16 @@ export function Config() {
     const map: Record<string, React.RefObject<HTMLElement | null>> = {
       pessoas: refPessoas, categorias: refCategorias, bancos: refBancos, sistema: refSistema, perigo: refPerigo,
     }
-    map[id]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const target = map[id]?.current
+    if (!target) return
+    // Scroll the nearest scrollable ancestor (.app-main), not just the element
+    const container = target.closest('.app-main') as HTMLElement | null
+    if (container) {
+      const offset = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 16
+      container.scrollTo({ top: offset, behavior: 'smooth' })
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   async function deletePerson(id: number) {

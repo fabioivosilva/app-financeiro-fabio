@@ -5,6 +5,7 @@ import { CategoryPopover } from './CategoryPopover'
 import { RuleModal } from './RuleModal'
 import { formatCurrency, isTransactionPending } from '../../hooks/useTransacoes'
 import { api } from '../../api/client'
+import { toast } from '../ui/Toast'
 import type { Transaction, Category, Person } from '../../api/types'
 
 interface Props {
@@ -61,14 +62,16 @@ export function TransacaoRow({ tx, categories, persons, onUpdated }: Props) {
 
   async function handleSelectCategory(categoryId: number) {
     try {
+      const chosenCat = categories.find(c => c.id === categoryId)
       await api.put(`/transactions/${tx.id}`, { ...tx, category_id: categoryId, status: 'confirmado' })
-      // Cria regra com keyword da descrição e aplica em massa a transações similares
       const keyword = tx.description.trim().split(/\s+/).slice(0, 2).join(' ')
       await api.post('/rules/', { keyword, category_id: categoryId, person_id: tx.person_id ?? null, origin: null, goal_id: null })
-      await api.post('/rules/apply', {})
+      const { updated } = await api.post<{ updated: number }>('/rules/apply', {})
+      const sub = updated > 1 ? `+${updated - 1} transação semelhante categorizada` : undefined
+      toast(`Categoria salva: ${chosenCat?.name ?? ''}`, sub)
       onUpdated?.()
     } catch {
-      // erro silencioso — refetch vai corrigir
+      toast('Erro ao salvar categoria', undefined, 'error')
     }
   }
 
