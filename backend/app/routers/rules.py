@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from app.database import get_db
 from app.models import Rule, Transaction
+from app.services.auto_provision import maybe_upsert_income_provision
 
 router = APIRouter(prefix="/rules", tags=["rules"])
 
@@ -109,8 +110,12 @@ def deduplicate_rules(db: Session = Depends(get_db)):
 def apply_rules(db: Session = Depends(get_db)):
     rules = db.query(Rule).filter(Rule.category_id.isnot(None)).all()
     if not rules:
-        return {"updated": 0}
+        return {"updated": 0, "auto_provisions": 0}
     pending = db.query(Transaction).filter(Transaction.category_id.is_(None)).all()
     updated = apply_rules_to(pending, rules)
     db.commit()
-    return {"updated": updated}
+    auto_provisions = 0
+    for tx in pending:
+        if tx.category_id and maybe_upsert_income_provision(db, tx):
+            auto_provisions += 1
+    return {"updated": updated, "auto_provisions": auto_provisions}
