@@ -76,14 +76,17 @@ def update_transaction(id: int, data: TransactionIn, response: Response, db: Ses
     db.commit()
     db.refresh(t)
 
-    # Motor de provisão central
-    prov_result = evaluate_transaction_for_provision(db, t)
-    provision = prov_result.get("provision")
-    if provision:
-        response.headers["X-Auto-Provision-Id"] = str(provision.id)
-        response.headers["X-Auto-Provision-Description"] = provision.description
-        response.headers["X-Auto-Provision-Amount"] = str(provision.amount)
-        response.headers["X-Auto-Provision-Day"] = str(provision.day)
+    # Motor de provisão central — isolado para não bloquear o save
+    try:
+        prov_result = evaluate_transaction_for_provision(db, t)
+        provision = prov_result.get("provision")
+        if provision:
+            response.headers["X-Auto-Provision-Id"] = str(provision.id)
+            response.headers["X-Auto-Provision-Description"] = provision.description
+            response.headers["X-Auto-Provision-Amount"] = str(provision.amount)
+            response.headers["X-Auto-Provision-Day"] = str(provision.day)
+    except Exception:
+        pass
 
     return t
 

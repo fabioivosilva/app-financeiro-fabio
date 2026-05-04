@@ -246,8 +246,11 @@ def _process_import(
             or (getattr(c, "parent_id", None) in parent_ids)
         }
         for tx in criadas:
-            if tx.category_id in eligible_cat_ids:
-                evaluate_transaction_for_provision(db, tx)
+            try:
+                if tx.category_id in eligible_cat_ids:
+                    evaluate_transaction_for_provision(db, tx)
+            except Exception:
+                pass
 
     return {
         "bank": result.bank,

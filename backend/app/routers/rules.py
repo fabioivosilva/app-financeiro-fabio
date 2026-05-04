@@ -130,8 +130,11 @@ def apply_rules(db: Session = Depends(get_db)):
     }
     auto_provisions = 0
     for tx in pending:
-        if tx.category_id in cat_ids:
-            result = evaluate_transaction_for_provision(db, tx)
-            if result.get("provision") or result.get("installments"):
-                auto_provisions += 1
+        try:
+            if tx.category_id in cat_ids:
+                result = evaluate_transaction_for_provision(db, tx)
+                if result.get("provision") or result.get("installments"):
+                    auto_provisions += 1
+        except Exception:
+            pass
     return {"updated": updated, "auto_provisions": auto_provisions}
