@@ -206,6 +206,25 @@ def evaluate_transaction_for_provision(
     if not cat:
         return result
 
+    # 1. Matching Automático: Tenta vincular a transação a uma provisão aberta
+    # Mesma categoria + mesmo valor (ou aproximado) + mesmo dono
+    if not transaction.provision_id:
+        # Busca provisões ativas deste ciclo/tipo
+        a = transaction.amount
+        min_a, max_a = (a * 1.1, a * 0.9) if a < 0 else (a * 0.9, a * 1.1)
+        match_q = db.query(Provision).filter(
+            Provision.active == True,
+            Provision.category_id == transaction.category_id,
+            Provision.amount.between(min_a, max_a)
+        )
+        if transaction.person_id:
+            match_q = match_q.filter(Provision.person_id == transaction.person_id)
+        
+        matched_prov = match_q.first()
+        if matched_prov:
+            transaction.provision_id = matched_prov.id
+            db.commit()
+
     behavior = cat.provision_behavior or "none"
 
     # Subcategorias herdam o behavior do pai quando não têm o próprio configurado

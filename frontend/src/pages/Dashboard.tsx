@@ -1,10 +1,9 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, SectionHeader } from '../components/layout/PageHeader'
-import { CycleProgress, getCycleInfo } from '../components/layout/CycleProgress'
+import { CycleProgress } from '../components/layout/CycleProgress'
 import { Glass } from '../components/ui/Glass'
 import { Icon } from '../components/ui/Icon'
-import { useTransacoes } from '../hooks/useTransacoes'
 import { useMetas } from '../hooks/useMetas'
 import { api } from '../api/client'
 
@@ -19,106 +18,82 @@ const brlCompact = (v: number) => {
   if (abs >= 1000) return (v / 1000).toFixed(1) + 'k'
   return brl(v)
 }
-const fmtData = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+const fmtData = (d: string) => {
+  if (!d) return ''
+  const parts = d.split('-')
+  return `${parts[2]}/${parts[1]}`
+}
 
 export function Dashboard() {
   const navigate = useNavigate()
-  const { transactions = [], categories = [] } = useTransacoes({})
   const { goals } = useMetas()
+  
+  const [summary, setSummary] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const { inicio, fim } = getCycleInfo()
-
-  const [provisions, setProvisions] = useState<{
-    id: number; active: boolean; amount: number; day: number; type: string
-  }[]>([])
+  // O Dashboard sempre mostra o ciclo atual ao carregar
+  // No futuro, podemos integrar o MonthSelector
   useEffect(() => {
-    api.get<{ id: number; active: boolean; amount: number; day: number; type: string }[]>('/provisions/')
-      .then(p => setProvisions(p || []))
+    const hoje = new Date()
+    // Se hoje >= 27, o ciclo que termina no mês que vem é o "atual"
+    let month = hoje.getMonth() + 1
+    let year = hoje.getFullYear()
+    if (hoje.getDate() >= 27) {
+        month += 1
+        if (month > 12) { month = 1; year += 1 }
+    }
+
+    api.get(`/dashboard/summary?month=${month}&year=${year}`)
+      .then(res => {
+        setSummary(res)
+        setLoading(false)
+      })
   }, [])
 
-  const { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas } = useMemo(() => {
-    const ciclo = transactions.filter(t => {
-      const d = new Date(t.date + 'T00:00:00')
-      return d >= inicio && d <= fim
-    })
-    const ok = ciclo.filter(t => t.status === 'confirmado')
-    const receitas = ok.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
-    const gastos = -ok.filter(t => t.amount < 0).reduce((s, t) => s + t.amount, 0)
+  const metrics = summary?.metrics || {}
+  const counts = summary?.counts || {}
+  const gastosPorCat = summary?.gastos_por_cat || []
+  const topGastos = summary?.top_gastos || []
 
-    const byCat: Record<number, number> = {}
-    ok.filter(t => t.amount < 0).forEach(t => {
-      if (t.category_id) byCat[t.category_id] = (byCat[t.category_id] || 0) + (-t.amount)
-    })
-
-    const gastosPorCat = Object.entries(byCat)
-      .map(([id, v]) => {
-        const cat = categories.find(c => c.id === parseInt(id))
-        return { id: parseInt(id), valor: v, label: cat?.name || '', color: cat?.color || '#C084FC', icon: cat?.icon || 'shopping_cart' }
+  // Alertas baseados no orçamento vindo do backend
+  const alertas = useMemo(() => {
+    return gastosPorCat
+      .filter((c: any) => c.limit && c.limit > 0)
+      .map((c: any) => {
+        const pct = c.valor / c.limit
+        return { cat: c, usado: c.valor, limite: c.limit, pct }
       })
-      .sort((a, b) => b.valor - a.valor)
+      .filter((a: any) => a.pct >= 0.85)
+  }, [gastosPorCat])
 
-    const topGastos = ok.filter(t => t.amount < 0).sort((a, b) => a.amount - b.amount).slice(0, 5)
-    const pendentes = ciclo.filter(t => t.status === 'pendente' || !t.category_id).length
-
-    const alertas = categories
-      .filter(c => c.limit_value && c.limit_value > 0)
-      .map(c => {
-        const usado = byCat[c.id] || 0
-        const pct = usado / c.limit_value!
-        return { cat: c, usado, limite: c.limit_value!, pct }
-      })
-      .filter(a => a.pct >= 0.85)
-
-    return { receitas, gastos, gastosPorCat, topGastos, pendentes, alertas }
-  }, [transactions, categories, inicio, fim])
-
-  const saldoAtual = receitas - gastos
-  const provisoesRestantes = provisions.filter(p => p.active)
-
-  // Receitas previstas restantes no ciclo (provisões de receita com dia > hoje)
-  const hoje = new Date()
-  const receitaRestante = provisoesRestantes
-    .filter(p => p.amount > 0 && p.day > hoje.getDate())
-    .reduce((s, p) => s + p.amount, 0)
-
-  // Compromissos futuros restantes no ciclo (provisões de despesa com dia > hoje)
-  const compromissoRestante = provisoesRestantes
-    .filter(p => p.amount < 0 && p.day > hoje.getDate())
-    .reduce((s, p) => s + Math.abs(p.amount), 0)
-
-  // Saldo projetado = atual + receitas esperadas - compromissos futuros
-  const saldoProjetado = saldoAtual + receitaRestante - compromissoRestante
-
+  // Projeção simples de 6 meses (poderia vir do backend também)
   const projecao = useMemo(() => {
+    if (!summary) return []
     const meses = []
-    const labelsM: string[] = []
-    for (let i = 0; i < 6; i++) {
-      const d = new Date(hoje)
-      d.setMonth(d.getMonth() + i)
-      labelsM.push(d.toLocaleDateString('pt-BR', { month: '2-digit', year: '2-digit' }).replace(/\//g, '/'))
-    }
-    // Receitas mensais recorrentes ativas
-    const receitaMensal = provisoesRestantes
-      .filter(p => p.amount > 0 && p.type === 'mensal')
-      .reduce((s, p) => s + p.amount, 0)
-    // Despesas mensais recorrentes ativas
-    const despesaMensal = provisoesRestantes
-      .filter(p => p.amount < 0 && p.type === 'mensal')
-      .reduce((s, p) => s + Math.abs(p.amount), 0)
-    const saldoMensalLiquido = receitaMensal - despesaMensal
+    const hoje = new Date()
+    
+    // Simplificado: usa o delta do ciclo atual para os próximos
+    const saldoAtual = metrics.actual_balance || 0
+    const saldoProjetado = metrics.projected_balance || 0
+    const saldoMensalLiquido = metrics.predicted_income_remaining - metrics.predicted_expense_remaining // Aproximação
 
     let saldoAcum = saldoProjetado
     for (let i = 0; i < 6; i++) {
+      const d = new Date(hoje)
+      d.setMonth(d.getMonth() + i)
+      const label = d.toLocaleDateString('pt-BR', { month: '2-digit', year: '2-digit' })
+      
       if (i === 0) {
-        meses.push({ label: labelsM[i], saldo: saldoProjetado, delta: saldoProjetado - saldoAtual })
-        saldoAcum = saldoProjetado
+        meses.push({ label, saldo: saldoProjetado, delta: saldoProjetado - saldoAtual })
       } else {
         saldoAcum += saldoMensalLiquido
-        meses.push({ label: labelsM[i], saldo: saldoAcum, delta: saldoMensalLiquido })
+        meses.push({ label, saldo: saldoAcum, delta: saldoMensalLiquido })
       }
     }
     return meses
-  }, [saldoProjetado, saldoAtual, provisoesRestantes])
+  }, [summary])
+
+  if (loading || !summary) return <div className="page p-8 t-center t-muted">Carregando dashboard...</div>
 
   return (
     <div className="page page-dashboard">
@@ -135,13 +110,13 @@ export function Dashboard() {
             <Icon name="trending_up" size={16} />
             <span>SALDO PROJETADO · FIM DO CICLO</span>
           </div>
-          <div className="hero-value">{brl(saldoProjetado)}</div>
+          <div className="hero-value">{brl(metrics.projected_balance)}</div>
           <div className="hero-foot">
-            <span className={saldoProjetado - saldoAtual >= 0 ? 'delta-pos' : 'delta-neg'}>
-              <Icon name={saldoProjetado - saldoAtual >= 0 ? 'arrow_upward' : 'arrow_downward'} size={14} />
-              {brl(Math.abs(saldoProjetado - saldoAtual))}
+            <span className={metrics.projected_balance - metrics.actual_balance >= 0 ? 'delta-pos' : 'delta-neg'}>
+              <Icon name={metrics.projected_balance - metrics.actual_balance >= 0 ? 'arrow_upward' : 'arrow_downward'} size={14} />
+              {brl(Math.abs(metrics.projected_balance - metrics.actual_balance))}
             </span>
-            <span className="t-xs t-muted">depois das {provisoesRestantes.length} provisões pendentes</span>
+            <span className="t-xs t-muted">depois das {counts.pending_provisions} provisões pendentes</span>
           </div>
         </Glass>
 
@@ -150,11 +125,11 @@ export function Dashboard() {
             <Icon name="payments" size={16} />
             <span>RECEITAS DO CICLO</span>
           </div>
-          <div className="hero-value-sm">{brl(receitas)}</div>
+          <div className="hero-value-sm">{brl(metrics.realized_income)}</div>
           <div className="hero-bar">
             <div className="hero-bar-fill" style={{ background: '#22C55E', width: '100%' }} />
           </div>
-          <div className="t-xs t-muted">+{brl(receitaRestante)} ainda esperado</div>
+          <div className="t-xs t-muted">+{brl(metrics.predicted_income_remaining)} ainda esperado</div>
         </Glass>
 
         <Glass className="hero-card">
@@ -162,21 +137,21 @@ export function Dashboard() {
             <Icon name="shopping_bag" size={16} />
             <span>GASTOS DO CICLO</span>
           </div>
-          <div className="hero-value-sm" style={{ color: '#F472B6' }}>{brl(gastos)}</div>
+          <div className="hero-value-sm" style={{ color: '#F472B6' }}>{brl(metrics.realized_expense)}</div>
           <div className="hero-bar">
-            <div className="hero-bar-fill" style={{ background: '#EC4899', width: Math.min(100, (gastos / receitas) * 100) + '%' }} />
+            <div className="hero-bar-fill" style={{ background: '#EC4899', width: Math.min(100, (metrics.realized_expense / (metrics.realized_income || 1)) * 100) + '%' }} />
           </div>
-          <div className="t-xs t-muted">+{brl(compromissoRestante)} já comprometidos</div>
+          <div className="t-xs t-muted">+{brl(metrics.predicted_expense_remaining)} já comprometidos</div>
         </Glass>
       </div>
 
-      {pendentes > 0 && (
+      {counts.pending_transactions > 0 && (
         <button className="alert-banner" onClick={() => navigate('/transacoes')}>
           <div className="alert-icon" style={{ background: '#F59E0B20', color: '#F59E0B' }}>
             <Icon name="inbox" size={20} />
           </div>
           <div style={{ flex: 1 }}>
-            <div className="t-md">{pendentes} transações aguardando categorização</div>
+            <div className="t-md">{counts.pending_transactions} transações aguardando categorização</div>
             <div className="t-xs t-muted">Revisar uma a uma para manter o dashboard preciso</div>
           </div>
           <span className="btn-ghost">
@@ -207,23 +182,37 @@ export function Dashboard() {
             hint="Ciclo atual"
             right={<button className="btn-ghost"><Icon name="more_horiz" size={16} /></button>}
           />
-          <CategoryDonut data={gastosPorCat} total={gastos} />
+          <CategoryDonut data={gastosPorCat} total={metrics.realized_expense + metrics.card_consumption} />
           <div className="cat-list">
-            {gastosPorCat.slice(0, 6).map(c => {
-              const pctTot = (c.valor / gastos) * 100
+            {gastosPorCat.slice(0, 6).map((c: any) => {
+              const pctTot = (c.valor / (metrics.realized_expense + metrics.card_consumption || 1)) * 100
+              const pctOrc = c.limit ? (c.valor / c.limit) * 100 : null
               return (
                 <div key={c.id} className="cat-row">
                   <div className="cat-row-head">
                     <span className="cat-dot" style={{ background: c.color }} />
                     <span className="cat-name">{c.label}</span>
-                    <span className="cat-pct">{Math.round(pctTot)}%</span>
+                    <span className="cat-pct" style={{
+                         color: pctOrc !== null
+                           ? (pctOrc >= 100 ? "#EF4444" : pctOrc >= 85 ? "#F59E0B" : "var(--text)")
+                           : "var(--text)",
+                       }}>
+                         {pctOrc !== null ? Math.round(pctOrc) + "%" : Math.round(pctTot) + "%"}
+                    </span>
                   </div>
                   <div className="cat-row-bar">
-                    <div className="cat-row-fill" style={{ width: Math.min(100, pctTot) + '%', background: c.color }} />
+                    <div className="cat-row-fill" style={{ 
+                        width: Math.min(100, pctOrc !== null ? pctOrc : pctTot) + '%', 
+                        background: pctOrc !== null && pctOrc >= 100 ? "#EF4444"
+                                  : pctOrc !== null && pctOrc >= 85  ? "#F59E0B"
+                                  : c.color 
+                    }} />
                   </div>
                   <div className="cat-row-foot">
-                    <span className="t-xs t-muted">{brl(-c.valor)}</span>
-                    <span className="t-xs t-muted">sem orçamento</span>
+                    <span className="t-xs t-muted">{brl(c.valor)}</span>
+                    <span className="t-xs t-muted">
+                        {c.limit ? `de ${brl(c.limit)} de orçamento` : "sem orçamento"}
+                    </span>
                   </div>
                 </div>
               )
@@ -240,13 +229,13 @@ export function Dashboard() {
                 hint={`${alertas.length} ${alertas.length === 1 ? 'categoria' : 'categorias'} próximas do limite`}
               />
               <div className="alert-list">
-                {alertas.map(a => (
+                {alertas.map((a: any) => (
                   <div key={a.cat.id} className="alert-row">
                     <div className="alert-row-icon" style={{ background: (a.cat.color || '#C084FC') + '20', color: a.cat.color || '#C084FC' }}>
-                      <Icon name={(a.cat as any).icon || 'warning'} size={18} />
+                      <Icon name={a.cat.icon || 'warning'} size={18} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div className="t-sm">{a.cat.name}</div>
+                      <div className="t-sm">{a.cat.label}</div>
                       <div className="t-xs t-muted">{brl(a.usado)} de {brl(a.limite)}</div>
                     </div>
                     <div className={`alert-pct${a.pct >= 1 ? ' alert-pct-over' : ''}`}>
@@ -261,27 +250,24 @@ export function Dashboard() {
           <Glass>
             <SectionHeader title="Top gastos do ciclo" />
             <div className="top-list">
-              {topGastos.map(t => {
-                const cat = categories.find(c => c.id === t.category_id)
-                return (
-                  <div key={t.id} className="top-row">
-                    <div className="top-row-icon" style={{ background: (cat?.color || '#C084FC') + '20', color: cat?.color || '#C084FC' }}>
-                      <Icon name={(cat as any)?.icon || 'shopping_cart'} size={18} />
+              {topGastos.map((t: any) => (
+                <div key={t.id} className="top-row">
+                  <div className="top-row-icon" style={{ background: (t.category_color || '#C084FC') + '20', color: t.category_color || '#C084FC' }}>
+                    <Icon name={t.category_icon || 'shopping_cart'} size={18} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="t-sm" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {t.description}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="t-sm" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {t.description}
-                      </div>
-                      <div className="t-xs t-muted">
-                        {fmtData(t.date)} · {cat?.name || 'Sem categoria'}
-                      </div>
-                    </div>
-                    <div className="t-sm" style={{ color: '#F472B6', fontVariantNumeric: 'tabular-nums' }}>
-                      {brl(t.amount)}
+                    <div className="t-xs t-muted">
+                      {fmtData(t.date)} · {t.category_name}
                     </div>
                   </div>
-                )
-              })}
+                  <div className="t-sm" style={{ color: '#F472B6', fontVariantNumeric: 'tabular-nums' }}>
+                    {brl(t.amount)}
+                  </div>
+                </div>
+              ))}
             </div>
           </Glass>
 

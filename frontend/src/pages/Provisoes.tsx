@@ -240,6 +240,7 @@ export function Provisoes() {
         <TimelineView
           meses={meses} sel={selMes} onSel={setSelMes}
           categories={categories} persons={persons}
+          transactions={transactions}
           importing={importing} onImport={handleImportInstallments}
           reinforcing={reinforcing} onReinforce={handleReinforceAuto}
           onAdd={() => setShowModal(true)} onEdit={openEdit}
@@ -273,9 +274,9 @@ export function Provisoes() {
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
-function TimelineView({ meses, sel, onSel, categories, persons, importing, reinforcing, onImport, onReinforce, onAdd, onEdit }: {
+function TimelineView({ meses, sel, onSel, categories, persons, transactions, importing, reinforcing, onImport, onReinforce, onAdd, onEdit }: {
   meses: any[]; sel: number; onSel: (i: number) => void
-  categories: Category[]; persons: Person[]; importing: boolean; reinforcing: boolean
+  categories: Category[]; persons: Person[]; transactions: Transaction[]; importing: boolean; reinforcing: boolean
   onImport: () => void; onReinforce: () => void; onAdd: () => void; onEdit: (p: Provision) => void
 }) {
   const m = meses[sel]
@@ -287,20 +288,19 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, reinf
         <SectionHeader title="6 meses à frente" hint="Clique em um mês para ver os eventos" />
         <div className="timeline-strip">
           {meses.map((mes, i) => (
-            <button key={i} className={`timeline-month${sel === i ? ' timeline-month-on' : ''}`} onClick={() => onSel(i)}>
+            <button
+              key={i}
+              className={`timeline-month ${sel === i ? "timeline-month-on" : ""}`}
+              onClick={() => onSel(i)}
+            >
               <div className="timeline-month-label">{mes.label}</div>
-              <div className="timeline-saldo" style={{ color: mes.total >= 0 ? '#22C55E' : '#F472B6' }}>
-                {mes.total >= 0 ? '+' : ''}{brlCompact(mes.total)}
+              <div className="timeline-bars">
+                <div className="timeline-bar timeline-bar-out" style={{ height: Math.min(100, (mes.compromisso / 6000) * 100) + "%" }} />
+                <div className="timeline-bar timeline-bar-in" style={{ height: Math.min(100, (mes.receita / 10000) * 100) + "%" }} />
               </div>
-              {(() => {
-                const pct = mes.receita > 0 ? Math.min(100, (mes.compromisso / mes.receita) * 100) : 100
-                const color = pct < 70 ? '#22C55E' : pct < 100 ? '#F59E0B' : '#F472B6'
-                return (
-                  <div className="timeline-commit-bar">
-                    <div className="timeline-commit-fill" style={{ width: pct + '%', background: color }} />
-                  </div>
-                )
-              })()}
+              <div className="timeline-month-total" style={{ color: mes.total >= 0 ? "#22C55E" : "#F472B6" }}>
+                {mes.total >= 0 ? "+" : ""}{brlCompact(mes.total)}
+              </div>
             </button>
           ))}
         </div>
@@ -311,13 +311,13 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, reinf
           hint={`${m?.items.length ?? 0} ocorrências · saldo ${m?.total >= 0 ? '+' : ''}${brl(m?.total ?? 0)}`}
           right={
             <div className="section-actions">
-              <button className="btn-ghost" onClick={onReinforce} disabled={reinforcing} title="Re-calcula provisões de todas as transações categorizadas">
+              <button className="btn-ghost" onClick={onReinforce} disabled={reinforcing}>
                 <Icon name={reinforcing ? 'hourglass_empty' : 'autorenew'} size={14} />
                 {reinforcing ? 'Sincronizando...' : 'Sincronizar'}
               </button>
               <button className="btn-ghost" onClick={onImport} disabled={importing}>
                 <Icon name={importing ? 'hourglass_empty' : 'credit_card'} size={14} />
-                {importing ? 'Importando...' : 'Importar parcelas pendentes'}
+                {importing ? 'Importando...' : 'Importar parcelas'}
               </button>
               <button className="btn-primary" onClick={onAdd}><Icon name="add" size={14} /> Nova provisão</button>
             </div>
@@ -334,46 +334,46 @@ function TimelineView({ meses, sel, onSel, categories, persons, importing, reinf
               const sorted = [...m.items].sort((a: any, b: any) => a.day - b.day)
               const receitas = sorted.filter((p: any) => p.amount > 0)
               const despesas = sorted.filter((p: any) => p.amount <= 0)
+              
               const renderRow = (p: any) => {
                 const cat = categories.find(c => c.id === p.category_id)
                 const person = persons.find(pe => pe.id === p.person_id)
-                const done = p.day <= today && sel === 0
-                const borderColor = p.amount > 0 ? '#22C55E' : '#F472B6'
+                const isLinked = transactions.some(t => t.provision_id === p.id)
+                const done = isLinked || (p.day <= today && sel === 0)
+                
                 return (
-                  <div key={p.id + sel} className={`prov-row${done ? ' prov-row-done' : ''}`} style={{ borderLeft: `3px solid ${borderColor}20` }}>
+                  <div key={p.id + (p.parcelaLabel || '')} className={`prov-row ${done ? 'prov-row-done' : ''}`}>
                     <div className="prov-day">
                       <div className="prov-day-num">{p.day}</div>
                       <div className="prov-day-mes">{m.label.split('/')[0]}</div>
                     </div>
-                    <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888', position: 'relative' }}>
+                    <div className="prov-icon" style={{ background: (cat?.color ?? '#888') + '20', color: cat?.color ?? '#888' }}>
                       <Icon name={(cat as any)?.icon ?? 'event'} size={18} />
-                      {(p.type === 'parcela' || p.virtual) && (
-                        <span style={{ position: 'absolute', bottom: -3, right: -3, background: 'var(--glass-bg, #1e1a2e)', borderRadius: 4, width: 14, height: 14, display: 'grid', placeItems: 'center' }}>
-                          <Icon name="credit_card" size={10} style={{ color: '#64748B' }} />
-                        </span>
-                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div className="t-sm">{p.description}{p.parcelaLabel ? ` (${p.parcelaLabel})` : ''}</div>
                       <div className="prov-row-meta">
                         {cat && <CategoryChip label={cat.name} color={cat.color} />}
                         {person && <span className="t-xs t-muted">{person.name}</span>}
-                        {p.virtual && <span className="t-xs t-muted">Cartão</span>}
                         <span className="t-xs t-muted">{p.type === 'mensal' ? 'Mensal' : 'Parcela'}</span>
                       </div>
                     </div>
-                    <div className={`prov-val${p.amount > 0 ? ' tx-val-pos' : ''}`}>{brl(p.amount)}</div>
+                    <div className={`prov-val ${p.amount > 0 ? 'tx-val-pos' : ''}`}>{brl(p.amount)}</div>
                     <div className="prov-status">
-                      {done
-                        ? <span className="prov-tag prov-tag-done"><Icon name="check_circle" size={14} /> Realizada</span>
-                        : p.virtual
-                          ? <span className="prov-tag" style={{ background: 'rgba(100,116,139,0.12)', color: '#64748B' }}>Auto</span>
-                          : <button className="btn-ghost btn-ghost-sm" onClick={() => onEdit(p as Provision)}><Icon name="edit" size={14} /> Editar</button>
-                      }
+                      {done ? (
+                        <span className="prov-tag prov-tag-done">
+                          <Icon name="check_circle" size={14} /> Realizada
+                        </span>
+                      ) : (
+                        <button className="btn-ghost btn-ghost-sm" onClick={() => onEdit(p as Provision)}>
+                          <Icon name="link" size={14} /> Vincular
+                        </button>
+                      )}
                     </div>
                   </div>
                 )
               }
+
               return (
                 <>
                   {receitas.length > 0 && (

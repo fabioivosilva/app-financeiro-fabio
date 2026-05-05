@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 
@@ -15,3 +16,7 @@ class Provision(Base):
     person_id = Column(Integer, ForeignKey("persons.id"), nullable=True)
     installment_current = Column(Integer, nullable=True)
     installment_total = Column(Integer, nullable=True)
+    month = Column(Integer, nullable=True)
+    year = Column(Integer, nullable=True)
+
+    transactions = relationship("Transaction", back_populates="provision")

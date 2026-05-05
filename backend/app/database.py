@@ -1,15 +1,16 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-import os
+import enum
+from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey, text, inspect
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "..", "data", "finance.db")
-DATABASE_URL = f"sqlite:///{os.path.abspath(DB_PATH)}"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./data/finance.db"
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
+Base = declarative_base()
 
 def get_db():
     db = SessionLocal()
@@ -18,52 +19,28 @@ def get_db():
     finally:
         db.close()
 
-
 def init_db():
-    from app.models import Transaction, Category, Rule, Person, Card, Goal, Settings, ImportRecord  # noqa
-    os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
+    from app.models import Category, Person, Card, Transaction, Rule, Goal, Provision, Settings
     Base.metadata.create_all(bind=engine)
-    _migrate()
-
-
-def _migrate():
-    from sqlalchemy import inspect, text
+    
+    # Migrações manuais
     inspector = inspect(engine)
-
+    
+    # Adiciona behaviors e limites
     if 'categories' in inspector.get_table_names():
         cols = [c['name'] for c in inspector.get_columns('categories')]
-        if 'parent_id' not in cols:
-            with engine.connect() as conn:
-                conn.execute(text("ALTER TABLE categories ADD COLUMN parent_id INTEGER"))
-                conn.commit()
-
-    # Adiciona exclude_totals em categories se não existir
-    if 'categories' in inspector.get_table_names():
-        cat_cols = [c['name'] for c in inspector.get_columns('categories')]
-        if 'exclude_totals' not in cat_cols:
-            with engine.connect() as conn:
-                conn.execute(text("ALTER TABLE categories ADD COLUMN exclude_totals BOOLEAN DEFAULT 0"))
-                conn.commit()
-        if 'icon' not in cat_cols:
-            with engine.connect() as conn:
-                conn.execute(text("ALTER TABLE categories ADD COLUMN icon VARCHAR DEFAULT 'label'"))
-                conn.commit()
-        if 'provision_behavior' not in cat_cols:
-            with engine.connect() as conn:
+        with engine.connect() as conn:
+            if 'provision_behavior' not in cols:
                 conn.execute(text("ALTER TABLE categories ADD COLUMN provision_behavior VARCHAR DEFAULT 'none'"))
-                # Aplicar behaviors baseados nas categorias reais do seed
-                conn.execute(text("""
-                    UPDATE categories SET provision_behavior = 'recurring_income'
-                    WHERE name IN ('Receitas','Salário','Freelance','CLT','13°/Bônus','Projetos')
-                """))
-                conn.execute(text("""
-                    UPDATE categories SET provision_behavior = 'fixed_expense'
-                    WHERE type = 'fixa'
-                """))
-                # variavel e interna ficam 'none' (padrão)
-                conn.commit()
-        _seed_missing_categories()
+            if 'exclude_totals' not in cols:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN exclude_totals BOOLEAN DEFAULT 0"))
+            if 'limit_value' not in cols:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN limit_value FLOAT"))
+            if 'parent_id' not in cols:
+                conn.execute(text("ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)"))
+            conn.commit()
 
+    # Adiciona campos extras em Provisões
     if 'provisions' in inspector.get_table_names():
         prov_cols = [c['name'] for c in inspector.get_columns('provisions')]
         with engine.connect() as conn:
@@ -77,16 +54,29 @@ def _migrate():
             if 'installment_total' not in prov_cols:
                 conn.execute(text("ALTER TABLE provisions ADD COLUMN installment_total INTEGER"))
                 changed = True
+            if 'month' not in prov_cols:
+                conn.execute(text("ALTER TABLE provisions ADD COLUMN month INTEGER"))
+                changed = True
+            if 'year' not in prov_cols:
+                conn.execute(text("ALTER TABLE provisions ADD COLUMN year INTEGER"))
+                changed = True
             if changed:
                 conn.commit()
 
-    # Corrige tipo das categorias existentes (SAEnum → String permite novos tipos)
+    # Adiciona provision_id em Transações
+    if 'transactions' in inspector.get_table_names():
+        tx_cols = [c['name'] for c in inspector.get_columns('transactions')]
+        if 'provision_id' not in tx_cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE transactions ADD COLUMN provision_id INTEGER REFERENCES provisions(id)"))
+                conn.commit()
+
+    # Corrige tipo das categorias existentes
     with engine.connect() as conn:
         conn.execute(text("UPDATE categories SET type='receita' WHERE name IN ('Receitas','Salário','Freelance','CLT','13°/Bônus','Projetos')"))
         conn.execute(text("UPDATE categories SET type='interna', exclude_totals=1 WHERE name IN ('Transferência','Entre contas','Cofrinho')"))
         conn.commit()
 
-    # Atualiza ícones das categorias conhecidas (icon='label' = padrão sem escolha)
     _migrate_icons()
 
     if 'goals' in inspector.get_table_names():
@@ -96,7 +86,7 @@ def _migrate():
                 conn.execute(text("ALTER TABLE goals ADD COLUMN icon VARCHAR"))
                 conn.commit()
 
-    # Torna person_id nullable em cards (recria tabela se necessário)
+    # Torna person_id nullable em cards
     if 'cards' in inspector.get_table_names():
         col_info = {c['name']: c for c in inspector.get_columns('cards')}
         if col_info.get('person_id', {}).get('nullable') is False:
@@ -115,9 +105,19 @@ def _migrate():
                 conn.execute(text("ALTER TABLE cards_new RENAME TO cards"))
                 conn.commit()
 
+def _migrate_icons():
+    from app.models import Category
+    db = SessionLocal()
+    try:
+        cats = db.query(Category).all()
+        for c in cats:
+            if c.icon == 'label' or not c.icon:
+                c.icon = _ICON_MAP.get(c.name, 'label')
+        db.commit()
+    finally:
+        db.close()
 
 _ICON_MAP: dict[str, str] = {
-    # Principais
     'Moradia':        'home',
     'Transporte':     'directions_car',
     'Saúde':          'health_and_safety',
@@ -128,119 +128,13 @@ _ICON_MAP: dict[str, str] = {
     'Farmácia':       'medication',
     'Lazer':          'sports_esports',
     'Outros':         'help',
-    # Receitas
-    'Receitas':       'attach_money',
-    'Salário':        'attach_money',
-    'CLT':            'work',
-    '13°/Bônus':      'card_giftcard',
-    'Freelance':      'work',
-    'Projetos':       'work',
-    # Internas
-    'Transferência':  'account_balance',
-    'Entre contas':   'account_balance',
-    'Cofrinho':       'savings',
-    # Subcategorias Moradia
-    'Aluguel':        'home',
-    'Condomínio':     'apartment',
-    'Luz':            'bolt',
-    'Internet/TV':    'wifi',
-    # Subcategorias Saúde
-    'Plano de saúde': 'medical_services',
-    'Academia':       'fitness_center',
-    # Subcategorias Educação
-    'Cursos online':  'menu_book',
-    # Assinaturas
-    'Assinaturas':    'credit_card',
-    'Streaming':      'movie',
-    'Música':         'music_note',
-    'Software':       'devices',
-    # Subcategorias Alimentação
-    'Restaurante':    'lunch_dining',
-    'Delivery':       'fastfood',
-    'Café/Lanche':    'coffee',
-    # Subcategorias Mercado
-    'Supermercado':   'shopping_basket',
-    'Feira':          'shopping_basket',
-    'Padaria':        'coffee',
-    # Subcategorias Transporte
-    'Apps':           'local_taxi',
-    'Combustível':    'local_gas_station',
-    'Estacionamento': 'local_parking',
-    # Subcategorias Lazer
-    'Cinema/Teatro':  'movie',
+    'Assinaturas':    'subscriptions',
+    'Pets':           'pets',
+    'Roupas':         'checkroom',
+    'Presentes':      'redeem',
     'Viagem':         'flight',
-    'Hobbies':        'park',
+    'Cartão':         'credit_card',
+    'Transferência':  'sync_alt',
+    'Salário':        'payments',
+    'Freelance':      'work',
 }
-
-
-def _migrate_icons():
-    from sqlalchemy import text
-    with engine.connect() as conn:
-        for name, icon in _ICON_MAP.items():
-            conn.execute(
-                text("UPDATE categories SET icon=:icon WHERE name=:name AND (icon IS NULL OR icon='label')"),
-                {'icon': icon, 'name': name},
-            )
-        conn.commit()
-
-
-def _seed_missing_categories():
-    """Insere categorias faltantes (Receitas, Internas e subcategorias) sem duplicar."""
-    from sqlalchemy import text
-    with engine.connect() as conn:
-        existing = {row[0] for row in conn.execute(text("SELECT name FROM categories")).fetchall()}
-
-        def add(name, color, type_, limit=None, parent_name=None, exclude=False):
-            if name in existing:
-                return
-            parent_id = None
-            if parent_name:
-                row = conn.execute(text("SELECT id FROM categories WHERE name=:n"), {"n": parent_name}).fetchone()
-                if row:
-                    parent_id = row[0]
-            icon = _ICON_MAP.get(name, 'label')
-            conn.execute(text(
-                "INSERT INTO categories (name, color, type, limit_value, parent_id, exclude_totals, icon) "
-                "VALUES (:name, :color, :type, :limit, :parent, :excl, :icon)"
-            ), {"name": name, "color": color, "type": type_, "limit": limit, "parent": parent_id, "excl": 1 if exclude else 0, "icon": icon})
-            existing.add(name)
-
-        # ── Receitas ──────────────────────────────────────────────────────────
-        add("Salário",     "#22c55e", "receita")
-        add("Freelance",   "#10b981", "receita")
-        add("CLT",           "#22c55e", "receita", parent_name="Salário")
-        add("13°/Bônus",     "#22c55e", "receita", parent_name="Salário")
-        add("Projetos",      "#10b981", "receita", parent_name="Freelance")
-
-        # ── Internas ──────────────────────────────────────────────────────────
-        add("Transferência", "#94a3b8", "interna", exclude=True)
-        add("Entre contas",  "#94a3b8", "interna", parent_name="Transferência", exclude=True)
-        add("Cofrinho",      "#94a3b8", "interna", parent_name="Transferência", exclude=True)
-
-        # ── Subcategorias Fixas ───────────────────────────────────────────────
-        add("Aluguel",       "#6366f1", "fixa", parent_name="Moradia")
-        add("Condomínio",    "#6366f1", "fixa", parent_name="Moradia")
-        add("Luz",           "#6366f1", "fixa", parent_name="Moradia")
-        add("Internet/TV",   "#6366f1", "fixa", parent_name="Moradia")
-        add("Plano de saúde","#ec4899", "fixa", parent_name="Saúde")
-        add("Academia",      "#ec4899", "fixa", parent_name="Saúde")
-        add("Cursos online", "#14b8a6", "fixa", parent_name="Educação")
-        add("Assinaturas",   "#f59e0b", "fixa", limit=150)
-        add("Streaming",     "#f59e0b", "fixa", parent_name="Assinaturas")
-        add("Música",        "#f59e0b", "fixa", parent_name="Assinaturas")
-        add("Software",      "#f59e0b", "fixa", parent_name="Assinaturas")
-
-        # ── Subcategorias Variáveis ───────────────────────────────────────────
-        add("Restaurante",   "#f97316", "variavel", limit=600)
-        add("Delivery",      "#ef4444", "variavel", parent_name="Restaurante")
-        add("Café/Lanche",   "#f97316", "variavel", parent_name="Restaurante")
-        add("Supermercado",  "#22c55e", "variavel", parent_name="Mercado")
-        add("Feira",         "#22c55e", "variavel", parent_name="Mercado")
-        add("Padaria",       "#22c55e", "variavel", parent_name="Mercado")
-        add("Apps",          "#8b5cf6", "variavel", parent_name="Transporte")
-        add("Combustível",   "#8b5cf6", "variavel", parent_name="Transporte")
-        add("Cinema/Teatro", "#a855f7", "variavel", parent_name="Lazer")
-        add("Viagem",        "#a855f7", "variavel", parent_name="Lazer")
-        add("Hobbies",       "#a855f7", "variavel", parent_name="Lazer")
-
-        conn.commit()

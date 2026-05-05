@@ -65,7 +65,9 @@ class Transaction(Base):
     installment_total = Column(Integer, nullable=True)
     goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
     external_id = Column(String, nullable=True, unique=True)
+    provision_id = Column(Integer, ForeignKey("provisions.id"), nullable=True)
 
     category = relationship("Category", back_populates="transactions")
     person = relationship("Person", back_populates="transactions")
     card = relationship("Card", back_populates="transactions")
+    provision = relationship("Provision", back_populates="transactions")

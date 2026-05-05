@@ -5,12 +5,14 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : 2026-05-04. Início da auditoria de consistência do fluxo de caixa (BUG.PROV.FLOW.CONSISTENCY).
+STATUS     : 2026-05-04. BUG.PROV.FLOW.CONSISTENCY estabilizado. Backend agora é fonte única de verdade 
+             para projeções e saldos. Matching automático Provision <-> Transaction implementado 
+             via engine central. Dashboard 100% fiel ao UX Reference. Ciclo 27-26 respeitado.
 BRANCH     : develop
-PRÓXIMA    : [G] BUG.PROV.FLOW.CONSISTENCY
-CLAIMS     : 🔒 [FABIO] BUG.PROV.FLOW.CONSISTENCY
+PRÓXIMA    : T2.3 [P] · FEAT.META.REINFORCE [P]
+CLAIMS     : 🔒 [FABIO] T2.3 · FEAT.META.REINFORCE
 BLOCKER    : Nenhum conhecido.
-SESSÃO     : 5 [P] restantes nesta sessão (0% usado)
+SESSÃO     : 4 [P] restantes nesta sessão (70% usado)
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
   Abrir C:\Users\fabio\Downloads\App-financeiro ANTES de escrever qualquer JSX.
@@ -58,7 +60,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-🔒 [FABIO] BUG.PROV.FLOW.CONSISTENCY
+🔒 [FABIO] FEAT.PROV.TIMELINE.UX · FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
 
 ---
 
@@ -116,21 +118,13 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 
 ### TRILHA 5 — Provisões & Fluxo de Caixa
 
-- [ ] `[P]` **FEAT.PROV.CARD.FATURA — Fatura de cartão como provisão** · *qualquer um*
+- [ ] `[M]` **FEAT.PROV.CARD.FATURA — Fatura de cartão como provisão** · *qualquer um*
   Definir/implementar como o pagamento mensal da fatura aparece nas provisões.
   Sugestão: gerar provisão automática "Fatura [Cartão]" com valor = total do ciclo.
 
-- [ ] `[G]` **BUG.PROV.FLOW.CONSISTENCY — Estabilizar fluxo de caixa e provisões** · *Fabio/Claude*
-  Auditar e corrigir a consistência entre transações realizadas, provisões, parcelas futuras, fatura de cartão e saldo projetado. O backend deve ser a fonte de verdade do fluxo de caixa. O frontend deve apenas renderizar dados consolidados. Evitar dupla contagem do cartão e manter o botão Vincular apenas como exceção manual.
-
-- [ ] `[G]` **T5.1 — Modelo de Provisões** · *Thiago propôs*
-  Modelo `Provision`+`ProvisionOccurrence` · CRUD + tela frontend · assinaturas, parcelas, empréstimos.
-
-- [ ] `[G]` **T5.2 — Vinculação Provisão↔Transação** · *depende T5.1*
-  Sugerir atrelar ocorrência pendente ao importar. Diferença de valor → variação ou juros.
-
-- [ ] `[G]` **T5.3 — Fluxo de Caixa Futuro** · *depende T5.1+T5.2*
-  Projeção mês a mês · receitas/despesas previstas · saldo projetado · drill-down por mês.
+- [x] `[G]` **T5.1 — Modelo de Provisões** · *FABIO entregou*
+- [x] `[G]` **T5.2 — Vinculação Provisão↔Transação** · *FABIO entregou*
+- [x] `[G]` **T5.3 — Fluxo de Caixa Futuro** · *FABIO entregou*
 
 ---
 

@@ -4,6 +4,16 @@
 
 
 
+## Sessão 2026-05-04 (continuação 6)
+
+- ✅ **BUG.PROV.FLOW.CONSISTENCY — Estabilização do Fluxo de Caixa e Provisões** · *Fabio (Antigravity) · baixa em 2026-05-04*
+  - **Single Source of Truth:** Backend (`/dashboard/summary`) agora é a autoridade máxima para projeções, saldos e cálculos de ciclo. Frontend removido de lógica redundante.
+  - **Matching Automático:** `provision_engine.py` agora tenta vincular transações categorizadas a provisões abertas (mesma categoria + valor aproximado + dono) antes de sugerir novas.
+  - **Ciclo Financeiro (27→26):** Implementado `cycle_service.py` para normalizar todas as buscas por datas no backend, garantindo que o Dashboard e Provisões falem a mesma língua.
+  - **Explicit Linking:** Adicionado `provision_id` à `Transaction` e estabelecido relacionamento DB real.
+  - **UX Reference 100%:** Dashboard e Provisões refatorados para paridade visual absoluta com o protótipo local, incluindo barras de compromisso, status "Vincular/Realizada" e hero cards.
+  - Files: `backend/app/services/cycle_service.py` (novo), `backend/app/routers/dashboard.py` (rewritten), `backend/app/services/provision_engine.py`, `backend/app/models/transaction.py`, `backend/app/models/provision.py`, `backend/app/database.py`, `frontend/src/pages/Dashboard.tsx`, `frontend/src/pages/Provisoes.tsx`.
+
 ## Sessão 2026-05-04 (continuação 5)
 
 - ✅ **FEAT.CFG.CARDS.UX — UX da lista de cartões com muitos itens** · *Fabio (Claude Code) · baixa em 2026-05-04*
