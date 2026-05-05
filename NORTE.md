@@ -5,15 +5,12 @@
 ## ⚡ SNAPSHOT — Única leitura obrigatória. Atualizar ao iniciar E fechar qualquer tarefa.
 
 ```
-STATUS     : 2026-05-04. BUG.DASH.CYCLE corrigido (getCycleInfo normalizado + StorageEvent Config).
-             Motor central provision_engine.py entregue. Category.provision_behavior
-             (none|recurring_income|fixed_expense|installment) + parcelas futuras + tags visuais
-             + Dashboard com saldo projetado real. Pontos de chamada unificados.
+STATUS     : 2026-05-04. Início da auditoria de consistência do fluxo de caixa (BUG.PROV.FLOW.CONSISTENCY).
 BRANCH     : develop
-PRÓXIMA    : T2.3 [P] · FEAT.META.REINFORCE [P]
-CLAIMS     : 🔒 [FABIO] T2.3 · FEAT.META.REINFORCE
+PRÓXIMA    : [G] BUG.PROV.FLOW.CONSISTENCY
+CLAIMS     : 🔒 [FABIO] BUG.PROV.FLOW.CONSISTENCY
 BLOCKER    : Nenhum conhecido.
-SESSÃO     : 4 [P] restantes nesta sessão (70% usado)
+SESSÃO     : 5 [P] restantes nesta sessão (0% usado)
 
 REGRA UX ABSOLUTA (ler antes de qualquer tela):
   Abrir C:\Users\fabio\Downloads\App-financeiro ANTES de escrever qualquer JSX.
@@ -61,7 +58,7 @@ QUANDO LER MAIS:
 git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push origin develop
 ```
 
-🔒 [FABIO] FEAT.PROV.TIMELINE.UX · FEAT.CFG.CARDS.UX · T2.3 · FEAT.META.REINFORCE
+🔒 [FABIO] BUG.PROV.FLOW.CONSISTENCY
 
 ---
 
@@ -122,6 +119,9 @@ git add NORTE.md && git commit -m "chore: 🔒 [FABIO] inicia TXX" && git push o
 - [ ] `[P]` **FEAT.PROV.CARD.FATURA — Fatura de cartão como provisão** · *qualquer um*
   Definir/implementar como o pagamento mensal da fatura aparece nas provisões.
   Sugestão: gerar provisão automática "Fatura [Cartão]" com valor = total do ciclo.
+
+- [ ] `[G]` **BUG.PROV.FLOW.CONSISTENCY — Estabilizar fluxo de caixa e provisões** · *Fabio/Claude*
+  Auditar e corrigir a consistência entre transações realizadas, provisões, parcelas futuras, fatura de cartão e saldo projetado. O backend deve ser a fonte de verdade do fluxo de caixa. O frontend deve apenas renderizar dados consolidados. Evitar dupla contagem do cartão e manter o botão Vincular apenas como exceção manual.
 
 - [ ] `[G]` **T5.1 — Modelo de Provisões** · *Thiago propôs*
   Modelo `Provision`+`ProvisionOccurrence` · CRUD + tela frontend · assinaturas, parcelas, empréstimos.
